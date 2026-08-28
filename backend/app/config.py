@@ -24,6 +24,13 @@ def _normalize_database_url(url: str) -> str:
     return urlunparse(parsed._replace(query=urlencode(query)))
 
 
+def _env(name: str, default: str | None = None) -> str | None:
+    value = os.environ.get(name, default)
+    if value is None:
+        return None
+    return value.strip()
+
+
 def _split_csv(value: str | None) -> list[str]:
     if not value:
         return []
@@ -33,21 +40,19 @@ def _split_csv(value: str | None) -> list[str]:
 class Config:
     """Base configuration loaded from environment variables."""
 
-    SECRET_KEY: str = os.environ.get("SECRET_KEY", "dev-insecure-secret-change-me")
+    SECRET_KEY: str = _env("SECRET_KEY", "dev-insecure-secret-change-me") or "dev-insecure-secret-change-me"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS: dict[str, Any] = {}
 
-    JWT_SECRET_KEY: str = os.environ.get("JWT_SECRET_KEY", SECRET_KEY)
+    JWT_SECRET_KEY: str = _env("JWT_SECRET_KEY") or SECRET_KEY
     JWT_ACCESS_TOKEN_EXPIRES: int = int(os.environ.get("JWT_ACCESS_TOKEN_EXPIRES", "900"))
     JWT_REFRESH_TOKEN_EXPIRES: int = int(os.environ.get("JWT_REFRESH_TOKEN_EXPIRES", "2592000"))
     REFRESH_ROTATION_GRACE_SECONDS: int = int(
         os.environ.get("REFRESH_ROTATION_GRACE_SECONDS", "60")
     )
 
-    CORS_ALLOWED_ORIGINS: list[str] = _split_csv(os.environ.get("CORS_ALLOWED_ORIGINS"))
-    CORS_ALLOWED_ORIGIN_REGEXES: list[str] = _split_csv(
-        os.environ.get("CORS_ALLOWED_ORIGIN_REGEXES")
-    )
+    CORS_ALLOWED_ORIGINS: list[str] = _split_csv(_env("CORS_ALLOWED_ORIGINS"))
+    CORS_ALLOWED_ORIGIN_REGEXES: list[str] = _split_csv(_env("CORS_ALLOWED_ORIGIN_REGEXES"))
 
     RATELIMIT_STORAGE_URI: str = os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
     RATELIMIT_DEFAULT: str = os.environ.get("RATELIMIT_DEFAULT", "200 per minute")
@@ -101,9 +106,12 @@ class Config:
 
     @classmethod
     def configure_database(cls) -> None:
-        database_url = os.environ.get("DATABASE_URL")
+        database_url = _env("DATABASE_URL")
         if not database_url:
-            raise RuntimeError("DATABASE_URL environment variable is required")
+            raise RuntimeError(
+                "DATABASE_URL environment variable is required. "
+                "Add it in Vercel → Settings → Environment Variables (Production)."
+            )
 
         database_url = _normalize_database_url(database_url)
         cls.SQLALCHEMY_DATABASE_URI = database_url
@@ -158,5 +166,7 @@ config_by_name = {
 
 
 def get_config() -> type[Config]:
+    if os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"):
+        return ProductionConfig
     env = os.environ.get("FLASK_ENV", "development").lower()
     return config_by_name.get(env, DevelopmentConfig)

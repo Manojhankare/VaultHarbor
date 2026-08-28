@@ -1,9 +1,18 @@
 """WSGI entrypoint for Gunicorn and Vercel."""
 
-from dotenv import load_dotenv
+from __future__ import annotations
 
-load_dotenv()
+import sys
+import traceback
 
-from app import create_app
+try:
+    from dotenv import load_dotenv
 
-app = create_app()
+    load_dotenv()
+
+    from app import create_app
+
+    app = create_app()
+except Exception:
+    traceback.print_exc(file=sys.stderr)
+    raise
