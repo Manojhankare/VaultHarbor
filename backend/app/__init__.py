@@ -5,7 +5,6 @@ from __future__ import annotations
 import re
 import time
 
-from dotenv import load_dotenv
 from flask import Flask, g, request
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.exceptions import HTTPException
@@ -94,8 +93,17 @@ def register_request_hooks(app: Flask) -> None:
         return response
 
 
+def _load_dotenv() -> None:
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv()
+    except ImportError:
+        pass
+
+
 def create_app(config_name: str | None = None) -> Flask:
-    load_dotenv()
+    _load_dotenv()
 
     from app.config import DevelopmentConfig, config_by_name
 

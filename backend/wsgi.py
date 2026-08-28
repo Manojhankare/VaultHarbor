@@ -6,9 +6,13 @@ import sys
 import traceback
 
 try:
-    from dotenv import load_dotenv
+    try:
+        from dotenv import load_dotenv
 
-    load_dotenv()
+        load_dotenv()
+    except ImportError:
+        # Vercel injects env vars directly; dotenv is optional at runtime.
+        pass
 
     from app import create_app
 
