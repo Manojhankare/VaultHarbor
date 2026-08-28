@@ -1,0 +1,43 @@
+---
+description: Keep docs/ updated whenever code, deployment, or architecture changes
+alwaysApply: true
+---
+
+# Maintain Project Documentation
+
+VaultSync documentation lives in **`docs/`** (repo root). Update it in the **same change** as code — not as a follow-up.
+
+## When to update docs
+
+| You changed… | Update these |
+|--------------|--------------|
+| Backend code structure, new module, API | `docs/backend/PROJECT_STRUCTURE.md`, `docs/CHANGELOG.md` |
+| New/changed API endpoint | `backend/docs/EXTENSION_INTEGRATION.md`, mention in CHANGELOG |
+| Database model or migration | `backend/docs/MIGRATIONS.md`, `docs/backend/PROJECT_STRUCTURE.md` |
+| Env var in `config.py` or `.env.example` | `docs/backend/ENVIRONMENT.md`, `.env.example` |
+| Deployment (Vercel, env, URLs) | `docs/backend/DEPLOYMENT.md`, `docs/README.md` (URLs table) |
+| Crypto / vault client contract | `backend/docs/CLIENT_CRYPTO.md` |
+| New repo component (extension, web) | Create/update `docs/<component>/` + `docs/README.md` index |
+| Architecture or security model | `docs/architecture/OVERVIEW.md` |
+
+## Rules
+
+1. **Do not skip docs** — if the change would confuse a future session, document it.
+2. **Prefer editing existing files** over creating duplicates; one source of truth per topic.
+3. **`backend/docs/`** holds deep technical guides; **`docs/`** holds project-wide index + summaries. Cross-link both.
+4. **Add a CHANGELOG entry** for user-visible or deploy-affecting changes.
+5. **Placeholder READMEs** (`docs/extension/`, `docs/web/`) — replace with real docs when that phase starts.
+6. **Keep `pyproject.toml` and `requirements.txt` in sync** when adding Python deps (note in DEPLOYMENT.md if relevant).
+
+## New component checklist
+
+When adding `extension/` or `web/`:
+
+1. Create `docs/<name>/PROJECT_STRUCTURE.md`
+2. Add entry to `docs/README.md` index
+3. Update `docs/architecture/OVERVIEW.md` phase table
+4. Add CHANGELOG entry
+
+## Definition of done
+
+A task is not complete until either (a) relevant docs are updated, or (b) you explicitly confirm no doc change is needed because the change is trivial/internal with no outward effect.
