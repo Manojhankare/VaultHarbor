@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: vaultsync
+      POSTGRES_PASSWORD: vaultsync
+      POSTGRES_DB: vaultsync
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: development
+      SECRET_KEY: docker-dev-secret-key-change-me
+      JWT_SECRET_KEY: docker-dev-jwt-secret-change-me
+      DATABASE_URL: postgresql://vaultsync:vaultsync@db:5432/vaultsync
+      DIRECT_DATABASE_URL: postgresql://vaultsync:vaultsync@db:5432/vaultsync
+      DB_POOL_MODE: queue
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+      ENABLE_API_DOCS: "true"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
