@@ -11,7 +11,7 @@ pythonpath = ["."]
 filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.vercel]
-entrypoint = "wsgi"
+entrypoint = "wsgi:app"
 
 [tool.ruff]
 line-length = 100
