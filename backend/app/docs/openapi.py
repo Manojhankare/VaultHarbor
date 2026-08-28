@@ -5,6 +5,9 @@ from __future__ import annotations
 from apispec import APISpec
 
 
+from app.meta import AUTHOR_NAME, AUTHOR_SITE
+
+
 def build_openapi_spec() -> dict:
     spec = APISpec(
         title="VaultSync API",
@@ -13,8 +16,13 @@ def build_openapi_spec() -> dict:
         info={
             "description": (
                 "Zero-knowledge password manager backend. "
-                "The server stores encrypted vault blobs only."
-            )
+                "The server stores encrypted vault blobs only. "
+                f"Made by {AUTHOR_NAME} — {AUTHOR_SITE}"
+            ),
+            "contact": {
+                "name": AUTHOR_NAME,
+                "url": AUTHOR_SITE,
+            },
         },
         servers=[{"url": "/"}],
     )

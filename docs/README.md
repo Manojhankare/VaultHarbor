@@ -2,13 +2,15 @@
 
 Central documentation for the VaultSync password manager monorepo. **Keep this folder updated** whenever code, deployment, or architecture changes.
 
+**Author:** [Manoj Hankare](https://manojhankare.in)
+
 ## Repository layout
 
 ```text
 VaultSync/
 ├── docs/                  ← you are here (project-wide docs)
 ├── backend/               ← Flask API (deployed)
-├── extension/             ← browser extension (planned)
+├── extension/             ← browser extension (Chromium V1)
 └── web/                   ← web vault UI (planned, optional)
 ```
 
@@ -23,7 +25,7 @@ VaultSync/
 | [Backend migrations](backend/MIGRATIONS.md) | Database schema changes (symlink to technical guide) |
 | [Client crypto contract](backend/CLIENT_CRYPTO.md) | Vault encryption for extension/web clients |
 | [Extension API integration](backend/EXTENSION_INTEGRATION.md) | How clients call the REST API |
-| [Extension (planned)](extension/README.md) | Browser extension docs placeholder |
+| [Extension](extension/README.md) | Browser extension (Chromium V1) |
 | [Web (planned)](web/README.md) | Future web vault placeholder |
 | [Changelog](CHANGELOG.md) | Notable project changes |
 
@@ -41,7 +43,7 @@ When editing those files, also update the matching section in `docs/backend/` if
 
 | Service | URL |
 |---------|-----|
-| API (Vercel) | `https://vault-sync-tawny.vercel.app` |
+| API (production) | `https://vaultsync.manojhankare.in` |
 | Health | `/health` |
 | API docs | `/api/docs` |
 | Database | Supabase PostgreSQL (`vaultsync`) |

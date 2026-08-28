@@ -2,6 +2,8 @@
 
 This guide maps the nine-step extension flow to concrete API calls.
 
+**VaultSync** — made by [Manoj Hankare](https://manojhankare.in)
+
 ## Prerequisites
 
 - MV3 service worker with `host_permissions` for your API domain

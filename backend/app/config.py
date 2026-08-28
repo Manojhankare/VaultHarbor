@@ -1,4 +1,7 @@
-"""Application configuration."""
+"""Application configuration for VaultSync.
+
+Author: Manoj Hankare — https://manojhankare.in
+"""
 
 from __future__ import annotations
 

@@ -1,0 +1,59 @@
+{
+  "manifest_version": 3,
+  "name": "VaultSync",
+  "version": "0.1.0",
+  "description": "Secure zero-knowledge password manager by Manoj Hankare (manojhankare.in)",
+  "minimum_chrome_version": "109",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "VaultSync"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "storage",
+    "alarms",
+    "offscreen",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "https://vaultsync.manojhankare.in/*",
+    "http://localhost:5000/*",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "exclude_matches": [
+        "https://vaultsync.manojhankare.in/*",
+        "http://localhost:5000/*"
+      ],
+      "js": ["content-script.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["picker.html", "save-prompt.html"],
+      "matches": ["http://*/*", "https://*/*"],
+      "use_dynamic_url": true
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

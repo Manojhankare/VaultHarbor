@@ -25,6 +25,7 @@ Root: [`backend/`](../../backend/)
 app/
 ├── __init__.py          # create_app() factory — wires extensions & blueprints
 ├── config.py            # Env-driven config (dev / test / production)
+├── meta.py              # Author / site metadata (health, OpenAPI)
 ├── extensions.py        # db, migrate, cors, limiter singletons
 │
 ├── models/              # SQLAlchemy ORM (database schema)

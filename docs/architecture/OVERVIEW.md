@@ -56,5 +56,5 @@ The backend **must not**:
 | Phase | Component | Status |
 |-------|-----------|--------|
 | 1 | Backend API | Done |
-| 2 | Chromium extension (MV3) | Planned |
+| 2 | Chromium extension (MV3) | Done (Chrome/Edge/Brave; Firefox unverified) |
 | 3 | Web vault (optional) | TBD |

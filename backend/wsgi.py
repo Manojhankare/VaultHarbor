@@ -1,4 +1,7 @@
-"""WSGI entrypoint for Gunicorn and Vercel."""
+"""WSGI entrypoint for Gunicorn and Vercel.
+
+VaultSync backend — Manoj Hankare (https://manojhankare.in)
+"""
 
 from __future__ import annotations
 

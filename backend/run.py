@@ -1,4 +1,7 @@
-"""Local development entrypoint."""
+"""Local development entrypoint.
+
+VaultSync backend — Manoj Hankare (https://manojhankare.in)
+"""
 
 from dotenv import load_dotenv
 

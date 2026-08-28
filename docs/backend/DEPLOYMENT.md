@@ -1,6 +1,6 @@
 # Backend Deployment (Vercel)
 
-Production API: **https://vault-sync-tawny.vercel.app**
+Production API: **https://vaultsync.manojhankare.in** (custom domain on Vercel)
 
 ## Vercel project settings
 

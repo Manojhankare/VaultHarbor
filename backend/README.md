@@ -2,6 +2,8 @@
 
 Zero-knowledge password manager backend API. The server stores encrypted vault blobs only and never sees plaintext credentials.
 
+**Author:** [Manoj Hankare](https://manojhankare.in) — made by [manojhankare.in](https://manojhankare.in)
+
 > **Project-wide docs:** see [`../docs/README.md`](../docs/README.md) and [`../docs/backend/PROJECT_STRUCTURE.md`](../docs/backend/PROJECT_STRUCTURE.md).
 
 ## Architecture
