@@ -2,6 +2,33 @@
 
 All notable VaultSync project changes. Update this file with each significant release or deployment change.
 
+## 2026-08-29 — Save vs update on login capture
+
+### Added
+
+- NordPass-style login capture: same username + changed password → **Update password?** (updates existing entry); new username → **Save login?**
+
+## 2026-08-29 — Focus dropdown for autofill
+
+### Added
+
+- Focusing or clicking username/password opens a VaultSync **dropdown** under the field with all matching logins (single or multiple); row or Fill autofills
+
+## 2026-08-29 — Unlock-first save prompt + keep unlocked
+
+### Changed
+
+- Save-password iframe shows **Unlock to save** when the vault is locked, then the save form after unlock
+- **Keep unlocked** checkbox on unlock (popup + save prompt): skips 15-minute auto-lock until browser closes, manual Lock, or Logout
+
+## 2026-08-29 — Extension save-login (SPA sites)
+
+### Fixed
+
+- Save-password prompt on SPAs (e.g. LinkedIn): detect **Sign in** / **Log in** button clicks (not only form submit), password field removal after login, and `history.pushState` navigation
+- Save prompt still offered when vault is locked (duplicate check skipped; unlock required to persist)
+- `webNavigation` permission for post-login prompt on client-side redirects
+
 ## 2026-08-29 — Account password reset and master password recovery
 
 ### Added

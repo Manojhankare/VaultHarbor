@@ -74,3 +74,23 @@ export function createDefaultKdf(): RegisterRequest["kdf"] {
     salt: btoa(salt),
   };
 }
+
+export async function forgotPassword(
+  email: string
+): Promise<{ message: string }> {
+  const { data } = await apiRequest<{ message: string }>(
+    "/api/v1/auth/forgot-password",
+    { method: "POST", body: { email }, skipAuth: true }
+  );
+  return data;
+}
+
+export async function resetPassword(
+  payload: import("../types/api").ResetPasswordRequest
+): Promise<void> {
+  await apiRequest<void>("/api/v1/auth/reset-password", {
+    method: "POST",
+    body: payload,
+    skipAuth: true,
+  });
+}

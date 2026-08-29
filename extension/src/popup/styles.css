@@ -60,6 +60,17 @@ body {
   text-align: left;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-logout {
+  font-size: 12px;
+  padding: 4px 0;
+}
+
 .brand-header--compact .brand-header__row {
   flex: 1;
 }
@@ -136,6 +147,87 @@ body {
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.btn-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.loading-spinner {
+  display: inline-block;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  animation: vs-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.loading-spinner--sm {
+  width: 14px;
+  height: 14px;
+}
+
+.loading-spinner--md {
+  width: 20px;
+  height: 20px;
+}
+
+.loading-spinner--lg {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+  border-color: rgba(0, 229, 255, 0.2);
+  border-top-color: var(--vs-accent);
+}
+
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 280px;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.loading-screen__message {
+  margin: 0;
+  font-size: 14px;
+  color: var(--vs-text-muted);
+  animation: vs-pulse 1.4s ease-in-out infinite;
+}
+
+.app--transition {
+  min-height: 448px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.loading-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@keyframes vs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes vs-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .btn-secondary {
@@ -227,6 +319,11 @@ body {
   box-shadow: var(--vs-shadow-glow);
 }
 
+.list-item--pickable:focus-visible {
+  outline: 2px solid var(--vs-accent, #0d9488);
+  outline-offset: 2px;
+}
+
 .list-item .name {
   font-weight: 600;
 }
@@ -310,4 +407,62 @@ body {
 
 .author-footer__link {
   font-size: 11px;
+}
+
+.recovery-key-box {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  word-break: break-all;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--vs-border-hover);
+  background: var(--vs-bg-elevated);
+  color: var(--vs-accent-slogan);
+  text-align: center;
+}
+
+.recovery-confirm {
+  font-size: 13px;
+  color: var(--vs-text-muted);
+  align-items: flex-start;
+}
+
+.password-requirements {
+  margin: 8px 0 12px;
+  font-size: 12px;
+}
+
+.password-requirements__label {
+  margin: 0 0 6px;
+  color: var(--vs-text-muted);
+}
+
+.password-requirements__list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.password-requirements__item,
+.password-requirements__item--ok {
+  padding: 2px 0 2px 18px;
+  position: relative;
+  color: var(--vs-text-muted);
+}
+
+.password-requirements__item::before {
+  content: "○";
+  position: absolute;
+  left: 0;
+  color: var(--vs-text-label);
+}
+
+.password-requirements__item--ok {
+  color: var(--vs-accent-slogan);
+}
+
+.password-requirements__item--ok::before {
+  content: "✓";
+  color: var(--vs-accent-slogan);
 }

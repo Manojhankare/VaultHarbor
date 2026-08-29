@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { BrandHeader } from "../components/BrandHeader";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 import { bg } from "../api";
 import { AddCredentialPage } from "./AddCredentialPage";
 import { CredentialDetailPage } from "./CredentialDetailPage";
+import { RecoveryKeyPage } from "../components/RecoveryKeyPage";
 import { PasswordGenerator } from "../components/PasswordGenerator";
 
 type CredentialSummary = { id: string; name: string; username: string };
@@ -16,18 +18,29 @@ type SiteInfo = {
 type Props = {
   email: string | null;
   pendingChanges: number;
+  hasRecoveryKey: boolean;
   onLock: () => void;
+  onLogout: () => void;
   onRefresh: () => void;
 };
 
-export function VaultPage({ email, pendingChanges, onLock, onRefresh }: Props) {
+export function VaultPage({
+  email,
+  pendingChanges,
+  hasRecoveryKey,
+  onLock,
+  onLogout,
+  onRefresh,
+}: Props) {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<CredentialSummary[]>([]);
   const [site, setSite] = useState<SiteInfo | null>(null);
-  const [view, setView] = useState<"list" | "add" | "detail" | "generator">("list");
+  const [view, setView] = useState<"list" | "add" | "detail" | "generator" | "recovery">("list");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [backfillDismissed, setBackfillDismissed] = useState(false);
+  const [generatedRecoveryKey, setGeneratedRecoveryKey] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const [listRes, siteRes] = await Promise.all([
@@ -47,6 +60,11 @@ export function VaultPage({ email, pendingChanges, onLock, onRefresh }: Props) {
     onLock();
   }
 
+  async function handleLogout() {
+    await bg({ type: "LOGOUT" });
+    onLogout();
+  }
+
   async function handleSync() {
     setSyncing(true);
     setError(null);
@@ -62,6 +80,32 @@ export function VaultPage({ email, pendingChanges, onLock, onRefresh }: Props) {
     const tabId = tabs[0]?.id;
     if (!tabId) return;
     await bg({ type: "FILL_CREDENTIAL", tabId, credentialId: id });
+  }
+
+  async function handleGenerateRecoveryKey() {
+    setError(null);
+    const res = await bg<{ recoveryKey: string }>({ type: "GENERATE_RECOVERY_KEY" });
+    if (res.ok && res.data?.recoveryKey) {
+      setGeneratedRecoveryKey(res.data.recoveryKey);
+      setView("recovery");
+    } else {
+      setError(res.error ?? "Failed to generate recovery key");
+    }
+  }
+
+  if (view === "recovery" && generatedRecoveryKey) {
+    return (
+      <RecoveryKeyPage
+        recoveryKey={generatedRecoveryKey}
+        title="Your new recovery key"
+        onConfirmed={() => {
+          setGeneratedRecoveryKey(null);
+          setView("list");
+          setBackfillDismissed(true);
+          onRefresh();
+        }}
+      />
+    );
   }
 
   if (view === "add") {
@@ -105,17 +149,48 @@ export function VaultPage({ email, pendingChanges, onLock, onRefresh }: Props) {
       <BrandHeader
         compact
         actions={
-          <button type="button" className="btn-icon" title="Lock vault" onClick={() => void handleLock()}>
-            🔒
-          </button>
+          <div className="header-actions">
+            <button type="button" className="btn-icon" title="Lock vault" onClick={() => void handleLock()}>
+              🔒
+            </button>
+            <button type="button" className="link header-logout" onClick={() => void handleLogout()}>
+              Log out
+            </button>
+          </div>
         }
       />
       {email && <p className="muted">{email}</p>}
       {pendingChanges > 0 && (
         <p className="badge">{pendingChanges} change(s) waiting to sync</p>
       )}
-      {syncing && <p className="muted">Syncing...</p>}
+      {syncing && (
+        <p className="muted loading-inline">
+          <LoadingSpinner size="sm" label="Syncing" />
+          Syncing...
+        </p>
+      )}
       {error && <p className="error">{error}</p>}
+
+      {!hasRecoveryKey && !backfillDismissed && (
+        <div className="section">
+          <h2>Recovery key missing</h2>
+          <p className="muted">
+            Generate a recovery key so you can reset your master password if you forget it.
+          </p>
+          <div className="actions" style={{ justifyContent: "flex-start" }}>
+            <button type="button" className="btn" onClick={() => void handleGenerateRecoveryKey()}>
+              Generate recovery key
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setBackfillDismissed(true)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       {site && (
         <div className="section">

@@ -1,15 +1,20 @@
 import { useState } from "react";
 import { BrandHeader } from "../components/BrandHeader";
+import { LoadingButton, TransitionScreen } from "../components/LoadingSpinner";
 import { bg } from "../api";
 
 type Props = {
-  onSuccess: () => void;
+  onSuccess: () => void | Promise<void>;
+  onForgotMaster: () => void;
+  onLogout: () => void;
 };
 
-export function UnlockPage({ onSuccess }: Props) {
+export function UnlockPage({ onSuccess, onForgotMaster, onLogout }: Props) {
   const [masterPassword, setMasterPassword] = useState("");
+  const [keepUnlocked, setKeepUnlocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [transitionMessage, setTransitionMessage] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -18,14 +23,20 @@ export function UnlockPage({ onSuccess }: Props) {
     const res = await bg({
       type: "UNLOCK_VAULT",
       masterPassword,
+      keepUnlocked,
     });
-    setMasterPassword("");
-    setLoading(false);
     if (res.ok) {
-      onSuccess();
+      setMasterPassword("");
+      setTransitionMessage("Unlocking vault...");
+      await onSuccess();
     } else {
+      setLoading(false);
       setError(res.error ?? "Unlock failed");
     }
+  }
+
+  if (transitionMessage) {
+    return <TransitionScreen message={transitionMessage} />;
   }
 
   return (
@@ -44,11 +55,47 @@ export function UnlockPage({ onSuccess }: Props) {
             autoFocus
           />
         </div>
+        <label
+          className="muted"
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 8,
+            marginBottom: 12,
+            fontSize: 12,
+            cursor: "pointer",
+            lineHeight: 1.35,
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={keepUnlocked}
+            onChange={(e) => setKeepUnlocked(e.target.checked)}
+            style={{ marginTop: 2 }}
+          />
+          <span>Keep unlocked (skip auto-lock until browser closes)</span>
+        </label>
         {error && <p className="error">{error}</p>}
-        <button type="submit" className="btn" disabled={loading} style={{ width: "100%" }}>
-          {loading ? "Unlocking..." : "Unlock"}
-        </button>
+        <LoadingButton loading={loading} loadingLabel="Unlocking..." style={{ width: "100%" }}>
+          Unlock
+        </LoadingButton>
       </form>
+      <p style={{ marginTop: 16, textAlign: "center" }}>
+        <button type="button" className="link" onClick={onForgotMaster}>
+          Forgot master password?
+        </button>
+      </p>
+      <p style={{ marginTop: 8, textAlign: "center" }}>
+        <button
+          type="button"
+          className="link"
+          onClick={() => {
+            void bg({ type: "LOGOUT" }).then(() => onLogout());
+          }}
+        >
+          Log out
+        </button>
+      </p>
     </div>
   );
 }

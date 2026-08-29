@@ -1,0 +1,146 @@
+/* Picker iframe — override popup shell (360×480) that caused scrollbars */
+
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+#root {
+  width: 300px;
+  background: var(--vs-bg);
+  border: 1px solid var(--vs-border-hover);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  color: var(--vs-text);
+}
+
+.picker {
+  padding: 12px 14px 12px;
+  box-sizing: border-box;
+}
+
+.picker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.picker__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.picker__close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--vs-text-muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.picker__close:hover {
+  background: rgba(0, 229, 255, 0.08);
+  color: var(--vs-text);
+}
+
+.picker__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 280px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 229, 255, 0.35) transparent;
+}
+
+.picker__list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.picker__list::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.35);
+  border-radius: 4px;
+}
+
+.picker__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  border: 1px solid var(--vs-border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  background: var(--vs-bg-card);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.picker__item:last-child {
+  margin-bottom: 0;
+}
+
+.picker__item:hover,
+.picker__item:focus-visible {
+  border-color: var(--vs-border-hover);
+  box-shadow: var(--vs-shadow-glow);
+  outline: none;
+}
+
+.picker__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.picker__name {
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.picker__user {
+  color: var(--vs-text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.picker__fill {
+  flex-shrink: 0;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+
+.picker__empty {
+  margin: 12px 0;
+  text-align: center;
+  color: var(--vs-text-muted);
+  font-size: 13px;
+}
+
+.picker__loading {
+  margin: 20px 0;
+  text-align: center;
+  color: var(--vs-text-muted);
+  font-size: 13px;
+}

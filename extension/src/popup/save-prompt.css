@@ -1,0 +1,162 @@
+/* Save-prompt iframe — no popup shell width/min-height from styles.css */
+
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+#root {
+  width: 320px;
+  background: var(--vs-bg);
+  border: 1px solid var(--vs-border-hover);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  color: var(--vs-text);
+}
+
+.save-prompt {
+  padding: 12px 14px 14px;
+  box-sizing: border-box;
+}
+
+.save-prompt__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.save-prompt__header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.save-prompt__close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--vs-text-muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.save-prompt__close:hover {
+  background: rgba(0, 229, 255, 0.08);
+  color: var(--vs-text);
+}
+
+.save-prompt__brand {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.save-prompt__loading {
+  margin: 20px 0;
+  text-align: center;
+  color: var(--vs-text-muted);
+  font-size: 13px;
+}
+
+.save-prompt__title {
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--vs-text);
+}
+
+.save-prompt__subtitle {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--vs-text-muted);
+  line-height: 1.35;
+}
+
+.save-prompt .field {
+  margin-bottom: 8px;
+}
+
+.save-prompt .field label {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 3px;
+  color: var(--vs-text-label);
+  font-weight: 500;
+}
+
+.save-prompt .field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid var(--vs-border);
+  border-radius: 8px;
+  background: var(--vs-bg-elevated);
+  color: var(--vs-text);
+}
+
+.save-prompt .field-row {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.save-prompt .field-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.save-prompt__toggle {
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.save-prompt__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.save-prompt__actions .btn {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.save-prompt .error {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--vs-danger);
+}
+
+.save-prompt__check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 4px 0 2px;
+  font-size: 12px;
+  color: var(--vs-text-muted);
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.save-prompt__check input {
+  margin-top: 2px;
+  flex-shrink: 0;
+}

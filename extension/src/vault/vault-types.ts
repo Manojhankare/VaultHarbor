@@ -47,6 +47,10 @@ export type EncryptedVaultMeta = {
   revision: number;
   etag?: string;
   updated_at: string;
+  recovery_wrapped_vault_key?: string | null;
+  recovery_salt?: string | null;
+  recovery_kdf_algorithm?: string | null;
+  recovery_kdf_iterations?: number | null;
 };
 
 export function isLoginItem(item: VaultItem): item is LoginItem {

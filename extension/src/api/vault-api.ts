@@ -4,7 +4,7 @@ import type { VaultPutRequest, VaultResponse } from "../types/api";
 export async function getVault(
   accessToken: string,
   ifNoneMatch?: string
-): Promise<{ vault?: VaultResponse; etag?: string; notModified: boolean }> {
+): Promise<{ vault?: VaultResponse | null; etag?: string; notModified: boolean; notFound?: boolean }> {
   try {
     const result = await apiRequest<{ vault: VaultResponse }>(
       "/api/v1/vault",
@@ -24,7 +24,7 @@ export async function getVault(
       "code" in err &&
       (err as { code: string }).code === "VAULT_NOT_FOUND"
     ) {
-      return { notModified: false };
+      return { notModified: false, vault: null, notFound: true };
     }
     throw err;
   }
@@ -39,4 +39,15 @@ export async function putVault(
     { method: "PUT", body: payload, accessToken }
   );
   return data;
+}
+
+export async function deleteVault(
+  accessToken: string,
+  payload: import("../types/api").VaultDeleteRequest
+): Promise<void> {
+  await apiRequest<void>("/api/v1/vault", {
+    method: "DELETE",
+    body: payload,
+    accessToken,
+  });
 }

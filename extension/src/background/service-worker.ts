@@ -5,6 +5,7 @@
 import { initAuthClient } from "../auth/auth";
 import { handleBackgroundMessage } from "./messages";
 import { handleClipboardAlarm } from "./clipboard";
+import { promptSaveIfPending } from "./save-prompt";
 import {
   AUTO_LOCK_ALARM_NAME,
   AUTO_LOCK_MINUTES,
@@ -39,7 +40,11 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === SYNC_ALARM_NAME) {
     void syncNow();
   } else if (alarm.name === AUTO_LOCK_ALARM_NAME) {
-    void lockVault();
+    void (async () => {
+      const { isKeepUnlocked } = await import("../vault/keep-unlocked");
+      if (await isKeepUnlocked()) return;
+      await lockVault();
+    })();
   } else if (alarm.name === "vaultsync-clipboard-clear") {
     void handleClipboardAlarm();
   }
@@ -58,6 +63,20 @@ chrome.runtime.onMessage.addListener(
     return true;
   }
 );
+
+// Re-show save prompt after login redirect (iframe on old page is destroyed).
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (changeInfo.status === "complete" || changeInfo.url) {
+    void promptSaveIfPending(tabId);
+  }
+});
+
+// SPAs (e.g. LinkedIn) navigate via history API without a full reload.
+chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+  if (details.frameId === 0) {
+    void promptSaveIfPending(details.tabId);
+  }
+});
 
 void setupAlarms();
 void loadDecryptedFromStorage();

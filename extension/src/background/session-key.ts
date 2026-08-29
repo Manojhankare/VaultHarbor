@@ -42,6 +42,7 @@ export async function clearSessionDek(): Promise<void> {
   await storageSessionRemove([
     STORAGE_KEYS.SESSION_DEK,
     STORAGE_KEYS.VAULT_UNLOCKED,
+    STORAGE_KEYS.KEEP_UNLOCKED,
   ]);
 }
 

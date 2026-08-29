@@ -64,6 +64,10 @@ export type VaultResponse = {
   wrapped_vault_key: string | null;
   vault_version: number;
   revision: number;
+  recovery_wrapped_vault_key?: string | null;
+  recovery_salt?: string | null;
+  recovery_kdf_algorithm?: string | null;
+  recovery_kdf_iterations?: number | null;
 };
 
 export type VaultPutRequest = {
@@ -73,6 +77,25 @@ export type VaultPutRequest = {
   base_revision: number;
   client_mutation_id: string;
   device_id?: string;
+  recovery_wrapped_vault_key?: string;
+  recovery_salt?: string;
+  recovery_kdf_algorithm?: string;
+  recovery_kdf_iterations?: number;
+};
+
+export type VaultDeleteRequest = {
+  password: string;
+  confirm: "DELETE";
+};
+
+export type ForgotPasswordRequest = {
+  email: string;
+};
+
+export type ResetPasswordRequest = {
+  email: string;
+  code: string;
+  new_password: string;
 };
 
 export type SyncChange = {

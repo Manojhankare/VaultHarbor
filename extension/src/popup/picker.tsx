@@ -1,14 +1,20 @@
-import { StrictMode, useEffect, useState } from "react";
+import { StrictMode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { AuthorFooter } from "./components/AuthorFooter";
 import { bg } from "./api";
-import "../popup/styles.css";
+import "./styles.css";
+import "./picker.css";
 import { MESSAGE_SOURCE } from "../shared/messages";
 
+function notifyParent(type: string, extra?: Record<string, unknown>) {
+  window.parent.postMessage({ source: MESSAGE_SOURCE, type, ...extra }, "*");
+}
+
 function PickerApp() {
+  const rootRef = useRef<HTMLDivElement>(null);
   const params = new URLSearchParams(window.location.search);
   const ids = (params.get("ids") ?? "").split(",").filter(Boolean);
   const [items, setItems] = useState<{ id: string; name: string; username: string }[]>([]);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -18,31 +24,92 @@ function PickerApp() {
       if (res.ok && res.data) {
         setItems(res.data.filter((i) => ids.includes(i.id)));
       }
+      setReady(true);
     })();
   }, [ids]);
 
+  useLayoutEffect(() => {
+    if (!ready || !rootRef.current) return;
+
+    const postHeight = () => {
+      const el = rootRef.current;
+      if (!el) return;
+      const height = Math.ceil(el.getBoundingClientRect().height);
+      notifyParent("RESIZE_PICKER", { height: height + 2 });
+    };
+
+    postHeight();
+    const observer = new ResizeObserver(postHeight);
+    observer.observe(rootRef.current);
+    return () => observer.disconnect();
+  }, [ready, items]);
+
   function pick(id: string) {
-    window.parent.postMessage(
-      { source: MESSAGE_SOURCE, type: "PICK_CREDENTIAL", id },
-      "*"
+    notifyParent("PICK_CREDENTIAL", { id });
+  }
+
+  function close() {
+    notifyParent("CLOSE_PICKER");
+  }
+
+  if (!ready) {
+    return (
+      <div className="picker" ref={rootRef}>
+        <p className="picker__loading">Loading...</p>
+      </div>
     );
   }
 
   return (
-    <div className="app">
-      <h1 style={{ fontSize: 16 }}>Choose login</h1>
-      <ul className="list">
-        {items.map((item) => (
-          <li key={item.id} className="list-item">
-            <div className="name">{item.name}</div>
-            <div className="domain">{item.username}</div>
-            <button type="button" className="btn" style={{ marginTop: 8 }} onClick={() => pick(item.id)}>
-              Fill
-            </button>
-          </li>
-        ))}
-      </ul>
-      <AuthorFooter />
+    <div className="picker" ref={rootRef}>
+      <div className="picker__header">
+        <h1 className="picker__title">Choose login</h1>
+        <button
+          type="button"
+          className="picker__close"
+          title="Close"
+          aria-label="Close"
+          onClick={close}
+        >
+          ×
+        </button>
+      </div>
+      {items.length === 0 ? (
+        <p className="picker__empty">No matching logins.</p>
+      ) : (
+        <ul className="picker__list">
+          {items.map((item) => (
+            <li
+              key={item.id}
+              className="picker__item"
+              role="button"
+              tabIndex={0}
+              onClick={() => pick(item.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  pick(item.id);
+                }
+              }}
+            >
+              <div className="picker__meta">
+                <div className="picker__name">{item.name}</div>
+                <div className="picker__user">{item.username}</div>
+              </div>
+              <button
+                type="button"
+                className="btn picker__fill"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  pick(item.id);
+                }}
+              >
+                Fill
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

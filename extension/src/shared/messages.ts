@@ -12,7 +12,7 @@ export type BackgroundRequest =
   | { type: "REGISTER"; email: string; password: string }
   | { type: "LOGIN"; email: string; password: string }
   | { type: "LOGOUT" }
-  | { type: "UNLOCK_VAULT"; masterPassword: string }
+  | { type: "UNLOCK_VAULT"; masterPassword: string; keepUnlocked?: boolean }
   | { type: "LOCK_VAULT" }
   | { type: "GET_VAULT_STATE" }
   | { type: "LIST_CREDENTIALS"; query?: string }
@@ -30,9 +30,16 @@ export type BackgroundRequest =
   | { type: "COPY_TO_CLIPBOARD"; text: string }
   | { type: "CONTENT_FORM_DETECTED"; tabId: number }
   | { type: "CONTENT_LOGIN_SUBMITTED"; tabId: number; username: string; password: string }
+  | { type: "CHECK_PENDING_SAVE" }
   | { type: "SETUP_MASTER_PASSWORD"; masterPassword: string }
+  | { type: "FORGOT_PASSWORD"; email: string }
+  | { type: "RESET_PASSWORD"; email: string; code: string; newPassword: string }
+  | { type: "RECOVER_WITH_RECOVERY_KEY"; recoveryKey: string; newMasterPassword: string }
+  | { type: "CHANGE_MASTER_PASSWORD"; currentMasterPassword: string; newMasterPassword: string }
+  | { type: "GENERATE_RECOVERY_KEY" }
+  | { type: "RESET_VAULT"; accountPassword: string }
   | { type: "GET_PENDING_SAVE" }
-  | { type: "SAVE_PENDING_CREDENTIAL" }
+  | { type: "SAVE_PENDING_CREDENTIAL"; item: NewLoginItem }
   | { type: "DISMISS_PENDING_SAVE" };
 
 export type PasswordGenOptions = {

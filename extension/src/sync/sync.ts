@@ -1,6 +1,6 @@
 import { getAccessToken } from "../auth/tokens";
 import { getDeviceId } from "../devices/device";
-import { ApiError } from "../shared/errors";
+import { ApiError, ExtensionError } from "../shared/errors";
 import { STORAGE_KEYS } from "../shared/constants";
 import { storageLocalSet } from "../shared/browser";
 import * as vaultApi from "../api/vault-api";
@@ -24,9 +24,9 @@ import {
   getPendingChangeCount,
   addPendingChange,
   clearPendingChange,
+  wipeLocalVaultState,
 } from "../vault/storage";
 import { mergeVaults, parseVault, serializeVault } from "../vault/codec";
-import { unwrapDek } from "../vault/crypto";
 import { rehydrateDek } from "../background/session-key";
 import type { EncryptedVaultMeta } from "../vault/vault-types";
 
@@ -43,6 +43,12 @@ export async function downloadAndCacheVault(
     return;
   }
 
+  if (result.notFound) {
+    await wipeLocalVaultState();
+    await lockVault();
+    return;
+  }
+
   if (!result.vault) {
     return;
   }
@@ -52,6 +58,10 @@ export async function downloadAndCacheVault(
     wrapped_vault_key: result.vault.wrapped_vault_key ?? "",
     vault_version: result.vault.vault_version,
     revision: result.vault.revision,
+    recovery_wrapped_vault_key: result.vault.recovery_wrapped_vault_key ?? undefined,
+    recovery_salt: result.vault.recovery_salt ?? undefined,
+    recovery_kdf_algorithm: result.vault.recovery_kdf_algorithm ?? undefined,
+    recovery_kdf_iterations: result.vault.recovery_kdf_iterations ?? undefined,
     etag: result.etag,
     updated_at: new Date().toISOString(),
   };
@@ -92,6 +102,13 @@ export async function uploadVault(
       wrapped_vault_key: vault.wrapped_vault_key ?? payload.wrapped_vault_key,
       vault_version: vault.vault_version,
       revision: vault.revision,
+      recovery_wrapped_vault_key:
+        vault.recovery_wrapped_vault_key ?? payload.recovery_wrapped_vault_key,
+      recovery_salt: vault.recovery_salt ?? payload.recovery_salt,
+      recovery_kdf_algorithm:
+        vault.recovery_kdf_algorithm ?? payload.recovery_kdf_algorithm,
+      recovery_kdf_iterations:
+        vault.recovery_kdf_iterations ?? payload.recovery_kdf_iterations,
       updated_at: new Date().toISOString(),
     };
     await saveEncryptedVault(meta);
@@ -124,16 +141,17 @@ async function handleConflict(
   const remote = remoteResult.vault;
   const dek = await rehydrateDek();
 
-  if (dek && remote.wrapped_vault_key) {
-    const localWrapped = getWrappedKeyCache() ?? localEncrypted?.wrapped_vault_key;
-    if (localWrapped && localWrapped !== remote.wrapped_vault_key) {
-      try {
-        await unwrapDek(dek, remote.wrapped_vault_key);
-      } catch {
-        await lockVault();
-        return;
-      }
-    }
+  const localWrapped = getWrappedKeyCache() ?? localEncrypted?.wrapped_vault_key;
+  if (
+    localWrapped &&
+    remote.wrapped_vault_key &&
+    localWrapped !== remote.wrapped_vault_key
+  ) {
+    await lockVault();
+    throw new ExtensionError(
+      "MASTER_PASSWORD_CHANGED",
+      "Master password was changed on another device. Unlock with your new master password."
+    );
   }
 
   await saveConflict({
@@ -150,6 +168,10 @@ async function handleConflict(
     wrapped_vault_key: remote.wrapped_vault_key ?? "",
     vault_version: remote.vault_version,
     revision: remote.revision,
+    recovery_wrapped_vault_key: remote.recovery_wrapped_vault_key ?? undefined,
+    recovery_salt: remote.recovery_salt ?? undefined,
+    recovery_kdf_algorithm: remote.recovery_kdf_algorithm ?? undefined,
+    recovery_kdf_iterations: remote.recovery_kdf_iterations ?? undefined,
     etag: remoteResult.etag,
     updated_at: new Date().toISOString(),
   };
@@ -188,7 +210,8 @@ export async function syncNow(): Promise<void> {
   if (pending > 0) {
     const vault = await getDecryptedVault();
     if (vault) {
-      await uploadVault(accessToken, stored?.revision ?? 0);
+      const currentStored = await getEncryptedVault();
+      await uploadVault(accessToken, currentStored?.revision ?? 0);
     }
   }
 }

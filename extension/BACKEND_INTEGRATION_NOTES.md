@@ -66,6 +66,23 @@ Development API: `http://localhost:5000`
 - Returns `{ user: { id, email, is_active, created_at, last_login_at, kdf } }`
 - KDF params used for master-password key derivation (not account password)
 
+### POST /api/v1/auth/forgot-password
+
+- Rate limit: 3/min
+- Body: `{ email }`
+- Returns **202** `{ message }` always (no email enumeration)
+- Sends 8-character reset code via configured email provider
+- Per-email cooldown (`PASSWORD_RESET_COOLDOWN_SECONDS`)
+
+### POST /api/v1/auth/reset-password
+
+- Rate limit: 10/min
+- Body: `{ email, code, new_password }`
+- Returns **204** on success
+- Revokes all refresh tokens; clears account lockout
+- **Does not modify `user.kdf`** — master-password KDF salt/iterations unchanged
+- Errors: `RESET_CODE_INVALID`, `RESET_CODE_EXPIRED`, `RESET_THROTTLED`
+
 ## Devices
 
 ### POST /api/v1/devices
@@ -96,7 +113,8 @@ Development API: `http://localhost:5000`
 - Optional header: `If-None-Match: <etag>` → 304 if unchanged
 - Response includes `ETag` header (weak: `W/"sha256..."`)
 - **404 `VAULT_NOT_FOUND`** = no vault yet (revision 0), not a fatal error
-- Body: `{ vault: { encrypted_vault, wrapped_vault_key, vault_version, revision } }`
+- Body includes optional recovery fields:
+  `{ vault: { encrypted_vault, wrapped_vault_key, vault_version, revision, recovery_wrapped_vault_key?, recovery_salt?, recovery_kdf_algorithm?, recovery_kdf_iterations? } }`
 
 ### PUT /api/v1/vault
 
@@ -109,17 +127,31 @@ Development API: `http://localhost:5000`
     "vault_version": 1,
     "base_revision": 15,
     "client_mutation_id": "<uuid>",
-    "device_id": "<uuid>"
+    "device_id": "<uuid>",
+    "recovery_wrapped_vault_key": "<base64>",
+    "recovery_salt": "<base64>",
+    "recovery_kdf_algorithm": "pbkdf2-sha256",
+    "recovery_kdf_iterations": 600000
   }
   ```
 - **No `If-Match` header.** Optimistic locking uses `base_revision` in body only.
 - `base_revision: 0` = create new vault (first upload)
 - **CRITICAL:** Always send `wrapped_vault_key` on every PUT. Omitting it nulls the field
   server-side and permanently destroys the wrapped DEK.
+- **Recovery preserve-on-omit:** Omitting `recovery_*` fields on PUT leaves existing recovery
+  data unchanged. Include them when creating, rotating, or backfilling a recovery key.
 - `client_mutation_id`: fresh UUID per distinct upload; reuse only when retrying same payload
 - 409 `VAULT_REVISION_CONFLICT` with `details.current_revision`
 - 413 `PAYLOAD_TOO_LARGE` (max 2 MiB per blob)
 - Returns 200 or 201 `{ vault: {...} }`
+
+### DELETE /api/v1/vault
+
+- Rate limit: 5/min
+- Body: `{ password, confirm: "DELETE" }`
+- Requires correct account password
+- Returns **204** (idempotent if vault already gone)
+- Deletes vault row and user's sync events — **permanent**; client must wipe local state
 
 ## Sync
 
@@ -145,6 +177,7 @@ Development API: `http://localhost:5000`
 | Register returns tokens | Returns `{ user }` only; login required |
 | 404 on GET /vault is error | Normal first-run state (revision 0) |
 | wrapped_vault_key optional on update | **Must resend every PUT** or DEK is destroyed |
+| recovery_* optional on update | **Preserve-on-omit** — omit on routine sync; include when rotating recovery |
 | Login with device_id first | Device registration needs token; register device after first login |
 
 ## KDF salt encoding
@@ -183,3 +216,7 @@ Extension service workers with matching `host_permissions` bypass CORS.
 | VALIDATION_ERROR | 422 | Show field errors |
 | RATE_LIMIT_EXCEEDED | 429 | Back off |
 | ACCOUNT_LOCKED | 429 | Show lockout message |
+| RESET_CODE_INVALID | 400 | Show invalid code message |
+| RESET_CODE_EXPIRED | 400 | Request new code |
+| RESET_THROTTLED | 429 | Wait before retry |
+| RECOVERY_KEY_INVALID | (client) | Invalid recovery key |

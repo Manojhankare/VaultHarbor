@@ -26,7 +26,9 @@
     "storage",
     "alarms",
     "offscreen",
-    "clipboardWrite"
+    "clipboardWrite",
+    "tabs",
+    "webNavigation"
   ],
   "host_permissions": [
     "https://vaultsync.manojhankare.in/*",

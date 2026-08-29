@@ -59,8 +59,9 @@ After changing `.env`, run `npm run build:chrome` and reload the extension in th
 
 ## Security model
 
-- **Account password** → API auth (Argon2id on server)
+- **Account password** → API auth (Argon2id on server); forgot/reset via email code
 - **Master password** → local KDF → vault encryption (**never sent to server**)
+- **Recovery key** → second DEK wrap for master-password recovery (shown once at setup)
 - Encrypted vault blob synced via `PUT /api/v1/vault`
 - See [BACKEND_INTEGRATION_NOTES.md](BACKEND_INTEGRATION_NOTES.md) and [docs/CRYPTOGRAPHY.md](docs/CRYPTOGRAPHY.md)
 

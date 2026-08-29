@@ -24,6 +24,8 @@ export const STORAGE_KEYS = {
   PENDING_CHANGES: "pending_changes",
   SESSION_DEK: "session_dek",
   VAULT_UNLOCKED: "vault_unlocked",
+  /** When true, auto-lock alarm is skipped until browser session ends or manual lock. */
+  KEEP_UNLOCKED: "keep_unlocked",
 } as const;
 
 export const IDB_NAME = "vaultsync";

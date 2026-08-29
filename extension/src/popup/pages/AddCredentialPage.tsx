@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { bg } from "../api";
 import { PasswordGenerator } from "../components/PasswordGenerator";
+import { LoadingButton } from "../components/LoadingSpinner";
 
 type Props = {
   onCancel: () => void;
@@ -79,9 +80,9 @@ export function AddCredentialPage({ onCancel, onSaved, initialUri = "" }: Props)
           <button type="button" className="btn btn-secondary" onClick={onCancel}>
             Cancel
           </button>
-          <button type="submit" className="btn" disabled={loading}>
+          <LoadingButton loading={loading} loadingLabel="Saving...">
             Save
-          </button>
+          </LoadingButton>
         </div>
       </form>
     </div>

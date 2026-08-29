@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { bg } from "../api";
+import { LoadingScreen } from "../components/LoadingSpinner";
 import type { LoginItem } from "../../vault/vault-types";
 
 type Props = {
@@ -45,7 +46,7 @@ export function CredentialDetailPage({ id, onBack }: Props) {
   if (!item) {
     return (
       <div className="app">
-        <p className="muted">Loading...</p>
+        <LoadingScreen message="Loading credential..." />
       </div>
     );
   }

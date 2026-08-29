@@ -25,6 +25,7 @@ This applies all migrations in `migrations/versions/`.
 |----------|------|---------|
 | `001_initial` | `001_initial.py` | Core schema: users, devices, vaults, sync_events, refresh_tokens |
 | `002_password_reset_and_recovery` | `002_password_reset_and_recovery.py` | `password_reset_tokens` table; recovery columns on `vaults` |
+| `003_password_reset_tokens_repair` | `003_password_reset_tokens_repair.py` | Creates `password_reset_tokens` if missing (repair partial 002 apply) |
 
 ### 002 — password reset and recovery
 

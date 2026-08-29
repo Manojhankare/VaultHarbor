@@ -11,7 +11,10 @@ export type ExtensionErrorCode =
   | "PAYLOAD_TOO_LARGE"
   | "RATE_LIMIT"
   | "OFFLINE"
-  | "MASTER_PASSWORD_CHANGED";
+  | "MASTER_PASSWORD_CHANGED"
+  | "RECOVERY_KEY_INVALID"
+  | "RESET_CODE_INVALID"
+  | "RESET_CODE_EXPIRED";
 
 export class ExtensionError extends Error {
   readonly code: ExtensionErrorCode;
@@ -79,6 +82,10 @@ export function userFacingMessage(err: unknown): string {
         return "Too many requests. Please wait.";
       case "PAYLOAD_TOO_LARGE":
         return "Vault is too large to sync.";
+      case "RESET_CODE_INVALID":
+        return "Invalid reset code.";
+      case "RESET_CODE_EXPIRED":
+        return "Reset code has expired. Request a new one.";
       default:
         return err.message || "Something went wrong.";
     }

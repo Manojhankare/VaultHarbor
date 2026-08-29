@@ -58,7 +58,7 @@ export async function importRawDek(bytes: Uint8Array): Promise<CryptoKey> {
     "raw",
     bytes.buffer as ArrayBuffer,
     { name: "AES-GCM", length: 256 },
-    false,
+    true,
     ["encrypt", "decrypt"]
   );
 }
@@ -91,7 +91,7 @@ export async function unwrapDek(
     kek,
     { name: "AES-GCM", iv: iv.buffer as ArrayBuffer },
     { name: "AES-GCM", length: 256 },
-    false,
+    true,
     ["encrypt", "decrypt"]
   );
 }

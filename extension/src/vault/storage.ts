@@ -1,4 +1,5 @@
-import { IDB_NAME, IDB_VERSION } from "../shared/constants";
+import { IDB_NAME, IDB_VERSION, STORAGE_KEYS } from "../shared/constants";
+import { storageLocalRemove } from "../shared/browser";
 import type { EncryptedVaultMeta } from "../vault/vault-types";
 
 export type PendingChange = {
@@ -82,6 +83,34 @@ export async function getEncryptedVault(): Promise<EncryptedVaultMeta | null> {
   if (!result) return null;
   const { id: _id, ...meta } = result;
   return meta;
+}
+
+export async function deleteEncryptedVault(): Promise<void> {
+  await withStore("vault", "readwrite", (store) => {
+    store.delete(VAULT_KEY);
+  });
+}
+
+export async function clearPendingChanges(): Promise<void> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("pending", "readwrite");
+    const store = tx.objectStore("pending");
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function wipeLocalVaultState(): Promise<void> {
+  await deleteEncryptedVault();
+  await clearPendingChanges();
+  await clearConflicts();
+  await storageLocalRemove([
+    STORAGE_KEYS.LOCAL_REVISION,
+    STORAGE_KEYS.VAULT_ETAG,
+    STORAGE_KEYS.PENDING_CHANGES,
+  ]);
 }
 
 export async function saveMeta(key: string, value: unknown): Promise<void> {

@@ -70,6 +70,7 @@ export default defineConfig(({ mode }) => {
   build: {
     outDir,
     emptyOutDir: true,
+    modulePreload: false,
     rollupOptions: {
       input: {
         popup: resolve(root, "popup.html"),
