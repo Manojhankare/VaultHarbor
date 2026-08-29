@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import secrets
+import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
@@ -15,7 +16,11 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 
 from app.auth.schemas import AuthTokensResponse, KdfDescriptor, RegisterRequest, UserResponse
+from app.email import get_email_sender
+from app.email.base import EmailMessage
+from app.email.templates import password_reset_email
 from app.extensions import db
+from app.models.password_reset_token import PasswordResetToken
 from app.models.refresh_token import RefreshToken
 from app.models.user import User, utcnow
 from app.security.auth import create_access_token
@@ -25,7 +30,11 @@ from app.utils.errors import (
     RefreshTokenInvalidError,
     RefreshTokenReusedError,
     RegistrationConflictError,
+    ResetCodeExpiredError,
+    ResetCodeInvalidError,
 )
+
+RESET_CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
 
 @lru_cache(maxsize=1)
 def _dummy_password_hash() -> str:
@@ -161,7 +170,7 @@ def _check_lockout(user: User) -> None:
 
 def _record_failed_login(user: User | None) -> None:
     if user is None:
-        verify_password(DUMMY_PASSWORD_HASH, "invalid-password-for-timing")
+        _timing_safe_verify()
         return
 
     user.failed_login_attempts += 1
@@ -309,8 +318,123 @@ def get_user_profile(user_id: uuid.UUID) -> UserResponse:
 
 def purge_expired_tokens() -> int:
     now = utcnow()
-    result = db.session.execute(
+    refresh_result = db.session.execute(
         RefreshToken.__table__.delete().where(RefreshToken.expires_at < now)
     )
+    reset_result = db.session.execute(
+        PasswordResetToken.__table__.delete().where(PasswordResetToken.expires_at < now)
+    )
     db.session.commit()
-    return result.rowcount or 0
+    return (refresh_result.rowcount or 0) + (reset_result.rowcount or 0)
+
+
+def _hash_reset_code(user_id: uuid.UUID, code: str) -> str:
+    normalized = code.strip().upper().replace("-", "").replace(" ", "")
+    return hashlib.sha256(f"{user_id}:{normalized}".encode("utf-8")).hexdigest()
+
+
+def _generate_reset_code() -> str:
+    return "".join(secrets.choice(RESET_CODE_ALPHABET) for _ in range(8))
+
+
+def _pad_reset_response(start: float) -> None:
+    min_seconds = current_app.config["PASSWORD_RESET_MIN_RESPONSE_MS"] / 1000.0
+    elapsed = time.perf_counter() - start
+    if elapsed < min_seconds:
+        time.sleep(min_seconds - elapsed)
+
+
+def request_password_reset(email: str) -> None:
+    start = time.perf_counter()
+    try:
+        normalized = normalize_email(email)
+        user = db.session.scalar(select(User).where(User.email == normalized))
+        if user is None or not user.is_active:
+            return
+
+        cooldown = current_app.config["PASSWORD_RESET_COOLDOWN_SECONDS"]
+        latest = db.session.scalar(
+            select(PasswordResetToken)
+            .where(
+                PasswordResetToken.user_id == user.id,
+                PasswordResetToken.used_at.is_(None),
+            )
+            .order_by(PasswordResetToken.created_at.desc())
+        )
+        if latest and (utcnow() - latest.created_at).total_seconds() < cooldown:
+            return
+
+        now = utcnow()
+        db.session.execute(
+            update(PasswordResetToken)
+            .where(
+                PasswordResetToken.user_id == user.id,
+                PasswordResetToken.used_at.is_(None),
+            )
+            .values(used_at=now)
+        )
+
+        code = _generate_reset_code()
+        ttl = current_app.config["PASSWORD_RESET_CODE_TTL_SECONDS"]
+        token = PasswordResetToken(
+            user_id=user.id,
+            code_hash=_hash_reset_code(user.id, code),
+            expires_at=now + timedelta(seconds=ttl),
+        )
+        db.session.add(token)
+        db.session.commit()
+
+        subject, text, html = password_reset_email(
+            code=code, ttl_minutes=max(1, ttl // 60)
+        )
+        try:
+            get_email_sender().send(
+                EmailMessage(
+                    to_email=user.email,
+                    subject=subject,
+                    text_body=text,
+                    html_body=html,
+                )
+            )
+        except Exception:
+            current_app.logger.exception("Failed to send password reset email")
+    finally:
+        _pad_reset_response(start)
+
+
+def reset_password(*, email: str, code: str, new_password: str) -> None:
+    normalized = normalize_email(email)
+    user = db.session.scalar(select(User).where(User.email == normalized))
+    if user is None or not user.is_active:
+        raise ResetCodeInvalidError()
+
+    token = db.session.scalar(
+        select(PasswordResetToken)
+        .where(
+            PasswordResetToken.user_id == user.id,
+            PasswordResetToken.used_at.is_(None),
+        )
+        .order_by(PasswordResetToken.created_at.desc())
+    )
+    if token is None:
+        raise ResetCodeInvalidError()
+
+    max_attempts = current_app.config["PASSWORD_RESET_MAX_ATTEMPTS"]
+    if token.attempts >= max_attempts:
+        raise ResetCodeInvalidError("Too many invalid attempts.")
+
+    if token.expires_at <= utcnow():
+        raise ResetCodeExpiredError()
+
+    if token.code_hash != _hash_reset_code(user.id, code):
+        token.attempts += 1
+        db.session.commit()
+        raise ResetCodeInvalidError()
+
+    user.password_hash = hash_password(new_password)
+    user.failed_login_attempts = 0
+    user.lockout_until = None
+    token.used_at = utcnow()
+    db.session.commit()
+
+    logout_user(user_id=user.id, refresh_token=None, all_devices=True)

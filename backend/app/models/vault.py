@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Integer, Text, func
+from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -31,6 +31,10 @@ class Vault(db.Model):
     )
     encrypted_vault: Mapped[str] = mapped_column(Text, nullable=False)
     wrapped_vault_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    recovery_wrapped_vault_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    recovery_salt: Mapped[str | None] = mapped_column(Text, nullable=True)
+    recovery_kdf_algorithm: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    recovery_kdf_iterations: Mapped[int | None] = mapped_column(Integer, nullable=True)
     vault_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
     revision: Mapped[int] = mapped_column(BigInteger, nullable=False, default=1, server_default="1")
 

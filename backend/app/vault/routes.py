@@ -10,7 +10,7 @@ from app.utils.errors import VaultNotFoundError
 from app.utils.responses import success_response
 from app.utils.validation import parse_payload
 from app.vault import service
-from app.vault.schemas import VaultPutRequest
+from app.vault.schemas import VaultDeleteRequest, VaultPutRequest
 
 vault_bp = Blueprint("vault", __name__, url_prefix="/api/v1/vault")
 
@@ -40,3 +40,12 @@ def put_vault():
     payload = parse_payload(VaultPutRequest, request.get_json(silent=True))
     vault, created = service.upsert_vault(g.current_user.id, payload)
     return success_response({"vault": vault.model_dump()}, status=201 if created else 200)
+
+
+@vault_bp.delete("")
+@require_auth
+@limiter.limit("5 per minute")
+def delete_vault():
+    payload = parse_payload(VaultDeleteRequest, request.get_json(silent=True))
+    service.delete_vault(g.current_user.id, payload)
+    return success_response(status=204)

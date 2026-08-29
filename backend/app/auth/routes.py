@@ -5,7 +5,14 @@ from __future__ import annotations
 from flask import Blueprint, g, request
 
 from app.auth import service
-from app.auth.schemas import LoginRequest, LogoutRequest, RefreshRequest, RegisterRequest
+from app.auth.schemas import (
+    ForgotPasswordRequest,
+    LoginRequest,
+    LogoutRequest,
+    RefreshRequest,
+    RegisterRequest,
+    ResetPasswordRequest,
+)
 from app.extensions import limiter
 from app.security.auth import require_auth
 from app.utils.responses import success_response
@@ -59,3 +66,26 @@ def logout():
 def me():
     user = service.get_user_profile(g.current_user.id)
     return success_response({"user": user.model_dump()})
+
+
+@auth_bp.post("/forgot-password")
+@limiter.limit("3 per minute")
+def forgot_password():
+    payload = parse_payload(ForgotPasswordRequest, request.get_json(silent=True))
+    service.request_password_reset(str(payload.email))
+    return success_response(
+        {"message": "If an account exists for this email, a reset code has been sent."},
+        status=202,
+    )
+
+
+@auth_bp.post("/reset-password")
+@limiter.limit("10 per minute")
+def reset_password():
+    payload = parse_payload(ResetPasswordRequest, request.get_json(silent=True))
+    service.reset_password(
+        email=str(payload.email),
+        code=payload.code,
+        new_password=payload.new_password,
+    )
+    return success_response(status=204)

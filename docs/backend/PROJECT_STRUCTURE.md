@@ -31,17 +31,28 @@ app/
 ├── models/              # SQLAlchemy ORM (database schema)
 │   ├── user.py          # Account + KDF metadata (not master password)
 │   ├── device.py        # Browser/device registration
-│   ├── vault.py         # encrypted_vault + wrapped_vault_key + revision
+│   ├── vault.py         # encrypted_vault + wrapped_vault_key + recovery fields + revision
 │   ├── sync_event.py    # Sync history metadata
-│   └── refresh_token.py # Hashed refresh tokens + rotation
+│   ├── refresh_token.py # Hashed refresh tokens + rotation
+│   └── password_reset_token.py  # Hashed password-reset codes
 │
-├── auth/                # POST register, login, refresh, logout; GET me
+├── email/               # Pluggable transactional email (password reset)
+│   ├── base.py          # EmailSender protocol
+│   ├── factory.py       # Provider selection from EMAIL_PROVIDER
+│   ├── brevo.py         # Brevo (default production)
+│   ├── resend.py        # Resend adapter
+│   ├── ses.py           # Amazon SES stub
+│   ├── console.py       # Dev: print codes to stdout
+│   ├── templates.py     # Reset email subject/body
+│   └── http.py          # Shared HTTP helper
+│
+├── auth/                # POST register, login, refresh, logout, forgot/reset password; GET me
 │   ├── routes.py        # HTTP layer only
 │   ├── service.py       # Argon2id, JWT, refresh rotation
 │   └── schemas.py       # Pydantic request/response models
 │
 ├── devices/             # Device register, list, delete, heartbeat
-├── vault/               # GET/PUT encrypted vault (ETag, optimistic lock)
+├── vault/               # GET/PUT/DELETE encrypted vault (ETag, optimistic lock)
 ├── sync/                # GET sync metadata since revision
 │
 ├── security/
@@ -74,9 +85,10 @@ app/
 |-------|---------|
 | `users` | Email, password_hash, KDF params for client vault key derivation |
 | `devices` | Per-browser identity |
-| `vaults` | One row per user: opaque blobs + revision |
+| `vaults` | One row per user: opaque blobs + revision + optional recovery wrap |
 | `sync_events` | Metadata-only sync history |
 | `refresh_tokens` | SHA-256 hashed refresh tokens |
+| `password_reset_tokens` | SHA-256 hashed account-password reset codes |
 | `alembic_version` | Migration tracking |
 
 ## API versioning

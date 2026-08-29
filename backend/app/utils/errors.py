@@ -119,3 +119,21 @@ class RefreshTokenReusedError(UnauthorizedError):
 class VaultNotFoundError(NotFoundError):
     code = "VAULT_NOT_FOUND"
     message = "Vault not found."
+
+
+class ResetCodeInvalidError(AppError):
+    status_code = 400
+    code = "RESET_CODE_INVALID"
+    message = "Invalid or expired reset code."
+
+
+class ResetCodeExpiredError(AppError):
+    status_code = 400
+    code = "RESET_CODE_EXPIRED"
+    message = "Reset code has expired."
+
+
+class ResetThrottledError(AppError):
+    status_code = 429
+    code = "RESET_THROTTLED"
+    message = "Please wait before requesting another reset code."

@@ -25,7 +25,7 @@ A zero-knowledge password manager. The **server never sees plaintext passwords**
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  PostgreSQL (Supabase) — database: vaultsync                │
-│  users | devices | vaults | sync_events | refresh_tokens     │
+│  users | devices | vaults | sync_events | refresh_tokens | password_reset_tokens │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -35,6 +35,13 @@ A zero-knowledge password manager. The **server never sees plaintext passwords**
 |--------|---------|-------------------|
 | **Account password** | Login to API | Hash only (Argon2id) |
 | **Master password** | Derive vault encryption key | **Never** |
+| **Recovery key** | Second wrap of DEK (master password recovery) | **Never** (only opaque recovery wrap stored) |
+
+## Recovery and account reset
+
+- **Account password reset** — email code via Brevo (or console in dev). Changes API login only; **KDF metadata unchanged** so existing vault data remains decryptable with master/recovery key.
+- **Master password recovery** — client unwraps DEK with recovery key, sets new master password, rotates recovery key. Server stores opaque `recovery_wrapped_vault_key` + salt.
+- **Vault wipe** — authenticated `DELETE /vault` removes encrypted data; user re-runs setup. No server-side undo.
 
 ## Sync model (V1)
 

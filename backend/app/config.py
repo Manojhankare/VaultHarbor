@@ -86,6 +86,23 @@ class Config:
 
     TEST_SCHEMA: str = os.environ.get("TEST_SCHEMA", "vaultsync_test")
 
+    EMAIL_PROVIDER: str = os.environ.get("EMAIL_PROVIDER", "console").lower()
+    EMAIL_API_KEY: str = _env("EMAIL_API_KEY", "") or ""
+    EMAIL_FROM_ADDRESS: str = _env("EMAIL_FROM_ADDRESS", "noreply@manojhankare.in") or "noreply@manojhankare.in"
+    EMAIL_FROM_NAME: str = _env("EMAIL_FROM_NAME", "VaultSync") or "VaultSync"
+    EMAIL_TIMEOUT_SECONDS: float = float(os.environ.get("EMAIL_TIMEOUT_SECONDS", "5"))
+
+    PASSWORD_RESET_CODE_TTL_SECONDS: int = int(
+        os.environ.get("PASSWORD_RESET_CODE_TTL_SECONDS", "900")
+    )
+    PASSWORD_RESET_MAX_ATTEMPTS: int = int(os.environ.get("PASSWORD_RESET_MAX_ATTEMPTS", "5"))
+    PASSWORD_RESET_COOLDOWN_SECONDS: int = int(
+        os.environ.get("PASSWORD_RESET_COOLDOWN_SECONDS", "60")
+    )
+    PASSWORD_RESET_MIN_RESPONSE_MS: int = int(
+        os.environ.get("PASSWORD_RESET_MIN_RESPONSE_MS", "700")
+    )
+
     @staticmethod
     def init_app(app: Any) -> None:
         pass

@@ -69,6 +69,28 @@ def build_openapi_spec() -> dict:
     )
 
     spec.path(
+        path="/api/v1/auth/forgot-password",
+        operations={
+            "post": {
+                "summary": "Request password reset code",
+                "tags": ["auth"],
+                "responses": {"202": {"description": "Accepted"}},
+            }
+        },
+    )
+
+    spec.path(
+        path="/api/v1/auth/reset-password",
+        operations={
+            "post": {
+                "summary": "Reset account password with email code",
+                "tags": ["auth"],
+                "responses": {"204": {"description": "Password reset"}},
+            }
+        },
+    )
+
+    spec.path(
         path="/api/v1/vault",
         operations={
             "get": {
@@ -90,6 +112,12 @@ def build_openapi_spec() -> dict:
                     "201": {"description": "Created"},
                     "409": {"description": "Revision conflict"},
                 },
+            },
+            "delete": {
+                "summary": "Delete vault (destructive reset)",
+                "tags": ["vault"],
+                "security": [{"bearerAuth": []}],
+                "responses": {"204": {"description": "Vault deleted"}},
             },
         },
     )

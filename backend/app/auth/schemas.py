@@ -73,3 +73,27 @@ class UserResponse(BaseModel):
     created_at: str
     last_login_at: str | None
     kdf: KdfDescriptor
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=32)
+    new_password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=128)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password_strength(cls, value: str) -> str:
+        if not PASSWORD_PATTERN.match(value):
+            raise ValueError(
+                "password must include upper, lower, digit, and special character"
+            )
+        return value
+
+    @field_validator("code")
+    @classmethod
+    def normalize_code(cls, value: str) -> str:
+        return value.strip().upper().replace("-", "").replace(" ", "")

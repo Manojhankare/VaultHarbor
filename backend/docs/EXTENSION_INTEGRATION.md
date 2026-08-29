@@ -42,6 +42,37 @@ POST /api/v1/auth/login
 
 Response includes `access_token` (15 min) and `refresh_token` (30 days).
 
+### Forgot account password
+
+```http
+POST /api/v1/auth/forgot-password
+
+{ "email": "user@example.com" }
+```
+
+- Always returns **202** with a generic message (no email enumeration).
+- Sends an 8-character reset code by email (or logs to console when `EMAIL_PROVIDER=console`).
+- Per-email cooldown between requests.
+
+### Reset account password
+
+```http
+POST /api/v1/auth/reset-password
+
+{
+  "email": "user@example.com",
+  "code": "AB12CD34",
+  "new_password": "NewAccountPass1!"
+}
+```
+
+- Returns **204** on success.
+- Revokes all refresh tokens for the user.
+- Clears account lockout.
+- **Does not change** `users.kdf_*` (master-password KDF metadata).
+
+Error codes: `RESET_CODE_INVALID`, `RESET_CODE_EXPIRED`, `RESET_THROTTLED`.
+
 ### 3. Register device
 
 ```http
@@ -83,12 +114,35 @@ Authorization: Bearer <access_token>
   "vault_version": 1,
   "base_revision": 15,
   "client_mutation_id": "<uuid>",
-  "device_id": "<device-uuid>"
+  "device_id": "<device-uuid>",
+  "recovery_wrapped_vault_key": "<base64>",
+  "recovery_salt": "<base64>",
+  "recovery_kdf_algorithm": "pbkdf2-sha256",
+  "recovery_kdf_iterations": 600000
 }
 ```
 
 - `base_revision: 0` means "no vault exists yet" (first upload).
 - Include `client_mutation_id` on every upload for safe retries.
+- **Always send `wrapped_vault_key`** on every PUT (omitting it nulls the field).
+- **Recovery fields are preserve-on-omit:** omit them on routine sync uploads to keep the existing recovery wrap; include them when creating, rotating, or backfilling a recovery key.
+
+### Delete vault (destructive)
+
+```http
+DELETE /api/v1/vault
+Authorization: Bearer <access_token>
+
+{
+  "password": "AccountPass1!",
+  "confirm": "DELETE"
+}
+```
+
+- Returns **204** (idempotent if vault already absent).
+- Requires correct account password.
+- Deletes vault row and the user's sync events.
+- Client must wipe local vault state and route to fresh setup.
 
 ### 8. Detect remote changes
 

@@ -59,6 +59,9 @@ class User(db.Model):
     refresh_tokens = relationship(
         "RefreshToken", back_populates="user", cascade="all, delete-orphan"
     )
+    password_reset_tokens = relationship(
+        "PasswordResetToken", back_populates="user", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         CheckConstraint(

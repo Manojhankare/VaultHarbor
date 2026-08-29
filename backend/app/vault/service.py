@@ -13,8 +13,13 @@ from app.extensions import db
 from app.models.sync_event import SyncEvent
 from app.models.vault import Vault, utcnow
 from app.security.permissions import get_owned_device
-from app.utils.errors import PayloadTooLargeError, VaultNotFoundError, VaultRevisionConflictError
-from app.vault.schemas import VaultPutRequest, VaultResponse
+from app.utils.errors import (
+    InvalidCredentialsError,
+    PayloadTooLargeError,
+    VaultNotFoundError,
+    VaultRevisionConflictError,
+)
+from app.vault.schemas import VaultDeleteRequest, VaultPutRequest, VaultResponse
 
 
 def _validate_vault_size(encrypted_vault: str) -> None:
@@ -31,6 +36,10 @@ def vault_to_response(vault: Vault) -> VaultResponse:
         wrapped_vault_key=vault.wrapped_vault_key,
         vault_version=vault.vault_version,
         revision=vault.revision,
+        recovery_wrapped_vault_key=vault.recovery_wrapped_vault_key,
+        recovery_salt=vault.recovery_salt,
+        recovery_kdf_algorithm=vault.recovery_kdf_algorithm,
+        recovery_kdf_iterations=vault.recovery_kdf_iterations,
     )
 
 
@@ -46,6 +55,21 @@ def get_vault(user_id: uuid.UUID) -> Vault:
     if vault is None:
         raise VaultNotFoundError()
     return vault
+
+
+def _apply_recovery_fields(vault: Vault, payload: VaultPutRequest) -> None:
+    """Recovery fields are preserved when omitted (unlike wrapped_vault_key)."""
+    provided = payload.model_dump(exclude_unset=True)
+    if "recovery_wrapped_vault_key" in provided:
+        if payload.recovery_wrapped_vault_key:
+            _validate_vault_size(payload.recovery_wrapped_vault_key)
+        vault.recovery_wrapped_vault_key = payload.recovery_wrapped_vault_key
+    if "recovery_salt" in provided:
+        vault.recovery_salt = payload.recovery_salt
+    if "recovery_kdf_algorithm" in provided:
+        vault.recovery_kdf_algorithm = payload.recovery_kdf_algorithm
+    if "recovery_kdf_iterations" in provided:
+        vault.recovery_kdf_iterations = payload.recovery_kdf_iterations
 
 
 def upsert_vault(user_id: uuid.UUID, payload: VaultPutRequest) -> tuple[VaultResponse, bool]:
@@ -88,6 +112,7 @@ def upsert_vault(user_id: uuid.UUID, payload: VaultPutRequest) -> tuple[VaultRes
             vault_version=payload.vault_version,
             revision=1,
         )
+        _apply_recovery_fields(vault, payload)
         db.session.add(vault)
         operation = "CREATE"
         created = True
@@ -97,6 +122,7 @@ def upsert_vault(user_id: uuid.UUID, payload: VaultPutRequest) -> tuple[VaultRes
         vault.encrypted_vault = payload.encrypted_vault
         vault.wrapped_vault_key = payload.wrapped_vault_key
         vault.vault_version = payload.vault_version
+        _apply_recovery_fields(vault, payload)
         vault.revision += 1
         vault.updated_at = utcnow()
         operation = "UPDATE"
@@ -123,3 +149,20 @@ def upsert_vault(user_id: uuid.UUID, payload: VaultPutRequest) -> tuple[VaultRes
 
     db.session.refresh(vault)
     return vault_to_response(vault), created
+
+
+def delete_vault(user_id: uuid.UUID, payload: VaultDeleteRequest) -> None:
+    from app.auth.service import verify_password
+    from app.models.user import User
+
+    user = db.session.get(User, user_id)
+    if user is None or not verify_password(user.password_hash, payload.password):
+        raise InvalidCredentialsError()
+
+    db.session.execute(
+        SyncEvent.__table__.delete().where(SyncEvent.user_id == user_id)
+    )
+    vault = db.session.scalar(select(Vault).where(Vault.user_id == user_id))
+    if vault is not None:
+        db.session.delete(vault)
+    db.session.commit()

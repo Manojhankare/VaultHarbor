@@ -19,6 +19,24 @@ flask db upgrade
 
 This applies all migrations in `migrations/versions/`.
 
+## Applied migrations
+
+| Revision | File | Summary |
+|----------|------|---------|
+| `001_initial` | `001_initial.py` | Core schema: users, devices, vaults, sync_events, refresh_tokens |
+| `002_password_reset_and_recovery` | `002_password_reset_and_recovery.py` | `password_reset_tokens` table; recovery columns on `vaults` |
+
+### 002 — password reset and recovery
+
+- **`password_reset_tokens`** — hashed reset codes, expiry, attempt counter (mirrors refresh-token hygiene).
+- **`vaults`** — adds nullable `recovery_wrapped_vault_key`, `recovery_salt`, `recovery_kdf_algorithm`, `recovery_kdf_iterations`.
+
+Apply after deploy:
+
+```bash
+flask db upgrade
+```
+
 ## Every future schema change
 
 ### 1. Edit the model

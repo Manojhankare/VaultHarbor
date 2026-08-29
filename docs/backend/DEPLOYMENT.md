@@ -36,8 +36,25 @@ Set in Vercel → Settings → Environment Variables → **Production** (+ Previ
 | `CORS_ALLOWED_ORIGIN_REGEXES` | Recommended | Extension origins |
 | `TRUSTED_PROXY_COUNT` | Recommended | `1` |
 | `FORCE_HTTPS` | Recommended | `true` |
+| `EMAIL_PROVIDER` | Production | `brevo` (or `resend`) |
+| `EMAIL_API_KEY` | Production | Brevo/Resend API key |
+| `EMAIL_FROM_ADDRESS` | Production | Verified sender (e.g. `noreply@yourdomain.com`) |
+| `EMAIL_FROM_NAME` | Optional | `VaultSync` |
 
 **Do not set on Vercel:** `DIRECT_DATABASE_URL`, `FLASK_DEBUG`
+
+## Email (password reset)
+
+Production uses **Brevo** by default (`EMAIL_PROVIDER=brevo`). Alternatives: `resend`, `ses` (stub).
+
+1. Create a Brevo account and generate an API key.
+2. Verify the sender domain (SPF/DKIM) for `EMAIL_FROM_ADDRESS`.
+3. Set `EMAIL_PROVIDER`, `EMAIL_API_KEY`, `EMAIL_FROM_ADDRESS`, and `EMAIL_FROM_NAME` on Vercel.
+4. Redeploy after env changes.
+
+Local development: `EMAIL_PROVIDER=console` prints reset codes to the server log (no API key needed).
+
+Run migration `002_password_reset_and_recovery` before enabling reset in production.
 
 ## Migrations
 

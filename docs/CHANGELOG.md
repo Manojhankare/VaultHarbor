@@ -2,6 +2,28 @@
 
 All notable VaultSync project changes. Update this file with each significant release or deployment change.
 
+## 2026-08-29 — Account password reset and master password recovery
+
+### Added
+
+- **Account password reset:** `POST /api/v1/auth/forgot-password` (202, anti-enumeration) and `POST /api/v1/auth/reset-password` (204); pluggable email via `app/email/` (Brevo default, Resend, SES stub, console for dev)
+- **`password_reset_tokens`** table and Alembic migration `002_password_reset_and_recovery`
+- **Master password recovery:** dual DEK wrap (master KEK + recovery KEK); recovery fields on `vaults` with preserve-on-omit on PUT
+- **`DELETE /api/v1/vault`** — account password + `confirm: DELETE`; wipes vault and sync events
+- Extension: recovery key interstitial, forgot-password flow (session-persisted), recover/reset vault pages, backfill banner for vaults without recovery key
+- Extension tests: `recovery.test.ts`; backend tests: `test_password_reset.py`, `test_vault_recovery.py`
+
+### Fixed (prerequisite — unlock/re-wrap was broken)
+
+- `unwrapDek` / `importRawDek` now use `extractable: true` so re-wrap after unlock works
+- `syncNow` re-reads revision after download (was uploading stale revision)
+- `handleConflict` compares wrapped keys directly; surfaces `MASTER_PASSWORD_CHANGED` instead of wrong DEK unwrap
+- Removed duplicate `CONTENT_LOGIN_SUBMITTED` handler in background messages
+
+### Deployment
+
+- Production: set `EMAIL_PROVIDER=brevo`, `EMAIL_API_KEY`, verified `EMAIL_FROM_*` on Vercel; run `flask db upgrade` for migration 002
+
 ## 2026-08-28 — Author attribution
 
 ### Added
