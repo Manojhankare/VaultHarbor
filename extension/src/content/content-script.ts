@@ -15,6 +15,8 @@ import {
 import {
   mountFillIcon,
   removeFillIcon,
+  setFillIconVisible,
+  setFillIconExpanded,
   showSavePromptIframe,
   removeIframes,
   showFillToast,
@@ -29,12 +31,69 @@ let pendingCredentials: CredentialSummary[] = [];
 let pendingPasswordFill: string | null = null;
 let focusBoundEls = new WeakSet<HTMLElement>();
 let domObserver: MutationObserver | null = null;
+let hideIconTimer: number | null = null;
+let focusedAutofillField: HTMLInputElement | null = null;
+
+function syncFillIconExpanded(): void {
+  setFillIconExpanded(isCredentialDropdownOpen());
+}
+
+function toggleDropdownFor(anchor: HTMLElement): void {
+  if (pendingCredentials.length === 0) return;
+  if (isCredentialDropdownOpen()) {
+    closeDropdown();
+    return;
+  }
+  openDropdownFor(anchor);
+}
+
+function showFillIconForField(field: HTMLInputElement): void {
+  if (pendingCredentials.length === 0) return;
+  focusedAutofillField = field;
+  if (hideIconTimer !== null) {
+    window.clearTimeout(hideIconTimer);
+    hideIconTimer = null;
+  }
+  mountFillIcon(() => {
+    toggleDropdownFor(field);
+  });
+  repositionFillIcon();
+  setFillIconVisible(true);
+}
+
+function scheduleHideFillIcon(): void {
+  if (hideIconTimer !== null) window.clearTimeout(hideIconTimer);
+  hideIconTimer = window.setTimeout(() => {
+    hideIconTimer = null;
+    if (isCredentialDropdownOpen()) return;
+    if (focusedAutofillField && document.activeElement === focusedAutofillField) return;
+    setFillIconVisible(false);
+    setFillIconExpanded(false);
+    focusedAutofillField = null;
+  }, 180);
+}
+
+function closeDropdown(): void {
+  removeCredentialDropdown();
+}
 
 function openDropdownFor(anchor: HTMLElement): void {
   if (pendingCredentials.length === 0) return;
-  showCredentialDropdown(anchor, pendingCredentials, (id) => {
-    void fillCredential(id);
-  });
+  showCredentialDropdown(
+    anchor,
+    pendingCredentials,
+    (id) => {
+      void fillCredential(id);
+    },
+    {
+      onClose: () => {
+        syncFillIconExpanded();
+        scheduleHideFillIcon();
+      },
+    }
+  );
+  syncFillIconExpanded();
+  setFillIconVisible(true);
 }
 
 function pageMayNeedAutofill(): boolean {
@@ -75,14 +134,18 @@ async function refreshMatches(): Promise<void> {
 
   if (response.ok && response.data && response.data.length > 0) {
     pendingCredentials = response.data;
-    mountFillIcon(() => {
-      const detected = detectLoginFields();
-      const anchor = detected?.password ?? detected?.username;
-      if (anchor) {
-        openDropdownFor(anchor);
-      }
-    });
     bindFieldFocusDropdown();
+    const active = focusedAutofillField ?? document.activeElement;
+    if (active instanceof HTMLInputElement && focusBoundEls.has(active)) {
+      showFillIconForField(active);
+    } else {
+      mountFillIcon(() => {
+        const detected = detectLoginFields();
+        const anchor = detected?.password ?? detected?.username;
+        if (anchor) toggleDropdownFor(anchor);
+      });
+      setFillIconVisible(false);
+    }
   } else {
     pendingCredentials = [];
     removeFillIcon();
@@ -104,11 +167,16 @@ function bindFieldFocusDropdown(): void {
 
     field.addEventListener("focus", () => {
       if (pendingCredentials.length === 0) return;
-      window.setTimeout(() => openDropdownFor(field), 10);
+      showFillIconForField(field);
+    });
+
+    field.addEventListener("blur", () => {
+      scheduleHideFillIcon();
     });
 
     field.addEventListener("click", () => {
       if (pendingCredentials.length === 0) return;
+      showFillIconForField(field);
       if (!isCredentialDropdownOpen()) {
         openDropdownFor(field);
       }
@@ -125,7 +193,7 @@ async function fillCredential(credentialId: string): Promise<void> {
     tabId: 0,
     credentialId,
   });
-  removeCredentialDropdown();
+  closeDropdown();
   removeIframes();
 
   if (isBridgeDead()) {
@@ -141,7 +209,7 @@ function handleFillResult(
   result: ReturnType<typeof fillFields>,
   password: string
 ): void {
-  removeCredentialDropdown();
+  closeDropdown();
   if (result === "full") {
     pendingPasswordFill = null;
     showFillToast("Credentials filled.");
@@ -236,7 +304,7 @@ function initContentScript(): void {
     }
     if (data.type === "CLOSE_PICKER" || data.type === "CLOSE_SAVE_PROMPT") {
       removeIframes();
-      removeCredentialDropdown();
+      closeDropdown();
     }
     if (data.type === "RESIZE_SAVE_PROMPT" && typeof data.height === "number") {
       const frame = document.getElementById("vaultsync-save-frame") as HTMLIFrameElement | null;

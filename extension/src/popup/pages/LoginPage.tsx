@@ -56,7 +56,6 @@ export function LoginPage({ onSuccess }: Props) {
   return (
     <div className="app">
       <BrandHeader />
-      <p className="brand-tagline">SECURE. SYNC. EVERYWHERE.</p>
       <p className="muted" style={{ textAlign: "center", marginBottom: 16 }}>
         Secure password manager
       </p>

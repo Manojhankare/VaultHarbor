@@ -46,11 +46,13 @@ export function toCredentialSummary(item: LoginItem): {
   id: string;
   name: string;
   username: string;
+  uri: string;
 } {
   return {
     id: item.id,
     name: item.name,
     username: item.username,
+    uri: item.uri,
   };
 }
 

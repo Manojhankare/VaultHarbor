@@ -12,6 +12,7 @@ const MIN_WIDTH = 260;
 
 let anchorEl: HTMLElement | null = null;
 let onPick: ((id: string) => void) | null = null;
+let onClose: (() => void) | null = null;
 let outsideHandler: ((e: MouseEvent) => void) | null = null;
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
 let scrollHandler: (() => void) | null = null;
@@ -61,6 +62,13 @@ export function removeCredentialDropdown(): void {
   }
   anchorEl = null;
   onPick = null;
+  const closeCb = onClose;
+  onClose = null;
+  closeCb?.();
+}
+
+function isFillIconInPath(event: Event): boolean {
+  return event.composedPath().some((node) => (node as HTMLElement).id === "vaultsync-fill-icon");
 }
 
 export function isCredentialDropdownOpen(): boolean {
@@ -70,13 +78,15 @@ export function isCredentialDropdownOpen(): boolean {
 export function showCredentialDropdown(
   anchor: HTMLElement,
   credentials: DropdownCredential[],
-  pick: (id: string) => void
+  pick: (id: string) => void,
+  options?: { onClose?: () => void }
 ): void {
   if (credentials.length === 0) return;
 
   removeCredentialDropdown();
   anchorEl = anchor;
   onPick = pick;
+  onClose = options?.onClose ?? null;
 
   const host = document.createElement("div");
   host.id = DROPDOWN_ID;
@@ -249,7 +259,7 @@ export function showCredentialDropdown(
     const t = e.target as Node | null;
     if (host.contains(t as Node)) return;
     if (anchorEl && (anchorEl === t || anchorEl.contains(t as Node))) return;
-    if ((t as Element | null)?.id === "vaultsync-fill-icon") return;
+    if (isFillIconInPath(e)) return;
     removeCredentialDropdown();
   };
   // Delay so the focus click that opened us doesn't immediately close.

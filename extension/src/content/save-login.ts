@@ -2,27 +2,143 @@ import { detectLoginFields } from "./detector";
 import { BRAND } from "../shared/brand";
 
 const ICON_ID = "vaultsync-fill-icon";
+const LOGO_URL = () => chrome.runtime.getURL("logo-icon.png");
+
 let iconClickHandler: (() => void) | null = null;
 let iconAnchorEl: HTMLInputElement | null = null;
+let pillBtn: HTMLButtonElement | null = null;
+let chevronEl: SVGElement | null = null;
 
-const ICON_SIZE = 22;
-const ICON_GAP = 6;
+const PILL_WIDTH = 58;
+const PILL_HEIGHT = 26;
+const INSIDE_INSET = 6;
+const PASSWORD_EYE_RESERVE = 38;
+
+function getInsideReserve(anchor: HTMLInputElement): number {
+  return anchor.type === "password" ? PASSWORD_EYE_RESERVE : INSIDE_INSET;
+}
 
 function positionIcon(host: HTMLElement, anchor: HTMLInputElement): void {
   const rect = anchor.getBoundingClientRect();
   if (rect.width === 0 && rect.height === 0) return;
 
-  // Sit outside the field so we don't cover the site's show-password (eye) control.
-  let left = rect.right + ICON_GAP;
-  if (left + ICON_SIZE > window.innerWidth - 4) {
-    left = rect.left - ICON_SIZE - ICON_GAP;
-  }
-  if (left < 4) {
-    left = Math.max(4, rect.right - ICON_SIZE - 36);
+  const reserve = getInsideReserve(anchor);
+  let left = rect.right - PILL_WIDTH - reserve;
+  if (left < rect.left + INSIDE_INSET) {
+    left = rect.right - PILL_WIDTH - INSIDE_INSET;
   }
 
-  host.style.top = `${rect.top + (rect.height - ICON_SIZE) / 2}px`;
+  host.style.top = `${rect.top + (rect.height - PILL_HEIGHT) / 2}px`;
   host.style.left = `${left}px`;
+  host.style.width = `${PILL_WIDTH}px`;
+  host.style.height = `${PILL_HEIGHT}px`;
+}
+
+function buildPillButton(): HTMLButtonElement {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "vs-pill";
+  btn.title = "VaultSync autofill";
+  btn.setAttribute("aria-label", "VaultSync autofill");
+  btn.setAttribute("aria-haspopup", "listbox");
+  btn.setAttribute("aria-expanded", "false");
+
+  const img = document.createElement("img");
+  img.src = LOGO_URL();
+  img.alt = "";
+  img.className = "vs-pill__logo";
+  img.draggable = false;
+
+  const chevron = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  chevron.setAttribute("class", "vs-pill__chev");
+  chevron.setAttribute("viewBox", "0 0 12 12");
+  chevron.setAttribute("aria-hidden", "true");
+  chevron.innerHTML =
+    '<path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+  chevronEl = chevron;
+
+  btn.append(img, chevron);
+  return btn;
+}
+
+function injectPillStyles(shadow: ShadowRoot): void {
+  const style = document.createElement("style");
+  style.textContent = `
+    :host {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.92);
+      transform-origin: center right;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+    :host([data-visible="true"]) {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+    .vs-pill {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0 7px 0 5px;
+      border: 1px solid rgba(0, 229, 255, 0.32);
+      border-radius: 999px;
+      background: linear-gradient(145deg, #0f172a 0%, #0c1220 100%);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      color: ${BRAND.accent};
+      font: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .vs-pill:hover {
+      border-color: rgba(0, 229, 255, 0.55);
+      background: linear-gradient(145deg, #131f35 0%, #0e1628 100%);
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.35),
+        0 0 12px rgba(0, 229, 255, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .vs-pill[aria-expanded="true"] {
+      border-color: rgba(0, 229, 255, 0.7);
+      background: linear-gradient(145deg, #152238 0%, #101a2e 100%);
+      box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.4),
+        0 0 16px rgba(0, 229, 255, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .vs-pill__logo {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      flex-shrink: 0;
+      pointer-events: none;
+      filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.35));
+    }
+    .vs-pill__chev {
+      width: 11px;
+      height: 11px;
+      flex-shrink: 0;
+      opacity: 0.75;
+      transition: transform 0.18s ease, opacity 0.15s ease;
+      pointer-events: none;
+    }
+    .vs-pill:hover .vs-pill__chev,
+    .vs-pill[aria-expanded="true"] .vs-pill__chev {
+      opacity: 1;
+    }
+    .vs-pill[aria-expanded="true"] .vs-pill__chev {
+      transform: rotate(180deg);
+    }
+  `;
+  shadow.appendChild(style);
 }
 
 export function mountFillIcon(onClick: () => void): void {
@@ -40,37 +156,23 @@ export function mountFillIcon(onClick: () => void): void {
   if (!host) {
     host = document.createElement("div");
     host.id = ICON_ID;
-    host.style.cssText =
-      "position:fixed;z-index:2147483646;pointer-events:auto;";
+    host.dataset.visible = "false";
+    host.style.cssText = "position:fixed;z-index:2147483646;";
 
     const shadow = host.attachShadow({ mode: "closed" });
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.title = "VaultSync autofill";
-    btn.setAttribute("aria-label", "VaultSync autofill");
-    btn.textContent = "🔐";
-    btn.style.cssText = [
-      `width:${ICON_SIZE}px`,
-      `height:${ICON_SIZE}px`,
-      "border:none",
-      "border-radius:6px",
-      `background:${BRAND.gradientBtn}`,
-      "color:#fff",
-      "cursor:pointer",
-      "font-size:12px",
-      "line-height:1",
-      "padding:0",
-      `box-shadow:${BRAND.shadowGlow}`,
-      "display:flex",
-      "align-items:center",
-      "justify-content:center",
-    ].join(";");
-    btn.addEventListener("click", (e) => {
+    injectPillStyles(shadow);
+
+    pillBtn = buildPillButton();
+    pillBtn.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    pillBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       iconClickHandler?.();
     });
-    shadow.appendChild(btn);
+    shadow.appendChild(pillBtn);
     document.body.appendChild(host);
 
     window.addEventListener("scroll", repositionFillIcon, true);
@@ -78,6 +180,27 @@ export function mountFillIcon(onClick: () => void): void {
   }
 
   positionIcon(host, anchor);
+}
+
+export function setFillIconVisible(visible: boolean): void {
+  const host = document.getElementById(ICON_ID);
+  if (!host) return;
+  host.dataset.visible = visible ? "true" : "false";
+}
+
+export function setFillIconExpanded(expanded: boolean): void {
+  if (pillBtn) {
+    pillBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+  }
+}
+
+export function getFillIconAnchor(): HTMLElement | null {
+  return iconAnchorEl;
+}
+
+export function isFillIconEvent(event: Event): boolean {
+  const path = event.composedPath();
+  return path.some((node) => (node as HTMLElement).id === ICON_ID);
 }
 
 export function repositionFillIcon(): void {
@@ -93,6 +216,8 @@ export function repositionFillIcon(): void {
 export function removeFillIcon(): void {
   iconClickHandler = null;
   iconAnchorEl = null;
+  pillBtn = null;
+  chevronEl = null;
   document.getElementById(ICON_ID)?.remove();
   window.removeEventListener("scroll", repositionFillIcon, true);
   window.removeEventListener("resize", repositionFillIcon);

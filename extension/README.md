@@ -18,11 +18,17 @@ https://vaultsync.manojhankare.in
 cd extension
 copy .env.example .env
 npm install
-node scripts/generate-icons.mjs   # from branding/ → public/icons + logos
+node scripts/generate-icons.mjs   # branding/ → public/ (transparent icons + store/)
 npm run build:chrome
 ```
 
+Icons: edit [`branding/vaultsynclogo_icon.png`](../branding/vaultsynclogo_icon.png) only — see [branding/README.md](../branding/README.md). **Do not** copy PNGs into `public/` by hand.
+
 Load **`dist/chrome/`** unpacked in `chrome://extensions` (Developer mode).
+
+The unlocked **vault list** popup uses a compact NordPass-style layout: sticky search header, scrollable rows with favicons and action menus, bottom sync/add toolbar.
+
+For **auto-updates** for end users, publish to the [Chrome Web Store](https://chrome.google.com/webstore/devconsole). See [docs/extension/RELEASE.md](../docs/extension/RELEASE.md).
 
 ## Scripts
 
@@ -31,6 +37,8 @@ Load **`dist/chrome/`** unpacked in `chrome://extensions` (Developer mode).
 | `npm run dev` | Watch build |
 | `npm run build:chrome` | Production Chromium build → `dist/chrome/` |
 | `npm run build:firefox` | Unverified Firefox build → `dist/firefox/` |
+| `npm run release:chrome` | Build + zip for Chrome Web Store / GitHub Release |
+| `npm run version:bump -- 0.2.0` | Sync version in package.json + manifests |
 | `npm test` | Vitest unit tests |
 | `npm run typecheck` | Strict TypeScript check |
 

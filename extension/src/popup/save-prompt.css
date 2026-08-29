@@ -40,6 +40,11 @@ body {
   min-width: 0;
 }
 
+.save-prompt__header-left img {
+  display: block;
+  flex-shrink: 0;
+}
+
 .save-prompt__close {
   flex-shrink: 0;
   width: 28px;

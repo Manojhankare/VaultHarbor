@@ -2,6 +2,39 @@
 
 All notable VaultSync project changes. Update this file with each significant release or deployment change.
 
+## 2026-08-29 — Extension landing page
+
+### Added
+
+- Root route `GET /` on the backend — full marketing site with logo, feature icons, about/security/how-it-works sections, extension install steps, FAQ preview, Chrome/Edge store placeholders, SEO meta tags, and `GET /manifest.webmanifest`
+- Legal/info pages: `GET /faq`, `GET /privacy`, `GET /terms` with shared nav and footer
+
+## 2026-08-29 — Vault popup UI (NordPass-style list)
+
+### Changed
+
+- Unlocked vault **list view**: sticky header (search + lock/logout icons), scrollable credential rows with favicons, inline open-site and overflow menu (copy/fill/edit/delete), sticky bottom toolbar (sync + add)
+- Compact author credit under vault toolbar; global footer hidden on list view only (detail/add unchanged)
+- `CredentialSummary` includes `uri` for open-site and favicons without opening detail
+- Inline SVG icons (no new npm deps); thin branded scrollbar on vault list
+
+## 2026-08-29 — Extension branding (transparent icons)
+
+### Fixed
+
+- Icon generator preserves **transparent PNG** alpha (no opaque `#050810` box on toolbar icons); lanczos3 resize, trim, safe padding for 16px
+- `logo-icon.png` and manifest icons generated from `branding/vaultsynclogo_icon.png` only; full lockup stays in `logo.png`
+- Edge store assets: `extension/public/store/icon128.png`, `promo-440x280.png`
+- [branding/README.md](../branding/README.md) — two-layer asset rules (transparent icons vs CSS/page backgrounds)
+
+## 2026-08-29 — Extension release workflow
+
+### Added
+
+- `extension/scripts/bump-version.mjs` and `package-release.mjs`; npm scripts `version:bump`, `package:chrome`, `release:chrome`
+- GitHub Actions: push tag `extension-vX.Y.Z` → build, test, zip, GitHub Release
+- [docs/extension/RELEASE.md](extension/RELEASE.md) — Chrome Web Store auto-update vs unpacked dev install
+
 ## 2026-08-29 — Save vs update on login capture
 
 ### Added

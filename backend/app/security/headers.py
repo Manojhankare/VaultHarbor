@@ -8,7 +8,14 @@ from flask import Flask, request
 def register_security_headers(app: Flask) -> None:
     @app.after_request
     def apply_security_headers(response):
-        if request.path.startswith("/api/docs"):
+        if request.path in ("/", "/faq", "/privacy", "/terms", "/manifest.webmanifest"):
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data: https://raw.githubusercontent.com; "
+                "frame-ancestors 'none'; base-uri 'none'"
+            )
+        elif request.path.startswith("/api/docs"):
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
                 "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "

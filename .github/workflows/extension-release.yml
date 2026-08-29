@@ -1,0 +1,59 @@
+name: Extension release
+
+# Builds a Chrome zip and attaches it to a GitHub Release when you push a tag:
+#   git tag extension-v0.2.0
+#   git push origin extension-v0.2.0
+#
+# For end-user AUTO-UPDATE, publish the same zip to the Chrome Web Store
+# (see docs/extension/RELEASE.md).
+
+on:
+  push:
+    tags:
+      - "extension-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: extension
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build Chrome extension
+        run: npm run build:chrome
+
+      - name: Package zip
+        run: node scripts/package-release.mjs
+
+      - name: Extract version from tag
+        id: meta
+        run: |
+          TAG="${GITHUB_REF_NAME#extension-v}"
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: VaultSync Extension v${{ steps.meta.outputs.version }}
+          files: extension/dist/releases/*.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(steps.meta.outputs.version, '-') }}

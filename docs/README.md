@@ -8,6 +8,7 @@ Central documentation for the VaultSync password manager monorepo. **Keep this f
 
 ```text
 VaultSync/
+├── branding/              ← master icons/logos (see branding/README.md)
 ├── docs/                  ← you are here (project-wide docs)
 ├── backend/               ← Flask API (deployed)
 ├── extension/             ← browser extension (Chromium V1)
@@ -26,6 +27,8 @@ VaultSync/
 | [Client crypto contract](backend/CLIENT_CRYPTO.md) | Vault encryption for extension/web clients |
 | [Extension API integration](backend/EXTENSION_INTEGRATION.md) | How clients call the REST API |
 | [Extension](extension/README.md) | Browser extension (Chromium V1) |
+| [Extension release](extension/RELEASE.md) | Versioning, GitHub + Chrome Web Store auto-update |
+| [Extension branding](../branding/README.md) | Master icon/logo sources and regen workflow |
 | [Web (planned)](web/README.md) | Future web vault placeholder |
 | [Changelog](CHANGELOG.md) | Notable project changes |
 

@@ -4,6 +4,7 @@ export type CredentialSummary = {
   id: string;
   name: string;
   username: string;
+  uri: string;
 };
 
 export type BackgroundRequest =

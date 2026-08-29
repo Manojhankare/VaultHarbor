@@ -19,6 +19,7 @@ from app.devices import devices_bp
 from app.docs import docs_bp
 from app.extensions import cors, db, limiter, migrate
 from app.health import health_bp
+from app.pages.routes import pages_bp
 from app.security.auth import AccessTokenExpiredError, AccessTokenInvalidError
 from app.security.headers import register_security_headers
 from app.security.rate_limit import register_rate_limit_handlers
@@ -166,6 +167,7 @@ def create_app(config_name: str | None = None) -> Flask:
     app.register_blueprint(sync_bp)
     app.register_blueprint(health_bp)
     app.register_blueprint(docs_bp)
+    app.register_blueprint(pages_bp)
 
     @app.cli.command("purge-expired-tokens")
     def purge_expired_tokens_cmd():

@@ -28,11 +28,11 @@ type AuthState = {
 
 type UnlockView = "unlock" | "recover" | "reset";
 
-function AppShell({ children }: { children: ReactNode }) {
+function AppShell({ children, hideFooter = false }: { children: ReactNode; hideFooter?: boolean }) {
   return (
     <>
       {children}
-      <AuthorFooter />
+      {!hideFooter && <AuthorFooter />}
     </>
   );
 }
@@ -44,6 +44,12 @@ export function App() {
   const [needsSetup, setNeedsSetup] = useState(false);
   const [pendingRecoveryKey, setPendingRecoveryKey] = useState<string | null>(null);
   const [unlockView, setUnlockView] = useState<UnlockView>("unlock");
+  const [vaultShellActive, setVaultShellActive] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.toggle("vault-popup-active", vaultShellActive);
+    return () => document.body.classList.remove("vault-popup-active");
+  }, [vaultShellActive]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -179,7 +185,7 @@ export function App() {
   }
 
   return (
-    <AppShell>
+    <AppShell hideFooter={vaultShellActive}>
       <VaultPage
         email={state.email}
         pendingChanges={state.pendingChanges}
@@ -187,6 +193,7 @@ export function App() {
         onLock={() => void refresh()}
         onLogout={() => void handleLogout()}
         onRefresh={() => void refresh()}
+        onShellActive={setVaultShellActive}
       />
     </AppShell>
   );
