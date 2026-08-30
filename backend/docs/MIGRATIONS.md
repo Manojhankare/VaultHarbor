@@ -1,6 +1,6 @@
 # Database Migrations Guide
 
-VaultSync uses **Flask-Migrate** (Alembic) for all schema changes. Never use `db.create_all()` in production.
+VaultHarbor uses **Flask-Migrate** (Alembic) for all schema changes. Never use `db.create_all()` in production.
 
 ## Prerequisites
 

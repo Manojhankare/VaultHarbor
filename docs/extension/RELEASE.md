@@ -1,6 +1,6 @@
 # Extension releases and auto-update
 
-How to version VaultSync, publish updates, and get **automatic updates** for users who already installed the extension.
+How to version VaultHarbor, publish updates, and get **automatic updates** for users who already installed the extension.
 
 ## Important: what auto-updates (and what does not)
 

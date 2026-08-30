@@ -1,4 +1,4 @@
-"""VaultSync project metadata — author and site attribution."""
+"""VaultHarbor project metadata — author and site attribution."""
 
 AUTHOR_NAME = "Manoj Hankare"
 AUTHOR_SITE = "https://manojhankare.in"

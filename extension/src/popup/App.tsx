@@ -95,7 +95,7 @@ export function App() {
     return (
       <AppShell>
         <div className="app app--transition">
-          <LoadingScreen branded message="Starting VaultSync..." />
+          <LoadingScreen branded message="Starting VaultHarbor..." />
         </div>
       </AppShell>
     );

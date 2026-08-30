@@ -14,7 +14,7 @@ SWAGGER_UI = """
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>VaultSync API Docs</title>
+  <title>VaultHarbor API Docs</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
 </head>
 <body>

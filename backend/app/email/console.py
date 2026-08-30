@@ -18,6 +18,6 @@ class ConsoleEmailSender:
     def send(self, message: EmailMessage) -> None:
         # Use print — logging redacts messages containing "password".
         print(
-            f"[VaultSync dev email] to={message.to_email}\n{message.text_body}",
+            f"[VaultHarbor dev email] to={message.to_email}\n{message.text_body}",
             flush=True,
         )

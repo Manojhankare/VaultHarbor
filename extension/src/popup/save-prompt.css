@@ -60,7 +60,7 @@ body {
 }
 
 .save-prompt__close:hover {
-  background: rgba(0, 229, 255, 0.08);
+  background: rgba(14, 201, 252), 0.08);
   color: var(--vs-text);
 }
 

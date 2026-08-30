@@ -22,6 +22,8 @@ import {
   showFillToast,
   repositionFillIcon,
 } from "./save-login";
+import { readApiBaseOriginFromStorage } from "../shared/api-base-url-read";
+import { STORAGE_KEYS } from "../shared/constants";
 
 type CredentialSummary = { id: string; name: string; username: string };
 
@@ -33,6 +35,21 @@ let focusBoundEls = new WeakSet<HTMLElement>();
 let domObserver: MutationObserver | null = null;
 let hideIconTimer: number | null = null;
 let focusedAutofillField: HTMLInputElement | null = null;
+let contentScriptInitialized = false;
+let autofillPausedForBackend = false;
+
+function isAutofillAllowed(): boolean {
+  return !autofillPausedForBackend && !isBridgeDead();
+}
+
+async function syncBackendAutofillPause(): Promise<void> {
+  try {
+    const origin = await readApiBaseOriginFromStorage();
+    autofillPausedForBackend = window.location.origin === origin;
+  } catch {
+    autofillPausedForBackend = false;
+  }
+}
 
 function syncFillIconExpanded(): void {
   setFillIconExpanded(isCredentialDropdownOpen());
@@ -100,6 +117,11 @@ function pageMayNeedAutofill(): boolean {
   return detectLoginFields() !== null || pendingCredentials.length > 0;
 }
 
+function pauseAutofillUi(): void {
+  pendingCredentials = [];
+  shutdownContentScript();
+}
+
 function shutdownContentScript(): void {
   domObserver?.disconnect();
   domObserver = null;
@@ -109,7 +131,7 @@ function shutdownContentScript(): void {
 }
 
 async function refreshMatches(): Promise<void> {
-  if (!isTopFrame || isBridgeDead()) return;
+  if (!isAutofillAllowed() || !isTopFrame) return;
   if (!pageMayNeedAutofill()) {
     pendingCredentials = [];
     removeFillIcon();
@@ -128,6 +150,10 @@ async function refreshMatches(): Promise<void> {
 
   if (isBridgeDead()) {
     shutdownContentScript();
+    return;
+  }
+  if (!isAutofillAllowed()) {
+    pauseAutofillUi();
     return;
   }
   if (!response) return;
@@ -166,7 +192,7 @@ function bindFieldFocusDropdown(): void {
     focusBoundEls.add(field);
 
     field.addEventListener("focus", () => {
-      if (pendingCredentials.length === 0) return;
+      if (!isAutofillAllowed() || pendingCredentials.length === 0) return;
       showFillIconForField(field);
     });
 
@@ -175,7 +201,7 @@ function bindFieldFocusDropdown(): void {
     });
 
     field.addEventListener("click", () => {
-      if (pendingCredentials.length === 0) return;
+      if (!isAutofillAllowed() || pendingCredentials.length === 0) return;
       showFillIconForField(field);
       if (!isCredentialDropdownOpen()) {
         openDropdownFor(field);
@@ -185,6 +211,8 @@ function bindFieldFocusDropdown(): void {
 }
 
 async function fillCredential(credentialId: string): Promise<void> {
+  if (!isAutofillAllowed()) return;
+
   const response = await sendToBackground<{
     ok: boolean;
     error?: string;
@@ -230,7 +258,7 @@ function tryCompletePendingPasswordFill(): void {
 }
 
 async function checkPendingSavePrompt(): Promise<void> {
-  if (!isTopFrame || isBridgeDead()) return;
+  if (!isAutofillAllowed() || !isTopFrame) return;
   const response = await sendToBackground<{
     ok: boolean;
     data?: { showSave: boolean };
@@ -239,39 +267,64 @@ async function checkPendingSavePrompt(): Promise<void> {
     shutdownContentScript();
     return;
   }
+  if (!isAutofillAllowed()) {
+    pauseAutofillUi();
+    return;
+  }
   if (response?.ok && response.data?.showSave) {
     showSavePromptIframe();
   }
 }
 
 function captureLogin(username: string, password: string): void {
-  if (!password || isBridgeDead()) return;
+  if (!isAutofillAllowed() || !password || isBridgeDead()) return;
   void sendToBackground({
     type: "CONTENT_LOGIN_SUBMITTED",
     tabId: 0,
     username,
     password,
   }).then(() => {
-    if (isBridgeDead()) return;
+    if (isBridgeDead() || !isAutofillAllowed()) return;
     window.setTimeout(() => void checkPendingSavePrompt(), 500);
     window.setTimeout(() => void checkPendingSavePrompt(), 2000);
   });
 }
 
 function bindFormCaptureIfTopFrame(): void {
-  if (!isTopFrame || isBridgeDead()) return;
+  if (!isAutofillAllowed() || !isTopFrame || isBridgeDead()) return;
   bindLoginFormCapture();
   bindFieldFocusDropdown();
 }
 
 function scheduleDomRefresh(): void {
-  if (isBridgeDead()) return;
+  if (!isAutofillAllowed() || isBridgeDead()) return;
   void refreshMatches().then(() => {
-    if (isBridgeDead()) return;
+    if (isBridgeDead() || !isAutofillAllowed()) return;
     bindFormCaptureIfTopFrame();
     repositionFillIcon();
     tryCompletePendingPasswordFill();
   });
+}
+
+function startDomObserver(): void {
+  if (domObserver || !document.body) return;
+
+  let refreshTimer: number | null = null;
+  domObserver = new MutationObserver(() => {
+    if (isBridgeDead()) {
+      shutdownContentScript();
+      return;
+    }
+    if (!isAutofillAllowed() || !pageMayNeedAutofill()) return;
+    if (refreshTimer !== null) window.clearTimeout(refreshTimer);
+    refreshTimer = window.setTimeout(scheduleDomRefresh, 200);
+  });
+  domObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+function resumeAutofillUi(): void {
+  startDomObserver();
+  scheduleDomRefresh();
 }
 
 function initContentScript(): void {
@@ -282,6 +335,7 @@ function initContentScript(): void {
   }
 
   listenForExtensionMessages((message) => {
+    if (!isAutofillAllowed()) return;
     if (message.type === "FILL_FIELDS" && message.password) {
       const result = fillFields(message.username ?? "", message.password);
       handleFillResult(result, message.password);
@@ -321,23 +375,49 @@ function initContentScript(): void {
   });
 
   void checkPendingSavePrompt();
-  scheduleDomRefresh();
-
-  let refreshTimer: number | null = null;
-  domObserver = new MutationObserver(() => {
-    if (isBridgeDead()) {
-      shutdownContentScript();
-      return;
-    }
-    if (!pageMayNeedAutofill()) return;
-    if (refreshTimer !== null) window.clearTimeout(refreshTimer);
-    refreshTimer = window.setTimeout(scheduleDomRefresh, 200);
-  });
-  if (document.body) {
-    domObserver.observe(document.body, { childList: true, subtree: true });
+  if (!autofillPausedForBackend) {
+    resumeAutofillUi();
   }
 }
 
-if (hasExtensionBridge()) {
+async function maybeStartContentScript(): Promise<void> {
+  if (!hasExtensionBridge()) return;
+  await syncBackendAutofillPause();
+  if (autofillPausedForBackend) return;
+  if (contentScriptInitialized) {
+    resumeAutofillUi();
+    return;
+  }
+  contentScriptInitialized = true;
   initContentScript();
 }
+
+async function handleApiBaseUrlStorageChange(): Promise<void> {
+  const wasPaused = autofillPausedForBackend;
+  await syncBackendAutofillPause();
+
+  if (autofillPausedForBackend) {
+    pauseAutofillUi();
+    return;
+  }
+
+  if (!contentScriptInitialized) {
+    contentScriptInitialized = true;
+    initContentScript();
+    return;
+  }
+
+  if (wasPaused) {
+    resumeAutofillUi();
+  } else {
+    scheduleDomRefresh();
+  }
+}
+
+void maybeStartContentScript();
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes[STORAGE_KEYS.API_BASE_URL]) {
+    void handleApiBaseUrlStorageChange();
+  }
+});

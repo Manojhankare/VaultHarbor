@@ -23,7 +23,7 @@ export function RecoveryKeyPage({
   function downloadKey() {
     const blob = new Blob(
       [
-        `VaultSync Recovery Key\n\n${recoveryKey}\n\nStore this safely. ` +
+        `VaultHarbor Recovery Key\n\n${recoveryKey}\n\nStore this safely. ` +
           "If you lose your master password, this key is the only way to recover your vault.\n",
       ],
       { type: "text/plain" }
@@ -31,7 +31,7 @@ export function RecoveryKeyPage({
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = "vaultsync-recovery-key.txt";
+    anchor.download = "vaultharbor-recovery-key.txt";
     anchor.click();
     URL.revokeObjectURL(url);
   }

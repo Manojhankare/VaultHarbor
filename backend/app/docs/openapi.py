@@ -10,7 +10,7 @@ from app.meta import AUTHOR_NAME, AUTHOR_SITE
 
 def build_openapi_spec() -> dict:
     spec = APISpec(
-        title="VaultSync API",
+        title="VaultHarbor API",
         version="1.0.0",
         openapi_version="3.1.0",
         info={

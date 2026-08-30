@@ -27,7 +27,7 @@ function SavePromptHeader({ onClose }: { onClose: () => void }) {
         <img src="/logo-icon.png" alt="" width={22} height={22} />
         <span className="save-prompt__brand">
           <span className="brand-title-vault">Vault</span>
-          <span className="brand-title-sync">Sync</span>
+          <span className="brand-title-sync">Harbor</span>
         </span>
       </div>
       <button

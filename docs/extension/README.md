@@ -30,7 +30,7 @@ Load `extension/dist/chrome/` unpacked.
 
 The main vault list uses a compact layout: sticky search header, scrollable rows with site favicons and action menus, and a bottom icon bar (sync, add). Fill from the popup works only for credentials matching the active tab (same as before).
 
-Edit sources in [`branding/`](../branding/README.md) only. Run `node scripts/generate-icons.mjs` before build — transparent icons for toolbar/manifest; CSS `--vs-bg` provides popup backgrounds.
+Edit sources in [`branding/`](../branding/README.md) only (`vaultharborlogo_icon.png`). Run `node scripts/generate-icons.mjs` before build — transparent icons for toolbar/manifest; CSS `--vs-bg` provides popup backgrounds. Store promo is `extension/public/store/promo-440x280.png`.
 
 ## Releases and auto-update
 
@@ -45,6 +45,12 @@ npm run version:bump -- 0.2.0   # sync version in manifests
 
 ## API base URL
 
+Default (Chrome Web Store build):
+
 ```text
 https://vaultsync.manojhankare.in
 ```
+
+**Self-hosted backend:** open the extension login screen → **Advanced** → enter your server URL → **Test connection** → **Save**. Switching servers removes local vault data from this browser.
+
+Developers can still set `VITE_API_BASE_URL` in `extension/.env` before build (fork default). See [extension README](../extension/README.md).

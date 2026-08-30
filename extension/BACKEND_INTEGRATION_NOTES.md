@@ -1,4 +1,4 @@
-# VaultSync Backend Integration Notes
+# VaultHarbor Backend Integration Notes
 
 Source of truth: `backend/app/**` routes, schemas, and services. When this document
 conflicts with assumptions in product specs, the backend wins.
@@ -7,6 +7,8 @@ conflicts with assumptions in product specs, the backend wins.
 
 Production API: `https://vaultsync.manojhankare.in`  
 Development API: `http://localhost:5000`
+
+The extension resolves the API base URL at **runtime**: stored override in `chrome.storage.local` (`api_base_url`), else the build default (`VITE_API_BASE_URL`). Users can set a custom server from the login popup **Advanced** panel; switching servers wipes local vault cache and signs out.
 
 ## Response envelopes
 

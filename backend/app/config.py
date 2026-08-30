@@ -1,4 +1,4 @@
-"""Application configuration for VaultSync.
+"""Application configuration for VaultHarbor.
 
 Author: Manoj Hankare — https://manojhankare.in
 """
@@ -89,7 +89,7 @@ class Config:
     EMAIL_PROVIDER: str = os.environ.get("EMAIL_PROVIDER", "console").lower()
     EMAIL_API_KEY: str = _env("EMAIL_API_KEY", "") or ""
     EMAIL_FROM_ADDRESS: str = _env("EMAIL_FROM_ADDRESS", "noreply@manojhankare.in") or "noreply@manojhankare.in"
-    EMAIL_FROM_NAME: str = _env("EMAIL_FROM_NAME", "VaultSync") or "VaultSync"
+    EMAIL_FROM_NAME: str = _env("EMAIL_FROM_NAME", "VaultHarbor") or "VaultHarbor"
     EMAIL_TIMEOUT_SECONDS: float = float(os.environ.get("EMAIL_TIMEOUT_SECONDS", "5"))
 
     PASSWORD_RESET_CODE_TTL_SECONDS: int = int(

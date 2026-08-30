@@ -1,6 +1,6 @@
-# VaultSync Architecture Overview
+# VaultHarbor Architecture Overview
 
-## What VaultSync is
+## What VaultHarbor is
 
 A zero-knowledge password manager. The **server never sees plaintext passwords** or vault contents. Clients (browser extension, future web app) encrypt locally; the backend stores opaque blobs and sync metadata.
 

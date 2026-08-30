@@ -1,4 +1,4 @@
-# VaultSync Browser Extension
+# VaultHarbor Browser Extension
 
 Zero-knowledge password manager extension for **Chrome, Edge, and Brave** (Chromium MV3).
 
@@ -22,7 +22,7 @@ node scripts/generate-icons.mjs   # branding/ → public/ (transparent icons + s
 npm run build:chrome
 ```
 
-Icons: edit [`branding/vaultsynclogo_icon.png`](../branding/vaultsynclogo_icon.png) only — see [branding/README.md](../branding/README.md). **Do not** copy PNGs into `public/` by hand.
+Icons: edit [`branding/vaultharborlogo_icon.png`](../branding/vaultharborlogo_icon.png) only — see [branding/README.md](../branding/README.md). **Do not** copy PNGs into `public/` by hand.
 
 Load **`dist/chrome/`** unpacked in `chrome://extensions` (Developer mode).
 
@@ -44,7 +44,9 @@ For **auto-updates** for end users, publish to the [Chrome Web Store](https://ch
 
 ## Environment
 
-Create **`extension/.env`** (project root, not `src/`):
+**End users (Chrome Web Store):** no build step — default server is production. To use a self-hosted backend, open the login popup → **Advanced** → set server URL → **Test connection** → **Save**.
+
+**Developers:** create **`extension/.env`** (project root, not `src/`):
 
 ```env
 VITE_API_BASE_URL=https://vaultsync.manojhankare.in
@@ -52,7 +54,7 @@ VITE_API_BASE_URL=https://vaultsync.manojhankare.in
 
 Local backend: `http://localhost:5000`
 
-After changing `.env`, run `npm run build:chrome` and reload the extension in the browser.
+`VITE_API_BASE_URL` is the **build default** when no runtime override is stored. After changing `.env`, run `npm run build:chrome` and reload the extension in the browser.
 
 ## Permissions
 

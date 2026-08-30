@@ -1,4 +1,5 @@
-import { API_BASE_URL, REQUEST_TIMEOUT_MS } from "../shared/constants";
+import { getApiBaseUrl } from "../config/api-base-url";
+import { REQUEST_TIMEOUT_MS } from "../shared/constants";
 import { ApiError } from "../shared/errors";
 import type { ApiErrorBody } from "../types/api";
 
@@ -52,7 +53,8 @@ async function refreshAccessToken(): Promise<string | null> {
           await onAuthFailure!();
           return null;
         }
-        const response = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
+        const baseUrl = await getApiBaseUrl();
+        const response = await fetch(`${baseUrl}/api/v1/auth/refresh`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ refresh_token: refreshToken }),
@@ -93,7 +95,8 @@ export async function apiRequest<T>(
     ifNoneMatch,
   } = options;
 
-  const url = `${API_BASE_URL}${path}`;
+  const baseUrl = await getApiBaseUrl();
+  const url = `${baseUrl}${path}`;
   const requestHeaders: Record<string, string> = {
     Accept: "application/json",
     ...headers,

@@ -39,7 +39,7 @@ Set in Vercel → Settings → Environment Variables → **Production** (+ Previ
 | `EMAIL_PROVIDER` | Production | `brevo` (or `resend`) |
 | `EMAIL_API_KEY` | Production | Brevo/Resend API key |
 | `EMAIL_FROM_ADDRESS` | Production | Verified sender (e.g. `noreply@yourdomain.com`) |
-| `EMAIL_FROM_NAME` | Optional | `VaultSync` |
+| `EMAIL_FROM_NAME` | Optional | `VaultHarbor` |
 
 **Do not set on Vercel:** `DIRECT_DATABASE_URL`, `FLASK_DEBUG`
 

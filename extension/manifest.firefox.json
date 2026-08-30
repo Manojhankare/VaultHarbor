@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "VaultSync",
+  "name": "VaultHarbor",
   "version": "0.1.0",
-  "description": "Secure zero-knowledge password manager by Manoj Hankare (manojhankare.in)",
+  "description": "VaultHarbor is a secure zero-knowledge password manager by Manoj Hankare (manojhankare.in)",
   "author": "Manoj Hankare",
   "homepage_url": "https://manojhankare.in",
   "browser_specific_settings": {
@@ -23,7 +23,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "VaultSync"
+    "default_title": "VaultHarbor"
   },
   "background": {
     "scripts": ["background.js"]

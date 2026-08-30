@@ -38,6 +38,12 @@ import { ExtensionError } from "../shared/errors";
 import { userFacingMessage } from "../shared/errors";
 import type { LoginItem, NewLoginItem } from "../vault/vault-types";
 import { extractOriginFromPageUrl } from "../domain/url";
+import {
+  getApiBaseUrlInfo,
+  switchApiBaseUrl,
+  clearApiBaseUrlOverride,
+  testApiConnection,
+} from "../config/api-base-url";
 
 function defaultCredentialName(originOrUrl: string): string {
   try {
@@ -454,6 +460,24 @@ export async function handleBackgroundMessage(
       case "DISMISS_PENDING_SAVE":
         await clearPendingSave();
         return { ok: true };
+
+      case "GET_API_BASE_URL":
+        return { ok: true, data: await getApiBaseUrlInfo() };
+
+      case "SET_API_BASE_URL": {
+        const result = await switchApiBaseUrl(request.url);
+        return { ok: true, data: result };
+      }
+
+      case "RESET_API_BASE_URL": {
+        const result = await clearApiBaseUrlOverride();
+        return { ok: true, data: result };
+      }
+
+      case "TEST_API_CONNECTION": {
+        const result = await testApiConnection(request.url);
+        return { ok: true, data: result };
+      }
 
       default:
         return { ok: false, error: "Unknown message type" };

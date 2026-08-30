@@ -1,4 +1,4 @@
-/** VaultSync author attribution (shown in UI and metadata). */
+/** VaultHarbor author attribution (shown in UI and metadata). */
 export const AUTHOR = {
   name: "Manoj Hankare",
   site: "https://manojhankare.in",

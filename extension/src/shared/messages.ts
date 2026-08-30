@@ -41,7 +41,11 @@ export type BackgroundRequest =
   | { type: "RESET_VAULT"; accountPassword: string }
   | { type: "GET_PENDING_SAVE" }
   | { type: "SAVE_PENDING_CREDENTIAL"; item: NewLoginItem }
-  | { type: "DISMISS_PENDING_SAVE" };
+  | { type: "DISMISS_PENDING_SAVE" }
+  | { type: "GET_API_BASE_URL" }
+  | { type: "SET_API_BASE_URL"; url: string }
+  | { type: "RESET_API_BASE_URL" }
+  | { type: "TEST_API_CONNECTION"; url: string };
 
 export type PasswordGenOptions = {
   length: number;

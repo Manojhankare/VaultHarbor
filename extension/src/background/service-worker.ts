@@ -1,5 +1,5 @@
 /**
- * VaultSync MV3 service worker.
+ * VaultHarbor MV3 service worker.
  * Author: Manoj Hankare — https://manojhankare.in
  */
 import { initAuthClient } from "../auth/auth";

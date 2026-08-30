@@ -52,7 +52,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: VaultSync Extension v${{ steps.meta.outputs.version }}
+          name: VaultHarbor Extension v${{ steps.meta.outputs.version }}
           files: extension/dist/releases/*.zip
           generate_release_notes: true
           draft: false

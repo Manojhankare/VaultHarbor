@@ -298,7 +298,7 @@ export function VaultPage({
               <div className="vault-header__meta">
                 <h1 className="brand-title brand-title--compact" style={{ margin: 0 }}>
                   <span className="brand-title-vault">Vault</span>
-                  <span className="brand-title-sync">Sync</span>
+                  <span className="brand-title-sync">Harbor</span>
                 </h1>
                 {email && <p className="vault-header__email">{email}</p>}
               </div>

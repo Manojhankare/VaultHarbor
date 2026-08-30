@@ -1,4 +1,4 @@
-"""Public landing and legal pages for VaultSync."""
+"""Public landing and legal pages for VaultHarbor."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ from app.pages.site_html import (
     build_page,
     faq_items_html,
     faq_preview_html,
+    features_section_html,
     hero_section_html,
     install_section_html,
     support_section_html,
@@ -27,23 +28,23 @@ pages_bp = Blueprint(
     static_url_path="/pages-static",
 )
 
-PAGE_TITLE = "VaultSync: Zero-Knowledge Password Manager"
+PAGE_TITLE = "VaultHarbor: Zero-Knowledge Password Manager"
 PAGE_DESCRIPTION = (
-    "VaultSync is a zero-knowledge password manager. Your vault is encrypted on your device before "
+    "VaultHarbor is a zero-knowledge password manager. Your vault is encrypted on your device before "
     "sync. The server only stores opaque blobs. Install the browser extension for Chrome, Edge, and Brave."
 )
 
 WEB_MANIFEST = {
-    "name": "VaultSync",
-    "short_name": "VaultSync",
+    "name": "VaultHarbor",
+    "short_name": "VaultHarbor",
     "description": (
         "Zero-knowledge password manager with encrypted vault on the client and opaque sync on the server."
     ),
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
-    "background_color": "#0f172a",
-    "theme_color": "#0f172a",
+    "background_color": "#000814",
+    "theme_color": "#000814",
     "lang": "en",
     "icons": [
         {
@@ -60,45 +61,7 @@ LANDING_BODY = f"""
 
 {about_section_html()}
 
-  <section id="features">
-    <div class="container">
-      <p class="section-label">Features</p>
-      <h2 class="section-title">Everything you need, nothing you don't</h2>
-      <p class="section-desc">Designed for everyday use with fast autofill, reliable sync, and security you can verify.</p>
-      <div class="features-grid">
-        <div class="feature-card">
-          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-          <h3>Zero-knowledge encryption</h3>
-          <p>Your vault is encrypted with AES-GCM on your device. The server stores ciphertext it can never decrypt.</p>
-        </div>
-        <div class="feature-card">
-          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-          <h3>One-click autofill</h3>
-          <p>Fill usernames and passwords on any site. VaultSync detects login fields and offers matching credentials instantly.</p>
-        </div>
-        <div class="feature-card">
-          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <h3>Save &amp; update prompts</h3>
-          <p>Capture new logins as you sign up. When a password changes, VaultSync asks whether to update the existing entry.</p>
-        </div>
-        <div class="feature-card">
-          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-          <h3>Cross-device sync</h3>
-          <p>Sign in on any browser with the extension. Your encrypted vault syncs automatically across all your devices.</p>
-        </div>
-        <div class="feature-card">
-          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-          <h3>Master password unlock</h3>
-          <p>One master password derives your vault key locally. It never travels to the server, not even as a hash.</p>
-        </div>
-        <div class="feature-card">
-          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-          <h3>Self-hosted backend</h3>
-          <p>Run your own sync server or use the hosted instance. Your encrypted data stays under your infrastructure.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+{features_section_html()}
 
   <section id="how-it-works">
     <div class="container">
@@ -113,7 +76,7 @@ LANDING_BODY = f"""
         <div class="step">
           <div class="step-num">2</div>
           <h3>Set a master password</h3>
-          <p>Choose a strong master password. VaultSync derives encryption keys locally and wraps your vault so the master password never leaves your device.</p>
+          <p>Choose a strong master password. VaultHarbor derives encryption keys locally and wraps your vault so the master password never leaves your device.</p>
         </div>
         <div class="step">
           <div class="step-num">3</div>
@@ -128,17 +91,17 @@ LANDING_BODY = f"""
     <div class="container">
       <p class="section-label">Security</p>
       <h2 class="section-title">Two passwords, one principle: your data stays yours</h2>
-      <p class="section-desc">VaultSync separates account login from vault encryption so your secrets remain protected even if credentials are reset.</p>
+      <p class="section-desc">VaultHarbor separates account login from vault encryption so your secrets remain protected even if credentials are reset.</p>
       <div class="security-cards">
         <div class="sec-card">
           <span class="sec-badge badge-green">Stored as hash only</span>
           <h3>Account password</h3>
-          <p>Used to sign in to VaultSync and sync your vault across devices. Stored on the server as an Argon2id hash, never in plaintext.</p>
+          <p>Used to sign in to VaultHarbor and sync your vault across devices. Stored on the server as an Argon2id hash, never in plaintext.</p>
         </div>
         <div class="sec-card">
           <span class="sec-badge badge-red">Never sent to server</span>
           <h3>Master password</h3>
-          <p>Derives the key that encrypts and decrypts your vault. Exists only on your device. VaultSync cannot recover it; only you can unlock your data.</p>
+          <p>Derives the key that encrypts and decrypts your vault. Exists only on your device. VaultHarbor cannot recover it; only you can unlock your data.</p>
         </div>
         <div class="sec-card">
           <span class="sec-badge badge-green">Client-side only</span>
@@ -148,7 +111,7 @@ LANDING_BODY = f"""
         <div class="sec-card">
           <span class="sec-badge badge-green">Recovery option</span>
           <h3>Recovery key</h3>
-          <p>If you forget your master password, a recovery key can re-wrap your vault key. Store it safely; VaultSync shows it once during setup.</p>
+          <p>If you forget your master password, a recovery key can re-wrap your vault key. Store it safely; VaultHarbor shows it once during setup.</p>
         </div>
       </div>
     </div>
@@ -160,7 +123,7 @@ LANDING_BODY = f"""
     <div class="container">
       <p class="section-label">FAQ</p>
       <h2 class="section-title">Common questions</h2>
-      <p class="section-desc">Quick answers about VaultSync security, installation, and your data.</p>
+      <p class="section-desc">Quick answers about VaultHarbor security, installation, and your data.</p>
       <div class="faq-preview">
 {faq_preview_html(3)}
         <a class="more-link" href="/faq">View all FAQ →</a>
@@ -174,7 +137,7 @@ FAQ_BODY = f"""
   <div class="page-hero">
     <div class="container">
       <h1>Frequently Asked Questions</h1>
-      <p>Answers about VaultSync security, installation, sync, and your data.</p>
+      <p>Answers about VaultHarbor security, installation, sync, and your data.</p>
     </div>
   </div>
   <div class="faq-list">
@@ -186,7 +149,7 @@ PRIVACY_BODY = f"""
   <div class="page-hero">
     <div class="container">
       <h1>Privacy Policy</h1>
-      <p>How VaultSync handles your information.</p>
+      <p>How VaultHarbor handles your information.</p>
     </div>
   </div>
   <div class="legal-body">
@@ -194,18 +157,18 @@ PRIVACY_BODY = f"""
 
     <h2>1. Introduction</h2>
     <p>
-      VaultSync (&ldquo;we&rdquo;, &ldquo;us&rdquo;) is a zero-knowledge password manager operated by
+      VaultHarbor (&ldquo;we&rdquo;, &ldquo;us&rdquo;) is a zero-knowledge password manager operated by
       Manoj Hankare. This Privacy Policy explains what information we collect, how we use it,
-      and your rights when you use VaultSync at <a href="{SITE_URL}">{SITE_URL.rstrip('/')}</a>
-      and the VaultSync browser extension.
+      and your rights when you use VaultHarbor at <a href="{SITE_URL}">{SITE_URL.rstrip('/')}</a>
+      and the VaultHarbor browser extension.
     </p>
     <p>
-      VaultSync is built on a zero-knowledge architecture: your master password and decrypted
+      VaultHarbor is built on a zero-knowledge architecture: your master password and decrypted
       vault contents never leave your device. We cannot read your stored credentials.
     </p>
 
     <h2>2. Information we collect</h2>
-    <p>When you create an account and use VaultSync, we may store:</p>
+    <p>When you create an account and use VaultHarbor, we may store:</p>
     <ul>
       <li><strong>Account information</strong>: email address and a one-way hash of your account password (Argon2id). We never store your account password in plaintext.</li>
       <li><strong>Encrypted vault data</strong>: your vault as an opaque, encrypted blob and wrapped encryption keys. We cannot decrypt this data.</li>
@@ -218,7 +181,7 @@ PRIVACY_BODY = f"""
     </ul>
 
     <h2>3. Information we do not collect</h2>
-    <p>VaultSync is designed so that we never receive or store:</p>
+    <p>VaultHarbor is designed so that we never receive or store:</p>
     <ul>
       <li>Your master password</li>
       <li>Your recovery key in plaintext</li>
@@ -232,7 +195,7 @@ PRIVACY_BODY = f"""
       <li>Authenticate your account and maintain secure sessions</li>
       <li>Store and sync your encrypted vault across your devices</li>
       <li>Send account password reset emails when you request them</li>
-      <li>Operate, secure, and improve the VaultSync service</li>
+      <li>Operate, secure, and improve the VaultHarbor service</li>
       <li>Respond to support requests and legal obligations</li>
     </ul>
     <p>We do not sell your personal information. We do not use your vault data for advertising or profiling.</p>
@@ -245,9 +208,9 @@ PRIVACY_BODY = f"""
     </p>
 
     <h2>6. Third-party services</h2>
-    <p>VaultSync relies on the following infrastructure providers:</p>
+    <p>VaultHarbor relies on the following infrastructure providers:</p>
     <ul>
-      <li><strong>Vercel</strong>: hosts the VaultSync API</li>
+      <li><strong>Vercel</strong>: hosts the VaultHarbor API</li>
       <li><strong>Supabase (PostgreSQL)</strong>: stores account and encrypted vault data</li>
       <li><strong>Brevo</strong>: sends transactional emails (e.g. password reset codes)</li>
     </ul>
@@ -267,7 +230,7 @@ PRIVACY_BODY = f"""
 
     <h2>8. Cookies and tracking</h2>
     <p>
-      The VaultSync marketing website does not use analytics cookies or third-party advertising
+      The VaultHarbor marketing website does not use analytics cookies or third-party advertising
       trackers. The browser extension stores session tokens and cached vault data locally in
       your browser, not in cross-site tracking cookies.
     </p>
@@ -296,21 +259,21 @@ PRIVACY_BODY = f"""
 
     <h2>11. Children</h2>
     <p>
-      VaultSync is not intended for users under 16. We do not knowingly collect information
+      VaultHarbor is not intended for users under 16. We do not knowingly collect information
       from children.
     </p>
 
     <h2>12. Changes to this policy</h2>
     <p>
       We may update this Privacy Policy from time to time. The &ldquo;Last updated&rdquo; date
-      at the top will reflect changes. Continued use of VaultSync after changes constitutes
+      at the top will reflect changes. Continued use of VaultHarbor after changes constitutes
       acceptance of the updated policy.
     </p>
 
     <h2>13. Contact</h2>
     <p>
       Manoj Hankare<br />
-      Email: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> (VaultSync support)
+      Email: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> (VaultHarbor support)
     </p>
   </div>
 """
@@ -319,7 +282,7 @@ TERMS_BODY = f"""
   <div class="page-hero">
     <div class="container">
       <h1>Terms of Service</h1>
-      <p>Terms governing your use of VaultSync.</p>
+      <p>Terms governing your use of VaultHarbor.</p>
     </div>
   </div>
   <div class="legal-body">
@@ -327,15 +290,15 @@ TERMS_BODY = f"""
 
     <h2>1. Acceptance of terms</h2>
     <p>
-      By accessing or using VaultSync (the website at {SITE_URL.rstrip('/')}, the browser
+      By accessing or using VaultHarbor (the website at {SITE_URL.rstrip('/')}, the browser
       extension, and related sync services), you agree to these Terms of Service. If you do
-      not agree, do not use VaultSync.
+      not agree, do not use VaultHarbor.
     </p>
 
     <h2>2. Service description</h2>
     <p>
-      VaultSync is a zero-knowledge password manager that encrypts your vault on your device
-      and syncs encrypted data to our servers. VaultSync is provided by Manoj Hankare as
+      VaultHarbor is a zero-knowledge password manager that encrypts your vault on your device
+      and syncs encrypted data to our servers. VaultHarbor is provided by Manoj Hankare as
       a personal/open-source project. The service is offered on an &ldquo;as is&rdquo; basis.
     </p>
 
@@ -351,7 +314,7 @@ TERMS_BODY = f"""
 
     <h2>4. Zero-knowledge responsibility</h2>
     <p>
-      Because VaultSync uses zero-knowledge encryption, <strong>we cannot recover your master
+      Because VaultHarbor uses zero-knowledge encryption, <strong>we cannot recover your master
       password or decrypt your vault</strong> if you lose your master password and recovery key.
       You acknowledge this limitation and accept full responsibility for maintaining access
       to your vault.
@@ -360,29 +323,29 @@ TERMS_BODY = f"""
     <h2>5. Acceptable use</h2>
     <p>You agree not to:</p>
     <ul>
-      <li>Use VaultSync for unlawful purposes</li>
-      <li>Attempt to gain unauthorized access to VaultSync systems or other users&rsquo; accounts</li>
+      <li>Use VaultHarbor for unlawful purposes</li>
+      <li>Attempt to gain unauthorized access to VaultHarbor systems or other users&rsquo; accounts</li>
       <li>Reverse engineer, attack, or disrupt the service</li>
       <li>Upload malicious content or abuse rate limits</li>
     </ul>
 
     <h2>6. Open source and self-hosting</h2>
     <p>
-      VaultSync source code is available on
+      VaultHarbor source code is available on
       <a href="{GITHUB_REPO}"{EXT_LINK}>GitHub</a>. You may self-host the backend subject to the
       project&rsquo;s open-source license. Self-hosted deployments are operated by you, not by us.
     </p>
 
     <h2>7. Availability and changes</h2>
     <p>
-      We aim to keep VaultSync available but do not guarantee uninterrupted access. We may
+      We aim to keep VaultHarbor available but do not guarantee uninterrupted access. We may
       modify, suspend, or discontinue features with reasonable notice where possible. The
       hosted service may be unavailable during maintenance or outages.
     </p>
 
     <h2>8. Disclaimer of warranties</h2>
     <p>
-      VaultSync is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo; without warranties
+      VaultHarbor is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo; without warranties
       of any kind, express or implied, including merchantability, fitness for a particular
       purpose, and non-infringement. We do not warrant that the service will be error-free
       or that your data will never be lost. Maintain your own backups and recovery keys.
@@ -392,13 +355,13 @@ TERMS_BODY = f"""
     <p>
       To the maximum extent permitted by law, Manoj Hankare shall not be liable for any
       indirect, incidental, special, consequential, or punitive damages, or any loss of
-      profits, data, or goodwill, arising from your use of VaultSync, including loss of
+      profits, data, or goodwill, arising from your use of VaultHarbor, including loss of
       access due to a forgotten master password or recovery key.
     </p>
 
     <h2>10. Termination</h2>
     <p>
-      You may stop using VaultSync at any time and request account deletion. We may suspend
+      You may stop using VaultHarbor at any time and request account deletion. We may suspend
       or terminate accounts that violate these terms. Upon termination, your right to use
       the service ceases; you may request deletion of server-stored data as described in
       our <a href="/privacy">Privacy Policy</a>.
@@ -406,7 +369,7 @@ TERMS_BODY = f"""
 
     <h2>11. Privacy</h2>
     <p>
-      Your use of VaultSync is also governed by our
+      Your use of VaultHarbor is also governed by our
       <a href="/privacy">Privacy Policy</a>, which describes how we handle your information.
     </p>
 
@@ -425,7 +388,7 @@ TERMS_BODY = f"""
     <h2>14. Contact</h2>
     <p>
       Manoj Hankare<br />
-      Email: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> (VaultSync support)
+      Email: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> (VaultHarbor support)
     </p>
   </div>
 """
@@ -438,22 +401,22 @@ def landing():
 
 @pages_bp.get("/faq")
 def faq():
-    title = "FAQ: VaultSync"
-    desc = "Frequently asked questions about VaultSync security, installation, sync, and your data."
+    title = "FAQ: VaultHarbor"
+    desc = "Frequently asked questions about VaultHarbor security, installation, sync, and your data."
     return build_page(title, desc, "/faq", FAQ_BODY, nav_active="faq")
 
 
 @pages_bp.get("/privacy")
 def privacy():
-    title = "Privacy Policy: VaultSync"
-    desc = "VaultSync Privacy Policy: what data we collect, zero-knowledge encryption, and your rights."
+    title = "Privacy Policy: VaultHarbor"
+    desc = "VaultHarbor Privacy Policy: what data we collect, zero-knowledge encryption, and your rights."
     return build_page(title, desc, "/privacy", PRIVACY_BODY)
 
 
 @pages_bp.get("/terms")
 def terms():
-    title = "Terms of Service: VaultSync"
-    desc = "VaultSync Terms of Service: rules for using the password manager and sync service."
+    title = "Terms of Service: VaultHarbor"
+    desc = "VaultHarbor Terms of Service: rules for using the password manager and sync service."
     return build_page(title, desc, "/terms", TERMS_BODY)
 
 

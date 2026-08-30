@@ -99,8 +99,8 @@ export function showCredentialDropdown(
     :host { all: initial; }
     .dd {
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: #050810;
-      border: 1px solid rgba(0, 229, 255, 0.45);
+      background: ${BRAND.bg};
+      border: 1px solid rgba(14, 201, 252, 0.45);
       border-radius: 10px;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
       overflow: hidden;
@@ -111,7 +111,7 @@ export function showCredentialDropdown(
       align-items: center;
       justify-content: space-between;
       padding: 8px 10px;
-      border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+      border-bottom: 1px solid rgba(14, 201, 252, 0.15);
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.02em;
@@ -127,8 +127,8 @@ export function showCredentialDropdown(
       font-size: 12px;
       color: #f8fafc;
     }
-    .dd__brand-vault { color: #00e5ff; }
-    .dd__brand-sync { color: #007bff; }
+    .dd__brand-vault { color: ${BRAND.accent}; }
+    .dd__brand-sync { color: ${BRAND.accentPurple}; }
     .dd__close {
       border: none;
       background: transparent;
@@ -141,7 +141,7 @@ export function showCredentialDropdown(
       border-radius: 4px;
       padding: 0;
     }
-    .dd__close:hover { background: rgba(0, 229, 255, 0.1); color: #fff; }
+    .dd__close:hover { background: rgba(14, 201, 252, 0.1); color: #fff; }
     .dd__list {
       list-style: none;
       margin: 0;
@@ -150,7 +150,7 @@ export function showCredentialDropdown(
       overflow-y: auto;
       overflow-x: hidden;
       scrollbar-width: thin;
-      scrollbar-color: rgba(0, 229, 255, 0.35) transparent;
+      scrollbar-color: rgba(14, 201, 252, 0.35) transparent;
     }
     .dd__item {
       display: flex;
@@ -167,7 +167,7 @@ export function showCredentialDropdown(
       font: inherit;
     }
     .dd__item:hover, .dd__item:focus-visible {
-      background: rgba(0, 229, 255, 0.1);
+      background: rgba(14, 201, 252, 0.1);
       outline: none;
     }
     .dd__meta { flex: 1; min-width: 0; }
@@ -190,7 +190,7 @@ export function showCredentialDropdown(
       flex-shrink: 0;
       font-size: 11px;
       font-weight: 600;
-      color: #050810;
+      color: ${BRAND.bg};
       background: ${BRAND.gradientBtn};
       border: none;
       border-radius: 6px;
@@ -204,7 +204,7 @@ export function showCredentialDropdown(
   wrap.innerHTML = `
     <div class="dd__head">
       <span class="dd__brand">
-        <span class="dd__brand-vault">Vault</span><span class="dd__brand-sync">Sync</span>
+        <span class="dd__brand-vault">Vault</span><span class="dd__brand-sync">Harbor</span>
       </span>
       <button type="button" class="dd__close" aria-label="Close" title="Close">×</button>
     </div>

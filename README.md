@@ -1,4 +1,4 @@
-# VaultSync
+# VaultHarbor
 
 Zero-knowledge password manager — encrypted vault on the client, opaque sync on the server.
 
@@ -62,7 +62,7 @@ python run.py
 
 ## License
 
-VaultSync is [MIT licensed](LICENSE). You may use, modify, and self-host the code. Keep the copyright notice and please [credit the project](CONTRIBUTING.md#self-hosting-and-reuse) when you ship a public fork or deployment.
+VaultHarbor is [MIT licensed](LICENSE). You may use, modify, and self-host the code. Keep the copyright notice and please [credit the project](CONTRIBUTING.md#self-hosting-and-reuse) when you ship a public fork or deployment.
 
 ## Contributing
 

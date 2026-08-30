@@ -36,7 +36,7 @@ export function ResetVaultPage({ onSuccess, onCancel }: Props) {
       <h1 style={{ fontSize: 16, color: "var(--vs-danger)" }}>Reset vault</h1>
       <p className="muted">
         This permanently deletes every stored password. The encrypted vault will be wiped from
-        the server and this device. This cannot be undone by anyone, including VaultSync support.
+        the server and this device. This cannot be undone by anyone, including VaultHarbor support.
       </p>
       <form onSubmit={(e) => void submit(e)}>
         <div className="field">

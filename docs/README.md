@@ -1,6 +1,6 @@
-# VaultSync Documentation
+# VaultHarbor Documentation
 
-Central documentation for the VaultSync password manager monorepo. **Keep this folder updated** whenever code, deployment, or architecture changes.
+Central documentation for the VaultHarbor password manager monorepo. **Keep this folder updated** whenever code, deployment, or architecture changes.
 
 **Author:** [Manoj Hankare](https://manojhankare.in)
 

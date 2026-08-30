@@ -1,4 +1,4 @@
-# VaultSync Backend
+# VaultHarbor Backend
 
 Zero-knowledge password manager backend API. The server stores encrypted vault blobs only and never sees plaintext credentials.
 

@@ -29,11 +29,13 @@ extension/
 │   │   └── conflict.ts         Merge export
 │   ├── auth/                   Tokens + login flow
 │   ├── api/                    REST client modules
+│   ├── config/
+│   │   └── api-base-url.ts     Runtime backend URL resolver + server switch
 │   ├── domain/                 URL + hostname matching
 │   ├── devices/                Device registration
 │   ├── password-generator/
 │   ├── offscreen/              Clipboard document
-│   ├── shared/                 browser shim, constants, brand, author
+│   ├── shared/                 browser shim, constants, brand, author, api-url-validation, api-base-url-read
 │   └── types/                  API DTOs
 ├── tests/
 ├── public/icons/

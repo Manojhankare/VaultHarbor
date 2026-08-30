@@ -38,8 +38,8 @@ function buildPillButton(): HTMLButtonElement {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "vs-pill";
-  btn.title = "VaultSync autofill";
-  btn.setAttribute("aria-label", "VaultSync autofill");
+  btn.title = "VaultHarbor autofill";
+  btn.setAttribute("aria-label", "VaultHarbor autofill");
   btn.setAttribute("aria-haspopup", "listbox");
   btn.setAttribute("aria-expanded", "false");
 
@@ -81,9 +81,9 @@ function injectPillStyles(shadow: ShadowRoot): void {
       height: 100%;
       margin: 0;
       padding: 0 7px 0 5px;
-      border: 1px solid rgba(0, 229, 255, 0.32);
+      border: 1px solid rgba(14, 201, 252, 0.32);
       border-radius: 999px;
-      background: linear-gradient(145deg, #0f172a 0%, #0c1220 100%);
+      background: linear-gradient(145deg, #0a1220 0%, #000814 100%);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -99,19 +99,19 @@ function injectPillStyles(shadow: ShadowRoot): void {
       transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
     .vs-pill:hover {
-      border-color: rgba(0, 229, 255, 0.55);
-      background: linear-gradient(145deg, #131f35 0%, #0e1628 100%);
+      border-color: rgba(14, 201, 252, 0.55);
+      background: linear-gradient(145deg, #0f1a2e 0%, #0a1220 100%);
       box-shadow:
         0 2px 8px rgba(0, 0, 0, 0.35),
-        0 0 12px rgba(0, 229, 255, 0.18),
+        0 0 12px rgba(14, 201, 252, 0.18),
         inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
     .vs-pill[aria-expanded="true"] {
-      border-color: rgba(0, 229, 255, 0.7);
-      background: linear-gradient(145deg, #152238 0%, #101a2e 100%);
+      border-color: rgba(14, 201, 252, 0.7);
+      background: linear-gradient(145deg, #122038 0%, #0a1220 100%);
       box-shadow:
         0 2px 10px rgba(0, 0, 0, 0.4),
-        0 0 16px rgba(0, 229, 255, 0.28),
+        0 0 16px rgba(14, 201, 252, 0.28),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
     .vs-pill__logo {
@@ -120,7 +120,7 @@ function injectPillStyles(shadow: ShadowRoot): void {
       object-fit: contain;
       flex-shrink: 0;
       pointer-events: none;
-      filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.35));
+      filter: drop-shadow(0 0 4px rgba(14, 201, 252, 0.35));
     }
     .vs-pill__chev {
       width: 11px;

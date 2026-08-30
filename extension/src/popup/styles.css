@@ -1,20 +1,20 @@
 :root {
-  --vs-bg: #050810;
-  --vs-bg-elevated: #0c1220;
-  --vs-bg-card: #111827;
-  --vs-border: rgba(0, 229, 255, 0.18);
-  --vs-border-hover: rgba(0, 229, 255, 0.45);
+  --vs-bg: #000814;
+  --vs-bg-elevated: #0a1220;
+  --vs-bg-card: #0f1a2e;
+  --vs-border: rgba(14, 201, 252, 0.18);
+  --vs-border-hover: rgba(14, 201, 252, 0.45);
   --vs-text: #f8fafc;
   --vs-text-muted: #94a3b8;
   --vs-text-label: #64748b;
-  --vs-accent: #00e5ff;
-  --vs-accent-slogan: #00d1ff;
-  --vs-accent-blue: #007bff;
-  --vs-accent-purple: #8a2be2;
+  --vs-accent: #0ec9fc;
+  --vs-accent-slogan: #08c9fc;
+  --vs-accent-blue: #0090f8;
+  --vs-accent-purple: #8b5af2;
   --vs-danger: #f87171;
-  --vs-gradient-btn: linear-gradient(135deg, #00d1ff 0%, #007bff 100%);
-  --vs-gradient-text: linear-gradient(135deg, #00e5ff 0%, #007bff 100%);
-  --vs-shadow-glow: 0 0 20px rgba(0, 229, 255, 0.12);
+  --vs-gradient-btn: linear-gradient(135deg, #08c9fc 0%, #0090f8 100%);
+  --vs-gradient-text: linear-gradient(135deg, #0ec9fc 0%, #0090f8 100%);
+  --vs-shadow-glow: 0 0 20px rgba(14, 201, 252, 0.12);
   --vs-radius-popup: 14px;
 }
 
@@ -48,6 +48,61 @@ body {
 
 body.vault-popup-active {
   min-height: 0;
+}
+
+body.auth-popup-active {
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+body.auth-popup-active .app {
+  min-height: auto;
+}
+
+.backend-settings {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--vs-border);
+}
+
+.backend-settings__active {
+  margin: 0 0 8px;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.backend-settings__tag {
+  white-space: nowrap;
+}
+
+.backend-settings__toggle {
+  font-size: 13px;
+}
+
+.backend-settings__panel {
+  margin-top: 12px;
+}
+
+.backend-settings__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.backend-settings__actions .btn {
+  flex: 1;
+  min-width: 120px;
+}
+
+.backend-settings__warn {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+.backend-settings__success {
+  margin: 8px 0 0;
+  color: #4ade80;
+  font-size: 13px;
 }
 
 .app {
@@ -209,7 +264,7 @@ body.vault-popup-active {
   width: 32px;
   height: 32px;
   border-width: 3px;
-  border-color: rgba(0, 229, 255, 0.2);
+  border-color: rgba(14, 201, 252), 0.2);
   border-top-color: var(--vs-accent);
 }
 
@@ -287,7 +342,7 @@ body.vault-popup-active {
 }
 
 .btn-icon:hover {
-  background: rgba(0, 229, 255, 0.08);
+  background: rgba(14, 201, 252), 0.08);
 }
 
 .field {
@@ -316,7 +371,7 @@ body.vault-popup-active {
 .field textarea:focus {
   outline: none;
   border-color: var(--vs-border-hover);
-  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.12);
+  box-shadow: 0 0 0 2px rgba(14, 201, 252), 0.12);
 }
 
 .field-row {
@@ -508,14 +563,14 @@ body.vault-popup-active {
   overflow: hidden;
   background: var(--vs-bg);
   border-radius: var(--vs-radius-popup);
-  border: 1px solid rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(14, 201, 252), 0.1);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .popup-shell__top {
   flex-shrink: 0;
   padding: 10px 12px 0;
-  border-bottom: 1px solid rgba(0, 229, 255, 0.08);
+  border-bottom: 1px solid rgba(14, 201, 252), 0.08);
 }
 
 .popup-shell__body {
@@ -528,14 +583,14 @@ body.vault-popup-active {
 
 .popup-shell__bottom {
   flex-shrink: 0;
-  border-top: 1px solid rgba(0, 229, 255, 0.1);
+  border-top: 1px solid rgba(14, 201, 252), 0.1);
   background: linear-gradient(180deg, rgba(12, 18, 32, 0.6) 0%, var(--vs-bg) 100%);
   box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.35);
 }
 
 .vs-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 229, 255, 0.35) transparent;
+  scrollbar-color: rgba(14, 201, 252), 0.35) transparent;
 }
 
 .vs-scrollbar::-webkit-scrollbar {
@@ -547,12 +602,12 @@ body.vault-popup-active {
 }
 
 .vs-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0, 229, 255, 0.25);
+  background: rgba(14, 201, 252), 0.25);
   border-radius: 999px;
 }
 
 .vs-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 229, 255, 0.45);
+  background: rgba(14, 201, 252), 0.45);
 }
 
 .vault-header {
@@ -618,7 +673,7 @@ body.vault-popup-active {
 .vault-search__input:focus {
   outline: none;
   border-color: var(--vs-border-hover);
-  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.1);
+  box-shadow: 0 0 0 2px rgba(14, 201, 252), 0.1);
 }
 
 .vault-section-label {
@@ -699,7 +754,7 @@ body.vault-popup-active {
 }
 
 .cred-row:hover {
-  background: rgba(0, 229, 255, 0.06);
+  background: rgba(14, 201, 252), 0.06);
 }
 
 .cred-row__main {
@@ -778,7 +833,7 @@ body.vault-popup-active {
 }
 
 .icon-btn:hover:not(:disabled) {
-  background: rgba(0, 229, 255, 0.1);
+  background: rgba(14, 201, 252), 0.1);
   color: var(--vs-accent);
 }
 
@@ -788,7 +843,7 @@ body.vault-popup-active {
 }
 
 .icon-btn--active {
-  background: rgba(0, 229, 255, 0.14);
+  background: rgba(14, 201, 252), 0.14);
   color: var(--vs-accent);
 }
 
@@ -821,7 +876,7 @@ body.vault-popup-active {
 .vault-toolbar__divider {
   width: 1px;
   height: 20px;
-  background: rgba(0, 229, 255, 0.15);
+  background: rgba(14, 201, 252), 0.15);
   flex-shrink: 0;
 }
 
@@ -829,7 +884,7 @@ body.vault-popup-active {
   width: 42px;
   height: 36px;
   border-radius: 10px;
-  border: 1px solid rgba(0, 229, 255, 0.14);
+  border: 1px solid rgba(14, 201, 252), 0.14);
   background: rgba(12, 18, 32, 0.85);
   color: var(--vs-text-muted);
   transition:
@@ -841,10 +896,10 @@ body.vault-popup-active {
 }
 
 .icon-btn--toolbar:hover:not(:disabled) {
-  background: rgba(0, 229, 255, 0.08);
-  border-color: rgba(0, 229, 255, 0.35);
+  background: rgba(14, 201, 252), 0.08);
+  border-color: rgba(14, 201, 252), 0.35);
   color: var(--vs-accent);
-  box-shadow: 0 0 14px rgba(0, 229, 255, 0.12);
+  box-shadow: 0 0 14px rgba(14, 201, 252), 0.12);
 }
 
 .icon-btn--toolbar:active:not(:disabled) {
@@ -852,15 +907,15 @@ body.vault-popup-active {
 }
 
 .icon-btn--toolbar.icon-btn--accent {
-  border-color: rgba(0, 229, 255, 0.28);
+  border-color: rgba(14, 201, 252), 0.28);
   color: var(--vs-accent);
   background: rgba(0, 123, 255, 0.08);
 }
 
 .icon-btn--toolbar.icon-btn--accent:hover:not(:disabled) {
   background: rgba(0, 123, 255, 0.16);
-  border-color: rgba(0, 229, 255, 0.5);
-  box-shadow: 0 0 16px rgba(0, 229, 255, 0.18);
+  border-color: rgba(14, 201, 252), 0.5);
+  box-shadow: 0 0 16px rgba(14, 201, 252), 0.18);
 }
 
 .icon-btn--toolbar .icon-btn__badge {
@@ -933,12 +988,12 @@ body.vault-popup-active {
 }
 
 .cred-menu__item:hover {
-  background: rgba(0, 229, 255, 0.1);
+  background: rgba(14, 201, 252), 0.1);
 }
 
 .cred-menu__item--sep-before {
   margin-top: 4px;
-  border-top: 1px solid rgba(0, 229, 255, 0.12);
+  border-top: 1px solid rgba(14, 201, 252), 0.12);
   border-radius: 0;
   padding-top: 10px;
 }

@@ -1,4 +1,4 @@
-"""Flask application factory for VaultSync.
+"""Flask application factory for VaultHarbor.
 
 Author: Manoj Hankare — https://manojhankare.in
 """

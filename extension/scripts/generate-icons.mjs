@@ -11,15 +11,16 @@ const publicDir = resolve(root, "public");
 const iconsDir = resolve(publicDir, "icons");
 const storeDir = resolve(publicDir, "store");
 
-const iconSrc = resolve(brandingDir, "vaultsynclogo_icon.png");
-const logoSrc = resolve(brandingDir, "vaultsynclogo.png");
+const iconSrc = resolve(brandingDir, "vaultharborlogo_icon.png");
+const logoSrc = resolve(brandingDir, "vaultharborlogo.png");
 
 const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
-const BRAND_BG = { r: 5, g: 8, b: 16, alpha: 1 };
+/** Harbor lockup dark (#000814). */
+const BRAND_BG = { r: 0, g: 8, b: 20, alpha: 1 };
 
 if (!existsSync(iconSrc) || !existsSync(logoSrc)) {
   console.error(
-    "Missing branding assets in branding/ (vaultsynclogo_icon.png, vaultsynclogo.png)"
+    "Missing branding assets in branding/ (vaultharborlogo_icon.png, vaultharborlogo.png)"
   );
   process.exit(1);
 }
@@ -38,10 +39,11 @@ async function getTrimmedMaster() {
 }
 
 /**
- * Sharp transparent icon at exact `size`×`size` with safe padding for toolbar readability.
+ * Sharp transparent icon at exact `size`×`size`.
+ * Light padding (~4%) so the mark fills the toolbar / extensions menu like peers.
  */
 async function buildIcon(size, destPath) {
-  const pad = Math.max(1, Math.round(size * 0.1));
+  const pad = Math.max(1, Math.round(size * 0.04));
   const inner = size - pad * 2;
 
   await sharp(await getTrimmedMaster())
@@ -115,7 +117,7 @@ const promoIconBuf = await sharp(await getTrimmedMaster())
   .toBuffer();
 
 const promoSvg = Buffer.from(`<svg width="${promoW}" height="${promoH}" xmlns="http://www.w3.org/2000/svg">
-  <text x="50%" y="215" text-anchor="middle" font-family="system-ui, Segoe UI, sans-serif" font-size="26" font-weight="700" fill="#f8fafc">VaultSync</text>
+  <text x="50%" y="215" text-anchor="middle" font-family="system-ui, Segoe UI, sans-serif" font-size="24" font-weight="700" fill="#f8fafc">VaultHarbor</text>
   <text x="50%" y="240" text-anchor="middle" font-family="system-ui, Segoe UI, sans-serif" font-size="11" font-weight="600" letter-spacing="0.12em" fill="#64748b">SECURE. SYNC. EVERYWHERE.</text>
 </svg>`);
 

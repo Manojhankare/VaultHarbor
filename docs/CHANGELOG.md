@@ -1,6 +1,36 @@
 # Changelog
 
-All notable VaultSync project changes. Update this file with each significant release or deployment change.
+All notable VaultHarbor project changes. Update this file with each significant release or deployment change.
+
+## 2026-08-30 — Larger toolbar icons
+
+### Changed
+
+- Manifest / toolbar icons use ~4% padding (was ~10%) so the VaultHarbor mark fills more of the slot in the browser toolbar and extensions menu
+- Marketing site brand logos enlarged (nav, footer, hero float, about, install mockups, support)
+- Site glow/border accents remapped from sky-blue leftovers to Harbor cyan/purple; GitHub release title and recovery-key download filename use VaultHarbor
+
+## 2026-08-30 — VaultHarbor rebrand
+
+### Changed
+
+- Product name is **VaultHarbor** in the extension (manifests, popup wordmark, autofill pill/dropdown, recovery/reset copy) and on the marketing site (SEO, FAQ, legal pages, emails)
+- Brand assets generated from `branding/vaultharborlogo_icon.png` and `branding/vaultharborlogo.png`; colors sampled from the lockup (`#000814`, `#0ec9fc`, `#0090f8`, `#8b5af2`)
+- Tagline unchanged: **SECURE. SYNC. EVERYWHERE.**
+- Domain, GitHub repo URLs, and internal `vaultsync-*` IDs unchanged (follow-up)
+
+## 2026-08-30 — Extension runtime backend URL
+
+### Added
+
+- Extension login screen **Advanced** panel: configure a custom self-hosted backend URL (defaults to production), test connection via `GET /health`, reset to build default
+- Runtime API base URL resolver (`chrome.storage.local`) with safe server-switch cleanup (logout, wipe local vault, clear device registration)
+
+### Changed
+
+- Extension API client resolves backend URL at request time instead of build-time constant only; `VITE_API_BASE_URL` remains the shipped default and for dev/fork builds
+- Content script backend-origin guard reads storage fresh on URL change (no stale cache); autofill pause/resume avoids duplicate listeners when switching servers
+- Sequential mutex for concurrent server URL switches
 
 ## 2026-08-29 — Landing page hero redesign
 
@@ -13,6 +43,7 @@ All notable VaultSync project changes. Update this file with each significant re
 - About section (`/#about`): two-column layout with gradient-accent headline, divider, body copy (including self-hosted backend), branded logo card, and subtle entrance/glow animations
 - Public page copy: replaced em dashes with clearer punctuation and phrasing
 - Install section (`/#install`): two-column glass panel with GitHub download CTA, numbered steps, store cards, and browser scene with VaultSync branding plus extension unlock popup
+- Features section (`/#features`): hub layout with hex logo, six radiating feature items, gradient headline, and privacy footer banner
 
 ## 2026-08-29 — Open source license and contributing
 

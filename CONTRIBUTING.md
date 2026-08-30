@@ -1,6 +1,6 @@
-# Contributing to VaultSync
+# Contributing to VaultHarbor
 
-Thank you for your interest in VaultSync. This project is open source — you are welcome to report issues, suggest improvements, and submit pull requests.
+Thank you for your interest in VaultHarbor. This project is open source — you are welcome to report issues, suggest improvements, and submit pull requests.
 
 **Repository:** [github.com/Manojhankare/VaultSync](https://github.com/Manojhankare/VaultSync)  
 **Author:** [Manoj Hankare](https://manojhankare.in)
@@ -30,7 +30,7 @@ We review PRs as time allows. Smaller, well-tested changes are easier to merge.
 
 ## Support development
 
-VaultSync is free to use and [MIT licensed](LICENSE). If you find it useful, you can help fund:
+VaultHarbor is free to use and [MIT licensed](LICENSE). If you find it useful, you can help fund:
 
 - Chrome Web Store and Microsoft Edge Add-ons listing fees
 - Production hosting (API, database)
@@ -44,7 +44,7 @@ GitHub also shows a **Sponsor** button on the repo via [`.github/FUNDING.yml`](.
 
 ## Self-hosting and reuse
 
-VaultSync is released under the [MIT License](LICENSE). You may:
+VaultHarbor is released under the [MIT License](LICENSE). You may:
 
 - Use, modify, and deploy the backend and extension for personal or commercial use
 - Self-host the API and point the extension at your own server
@@ -53,7 +53,7 @@ VaultSync is released under the [MIT License](LICENSE). You may:
 **Please give credit** when you ship a derivative or public deployment:
 
 - Retain the [LICENSE](LICENSE) copyright notice in source and documentation
-- Mention **VaultSync** and link to [https://github.com/Manojhankare/VaultSync](https://github.com/Manojhankare/VaultSync) (e.g. in your README, about page, or app credits)
+- Mention **VaultHarbor** and link to [https://github.com/Manojhankare/VaultSync](https://github.com/Manojhankare/VaultSync) (e.g. in your README, about page, or app credits)
 - Optional but appreciated: link to [manojhankare.in](https://manojhankare.in)
 
 You do **not** need permission to self-host. The MIT license already grants these rights; credit keeps the community aware of the upstream project.

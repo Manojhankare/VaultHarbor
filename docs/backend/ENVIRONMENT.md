@@ -64,7 +64,7 @@ See [`backend/app/config.py`](../../backend/app/config.py) for full list. Notabl
 | `EMAIL_PROVIDER` | `console` | `console` \| `brevo` \| `resend` \| `ses` |
 | `EMAIL_API_KEY` | (empty) | Provider API key (required for brevo/resend) |
 | `EMAIL_FROM_ADDRESS` | `noreply@manojhankare.in` | Sender address |
-| `EMAIL_FROM_NAME` | `VaultSync` | Sender display name |
+| `EMAIL_FROM_NAME` | `VaultHarbor` | Sender display name |
 | `EMAIL_TIMEOUT_SECONDS` | `5` | HTTP timeout for email APIs |
 | `PASSWORD_RESET_CODE_TTL_SECONDS` | `900` | Reset code lifetime |
 | `PASSWORD_RESET_MAX_ATTEMPTS` | `5` | Failed verify attempts before code invalidated |

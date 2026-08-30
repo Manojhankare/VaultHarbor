@@ -1,4 +1,4 @@
-"""Shared HTML helpers for VaultSync public pages."""
+"""Shared HTML helpers for VaultHarbor public pages."""
 
 from __future__ import annotations
 
@@ -25,16 +25,16 @@ BASE_CSS = """
     html { scroll-behavior: smooth; }
     body {
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: #0f172a; color: #f1f5f9; line-height: 1.6; min-height: 100vh;
+      background: #000814; color: #f1f5f9; line-height: 1.6; min-height: 100vh;
     }
-    a { color: #38bdf8; text-decoration: none; }
+    a { color: #0ec9fc; text-decoration: none; }
     a:hover { text-decoration: underline; }
     .container { max-width: 72rem; margin: 0 auto; padding: 0 1.25rem; }
     .nav {
       position: sticky; top: 0; z-index: 50;
       background: linear-gradient(
         180deg,
-        rgba(15, 23, 42, 0.68) 0%,
+        rgba(0, 8, 20, 0.68) 0%,
         rgba(10, 14, 23, 0.52) 100%
       );
       backdrop-filter: blur(20px) saturate(1.4);
@@ -53,13 +53,13 @@ BASE_CSS = """
       text-decoration: none; flex-shrink: 0;
     }
     .nav-brand:hover { text-decoration: none; }
-    .nav-brand img { width: 30px; height: 30px; display: block; flex-shrink: 0; }
+    .nav-brand img { width: 36px; height: 36px; display: block; flex-shrink: 0; }
     .nav-brand-title {
       font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; line-height: 1;
     }
     .nav-brand-vault { color: #f8fafc; }
     .nav-brand-sync {
-      background: linear-gradient(135deg, #38bdf8 0%, #60a5fa 45%, #818cf8 100%);
+      background: linear-gradient(135deg, #0ec9fc 0%, #0090f8 45%, #8b5af2 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .nav-links {
@@ -70,30 +70,30 @@ BASE_CSS = """
       color: #f1f5f9; font-size: 0.9rem; font-weight: 500; text-decoration: none;
       transition: color 0.2s ease;
     }
-    .nav-links a:hover, .nav-links a.active { color: #38bdf8; text-decoration: none; }
+    .nav-links a:hover, .nav-links a.active { color: #0ec9fc; text-decoration: none; }
     .nav-cta {
-      background: linear-gradient(90deg, #0ea5e9 0%, #6366f1 100%);
+      background: linear-gradient(90deg, #0090f8 0%, #8b5af2 100%);
       color: #fff !important; padding: 0.48rem 1.15rem; border-radius: 999px;
       font-size: 0.875rem; font-weight: 600;
-      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.28);
+      box-shadow: 0 4px 14px rgba(14, 201, 252, 0.28);
       transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
     .nav-cta:hover {
       opacity: 0.95; text-decoration: none !important;
       transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(14, 165, 233, 0.34);
+      box-shadow: 0 6px 18px rgba(14, 201, 252, 0.34);
     }
     footer { border-top: 1px solid #334155; padding: 2.5rem 0; text-align: center; margin-top: auto; }
     .footer-brand {
       display: flex; align-items: center; justify-content: center; gap: 0.5rem;
       margin-bottom: 1rem; font-weight: 600; color: #cbd5e1;
     }
-    .footer-brand img { width: 24px; height: 24px; display: block; }
+    .footer-brand img { width: 30px; height: 30px; display: block; }
     .footer-links { display: flex; justify-content: center; gap: 1.25rem; flex-wrap: wrap; margin-bottom: 1rem; }
     .footer-links a { color: #94a3b8; font-size: 0.88rem; }
     .footer-copy { font-size: 0.8rem; color: #64748b; }
     .footer-copy a { color: #94a3b8; text-decoration: none; }
-    .footer-copy a:hover { color: #38bdf8; text-decoration: underline; }
+    .footer-copy a:hover { color: #0ec9fc; text-decoration: underline; }
     .page-hero { padding: 3rem 0 2rem; text-align: center; }
     .page-hero h1 {
       font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 700; color: #f1f5f9; margin-bottom: 0.75rem;
@@ -118,10 +118,10 @@ BASE_CSS = """
       list-style: none; display: flex; justify-content: space-between; align-items: center;
     }
     details.faq-item summary::-webkit-details-marker { display: none; }
-    details.faq-item summary::after { content: "+"; color: #38bdf8; font-size: 1.25rem; font-weight: 400; }
+    details.faq-item summary::after { content: "+"; color: #0ec9fc; font-size: 1.25rem; font-weight: 400; }
     details.faq-item[open] summary::after { content: "−"; }
     details.faq-item .faq-answer { padding: 0 1.25rem 1.25rem; color: #cbd5e1; font-size: 0.95rem; }
-    details.faq-item .faq-answer a { color: #38bdf8; }
+    details.faq-item .faq-answer a { color: #0ec9fc; }
     code {
       font-family: ui-monospace, monospace; font-size: 0.88em;
       background: #1e293b; padding: 0.1em 0.35em; border-radius: 0.25rem; color: #7dd3fc;
@@ -176,7 +176,7 @@ LANDING_EXTRA_CSS = """
       font-size: 0.75rem;
       font-weight: 600;
       letter-spacing: 0.05em;
-      color: #22d3ee;
+      color: #0ec9fc;
       text-transform: uppercase;
       box-shadow: 0 0 15px rgba(34, 211, 238, 0.04);
     }
@@ -193,7 +193,7 @@ LANDING_EXTRA_CSS = """
       display: block;
     }
     .hero-title-gradient {
-      background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #a855f7 100%);
+      background: linear-gradient(135deg, #0ec9fc 0%, #0090f8 50%, #a855f7 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -218,7 +218,7 @@ LANDING_EXTRA_CSS = """
       align-items: center;
       justify-content: center;
       gap: 0.65rem;
-      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      background: linear-gradient(135deg, #0090f8, #8b5af2);
       color: #fff;
       font-weight: 600;
       font-size: 1rem;
@@ -239,7 +239,7 @@ LANDING_EXTRA_CSS = """
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      background: rgba(15, 23, 42, 0.4);
+      background: rgba(0, 8, 20, 0.4);
       border: 1px solid rgba(71, 85, 105, 0.6);
       color: #cbd5e1;
       font-weight: 600;
@@ -252,7 +252,7 @@ LANDING_EXTRA_CSS = """
     }
     .btn-secondary:hover {
       border-color: #64748b;
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(0, 8, 20, 0.6);
       transform: translateY(-1px);
       text-decoration: none;
       color: #f1f5f9;
@@ -303,7 +303,7 @@ LANDING_EXTRA_CSS = """
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.22) 0%, rgba(99, 102, 241, 0.08) 40%, transparent 70%);
+      background: radial-gradient(ellipse at center, rgba(14, 201, 252, 0.22) 0%, rgba(139, 90, 242, 0.08) 40%, transparent 70%);
       pointer-events: none;
       z-index: 0;
       animation: hero-glow-pulse 8s ease-in-out infinite;
@@ -323,7 +323,7 @@ LANDING_EXTRA_CSS = """
       z-index: 1;
       pointer-events: none;
       overflow: visible;
-      filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.2));
+      filter: drop-shadow(0 0 12px rgba(14, 201, 252, 0.2));
       transition: transform 0.5s ease, filter 0.5s ease;
     }
     .hero-orbit-field {
@@ -338,16 +338,16 @@ LANDING_EXTRA_CSS = """
     @media (hover: hover) {
       .hero-orbit-stage:hover .hero-mockup {
         transform: rotateY(-14deg) rotateX(7deg) rotateZ(1deg) translateY(-8px);
-        border-color: rgba(56, 189, 248, 0.48);
+        border-color: rgba(14, 201, 252, 0.48);
         box-shadow:
           32px 42px 78px rgba(0, 0, 0, 0.62),
           14px 20px 36px rgba(0, 0, 0, 0.42),
           inset 0 1px 0 rgba(255, 255, 255, 0.08),
-          0 0 72px rgba(56, 189, 248, 0.22);
+          0 0 72px rgba(14, 201, 252, 0.22);
       }
       .hero-orbit-stage:hover .hero-orbit-svg {
         transform: translate(-50%, -50%) scale(1.07);
-        filter: drop-shadow(0 0 24px rgba(56, 189, 248, 0.38));
+        filter: drop-shadow(0 0 24px rgba(14, 201, 252, 0.38));
       }
       .hero-orbit-stage:hover .hero-orbit-field {
         animation-duration: 14s;
@@ -360,7 +360,7 @@ LANDING_EXTRA_CSS = """
       .hero-orbit-stage:hover .hero-float-logo {
         animation-play-state: paused;
         transform: rotateY(-12deg) rotateX(8deg) translateY(-12px) scale(1.06);
-        filter: drop-shadow(0 0 42px rgba(56, 189, 248, 0.65)) drop-shadow(0 0 28px rgba(168, 85, 247, 0.55));
+        filter: drop-shadow(0 0 42px rgba(14, 201, 252, 0.65)) drop-shadow(0 0 28px rgba(139, 90, 242, 0.55));
       }
     }
     @media (hover: hover) and (max-width: 1100px) {
@@ -397,13 +397,13 @@ LANDING_EXTRA_CSS = """
       background: rgba(10, 15, 30, 0.72);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1.5px solid rgba(56, 189, 248, 0.28);
+      border: 1.5px solid rgba(14, 201, 252, 0.28);
       border-radius: 20px;
       box-shadow:
         28px 38px 70px rgba(0, 0, 0, 0.6),
         12px 18px 32px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.06),
-        0 0 52px rgba(56, 189, 248, 0.12);
+        0 0 52px rgba(14, 201, 252, 0.12);
       transform: rotateY(-18deg) rotateX(10deg) rotateZ(2deg);
       transform-style: preserve-3d;
       transform-origin: center center;
@@ -417,8 +417,8 @@ LANDING_EXTRA_CSS = """
       position: absolute;
       inset: 0.55rem;
       border-radius: 14px;
-      border: 1px solid rgba(56, 189, 248, 0.1);
-      box-shadow: inset 0 0 24px rgba(56, 189, 248, 0.04);
+      border: 1px solid rgba(14, 201, 252, 0.1);
+      box-shadow: inset 0 0 24px rgba(14, 201, 252, 0.04);
       pointer-events: none;
       z-index: 4;
     }
@@ -430,7 +430,7 @@ LANDING_EXTRA_CSS = """
       margin-bottom: 0.15rem;
       border-bottom: 1px solid rgba(51, 65, 85, 0.45);
       border-radius: 12px 12px 0 0;
-      background: rgba(15, 23, 42, 0.35);
+      background: rgba(0, 8, 20, 0.35);
     }
     .mockup-brand {
       display: flex;
@@ -441,8 +441,8 @@ LANDING_EXTRA_CSS = """
       color: #f8fafc;
     }
     .mockup-brand img {
-      width: 22px;
-      height: 22px;
+      width: 28px;
+      height: 28px;
     }
     .mockup-actions {
       display: flex;
@@ -539,7 +539,7 @@ LANDING_EXTRA_CSS = """
     .mockup-dots {
       font-size: 0.8rem;
       letter-spacing: 0.15em;
-      color: #38bdf8;
+      color: #0ec9fc;
       flex-shrink: 0;
       margin-right: 0.5rem;
     }
@@ -551,14 +551,14 @@ LANDING_EXTRA_CSS = """
     .hero-float-logo {
       position: absolute;
       z-index: 5;
-      width: 88px;
-      height: 88px;
-      bottom: -32px;
-      right: -22px;
+      width: 108px;
+      height: 108px;
+      bottom: -36px;
+      right: -26px;
       left: auto;
       transform: rotateY(-12deg) rotateX(8deg);
       transform-style: preserve-3d;
-      filter: drop-shadow(0 0 35px rgba(56, 189, 248, 0.5)) drop-shadow(0 0 20px rgba(168, 85, 247, 0.4));
+      filter: drop-shadow(0 0 35px rgba(14, 201, 252, 0.5)) drop-shadow(0 0 20px rgba(139, 90, 242, 0.4));
       animation: float-logo 6s ease-in-out infinite;
       transition: transform 0.45s ease, filter 0.45s ease;
     }
@@ -609,7 +609,7 @@ LANDING_EXTRA_CSS = """
       .hero-mockup { max-width: 290px; }
       .hero-orbit-stage { width: min(290px, 100%); }
       .hero-visual { margin-top: 1.5rem; padding-bottom: 2rem; }
-      .hero-float-logo { width: 82px; height: 82px; right: -18px; bottom: -28px; }
+      .hero-float-logo { width: 96px; height: 96px; right: -20px; bottom: -30px; }
       .hero-grid { gap: 2rem; }
     }
     @media (max-width: 1100px) {
@@ -646,11 +646,11 @@ LANDING_EXTRA_CSS = """
         padding: 0.55rem;
       }
       .hero-float-logo {
-        width: 88px;
-        height: 88px;
-        right: -22px;
+        width: 108px;
+        height: 108px;
+        right: -26px;
         left: auto;
-        bottom: -32px;
+        bottom: -36px;
       }
       .hero-trust {
         grid-template-columns: repeat(2, 1fr);
@@ -687,8 +687,8 @@ LANDING_EXTRA_CSS = """
         padding-bottom: 2.5rem;
       }
       .hero-float-logo {
-        width: 80px;
-        height: 80px;
+        width: 96px;
+        height: 96px;
         right: 5px;
         bottom: -10px;
       }
@@ -719,7 +719,7 @@ LANDING_EXTRA_CSS = """
     }
     .brand-title-vault { color: #f8fafc; }
     .brand-title-sync {
-      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      background: linear-gradient(135deg, #0ec9fc, #8b5af2);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .brand-slogan {
@@ -727,10 +727,10 @@ LANDING_EXTRA_CSS = """
       letter-spacing: 0.18em; color: #64748b; text-transform: uppercase;
     }
     section { padding: 3.5rem 0; }
-    section:nth-child(even) { background: #162032; }
+    section:nth-child(even) { background: #0a1220; }
     .section-label {
       font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
-      text-transform: uppercase; color: #38bdf8; margin-bottom: 0.5rem;
+      text-transform: uppercase; color: #0ec9fc; margin-bottom: 0.5rem;
     }
     .section-title {
       font-size: clamp(1.5rem, 3vw, 2rem);
@@ -778,7 +778,7 @@ LANDING_EXTRA_CSS = """
       opacity: 0; animation: about-fade-up 0.65s ease 0.1s forwards;
     }
     .about-title-accent {
-      background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #a855f7 100%);
+      background: linear-gradient(135deg, #0ec9fc 0%, #0090f8 50%, #a855f7 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
       background-size: 200% 200%;
       animation: about-fade-up 0.65s ease 0.1s forwards, about-accent-shift 6s ease-in-out infinite;
@@ -789,7 +789,7 @@ LANDING_EXTRA_CSS = """
     }
     .about-divider {
       width: 0; height: 3px; border-radius: 999px;
-      background: linear-gradient(90deg, #22d3ee, #a855f7); margin-bottom: 1.75rem;
+      background: linear-gradient(90deg, #0ec9fc, #a855f7); margin-bottom: 1.75rem;
       animation: about-divider-grow 0.7s ease 0.28s forwards;
     }
     .about-text p {
@@ -802,29 +802,29 @@ LANDING_EXTRA_CSS = """
     .about-text p:last-child { margin-bottom: 0; }
     .about-visual {
       position: relative; overflow: hidden; height: 100%; min-height: 100%;
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(22, 32, 50, 0.98));
-      border: 1px solid rgba(56, 189, 248, 0.14); border-radius: 1rem;
+      background: linear-gradient(145deg, rgba(0, 8, 20, 0.92), rgba(22, 32, 50, 0.98));
+      border: 1px solid rgba(14, 201, 252, 0.14); border-radius: 1rem;
       padding: clamp(2.5rem, 6vw, 4rem) clamp(1.75rem, 4vw, 2.5rem);
       text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.06) inset, 0 24px 48px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 0 0 1px rgba(139, 90, 242, 0.06) inset, 0 24px 48px rgba(0, 0, 0, 0.35);
       opacity: 0; animation: about-fade-in-right 0.75s ease 0.18s forwards;
       transition: transform 0.45s ease, box-shadow 0.45s ease, border-color 0.45s ease;
     }
     .about-visual::before {
       content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
       width: 78%; height: 55%;
-      background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.16) 0%, transparent 72%);
+      background: radial-gradient(ellipse at center, rgba(14, 201, 252, 0.16) 0%, transparent 72%);
       pointer-events: none;
       animation: about-glow-pulse 7s ease-in-out infinite;
     }
     .about-visual::after {
       content: ""; position: absolute; inset: 0; pointer-events: none;
-      background: linear-gradient(105deg, transparent 42%, rgba(56, 189, 248, 0.07) 50%, transparent 58%);
+      background: linear-gradient(105deg, transparent 42%, rgba(14, 201, 252, 0.07) 50%, transparent 58%);
       animation: about-shimmer 9s ease-in-out infinite;
     }
     .about-brand-logo {
-      position: relative; width: clamp(140px, 32vw, 176px); height: auto; object-fit: contain;
-      margin-bottom: 1.5rem; filter: drop-shadow(0 12px 24px rgba(56, 189, 248, 0.22));
+      position: relative; width: clamp(168px, 36vw, 208px); height: auto; object-fit: contain;
+      margin-bottom: 1.5rem; filter: drop-shadow(0 12px 24px rgba(14, 201, 252, 0.22));
       animation: about-logo-float 5.5s ease-in-out infinite;
       transition: transform 0.45s ease, filter 0.45s ease;
     }
@@ -837,11 +837,11 @@ LANDING_EXTRA_CSS = """
     @media (hover: hover) {
       .about-visual:hover {
         transform: translateY(-6px);
-        border-color: rgba(56, 189, 248, 0.34);
+        border-color: rgba(14, 201, 252, 0.34);
         box-shadow:
-          0 0 0 1px rgba(99, 102, 241, 0.1) inset,
+          0 0 0 1px rgba(139, 90, 242, 0.1) inset,
           0 28px 56px rgba(0, 0, 0, 0.42),
-          0 0 48px rgba(56, 189, 248, 0.14);
+          0 0 48px rgba(14, 201, 252, 0.14);
       }
       .about-visual:hover::before {
         animation-duration: 3.5s;
@@ -850,7 +850,7 @@ LANDING_EXTRA_CSS = """
       .about-visual:hover .about-brand-logo {
         animation-play-state: paused;
         transform: translateY(-12px) scale(1.05);
-        filter: drop-shadow(0 16px 32px rgba(56, 189, 248, 0.38)) drop-shadow(0 0 24px rgba(168, 85, 247, 0.28));
+        filter: drop-shadow(0 16px 32px rgba(14, 201, 252, 0.38)) drop-shadow(0 0 24px rgba(139, 90, 242, 0.28));
       }
     }
     @media (max-width: 768px) {
@@ -880,16 +880,182 @@ LANDING_EXTRA_CSS = """
         transform: none;
       }
     }
-    .features-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; margin-top: 2rem;
+    #features { padding: 4.5rem 0; }
+    .features-header { text-align: center; max-width: 44rem; margin: 0 auto 3rem; }
+    .features-title {
+      font-size: clamp(1.85rem, 4.2vw, 2.5rem); font-weight: 700; color: #f8fafc;
+      line-height: 1.22; letter-spacing: -0.025em; margin-bottom: 0.85rem;
     }
-    .feature-card {
-      background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem;
+    .features-accent-cyan {
+      background: linear-gradient(135deg, #0ec9fc 0%, #0ec9fc 55%, #0090f8 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .feature-card:hover { border-color: #475569; }
-    .feature-icon { width: 2.5rem; height: 2.5rem; margin-bottom: 1rem; color: #38bdf8; }
-    .feature-card h3 { font-size: 1rem; font-weight: 600; color: #f1f5f9; margin-bottom: 0.5rem; }
-    .feature-card p { font-size: 0.9rem; color: #cbd5e1; }
+    .features-accent-purple {
+      background: linear-gradient(135deg, #8b5af2 0%, #a855f7 55%, #c084fc 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .features-desc { color: #94a3b8; font-size: 0.95rem; line-height: 1.65; max-width: 36rem; margin: 0 auto; }
+    .features-stage {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      grid-template-rows: repeat(3, auto);
+      column-gap: clamp(1.25rem, 3.5vw, 2.75rem);
+      row-gap: clamp(2.5rem, 4.5vw, 3.25rem);
+      align-items: center;
+      margin-top: 0.75rem;
+      padding: 0 0.25rem;
+    }
+    .features-wires {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0; overflow: visible;
+    }
+    .features-hub-cell {
+      grid-column: 2; grid-row: 1 / -1;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 2;
+      width: clamp(7.25rem, 12vw, 9.5rem);
+    }
+    .features-hub-outer {
+      position: relative; width: 100%; aspect-ratio: 1;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(6, 10, 20, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.4);
+    }
+    .features-hub-core {
+      position: relative; width: 62%; aspect-ratio: 1;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(4, 8, 18, 0.98);
+      clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+      box-shadow:
+        0 0 30px rgba(14, 201, 252, 0.24),
+        0 0 44px rgba(139, 90, 242, 0.16);
+    }
+    .features-hub-core::before {
+      content: ""; position: absolute; inset: -2px;
+      background: linear-gradient(160deg, #0ec9fc 0%, #8b5af2 50%, #a855f7 100%);
+      clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+      z-index: -1;
+    }
+    .features-hub-core::after {
+      content: ""; position: absolute; inset: 2px;
+      background: rgba(4, 8, 18, 0.98);
+      clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+      z-index: -1;
+    }
+    .features-hub-keyhole {
+      width: 42%; height: 42%; color: #f8fafc; position: relative; z-index: 1;
+    }
+    .feat-group {
+      position: relative; z-index: 1;
+      display: flex; align-items: flex-start; gap: 0.85rem;
+    }
+    .feat-group--left {
+      grid-column: 1;
+      justify-content: flex-start;
+    }
+    .feat-group--right {
+      grid-column: 3;
+      justify-content: flex-end;
+    }
+    .feat-row-1 { grid-row: 1; }
+    .feat-row-2 { grid-row: 2; }
+    .feat-row-3 { grid-row: 3; }
+    .feat-icon {
+      flex-shrink: 0; width: 3.15rem; height: 3.15rem; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(6, 10, 22, 0.82);
+      backdrop-filter: blur(10px);
+    }
+    .feat-icon--left {
+      border: 1px solid rgba(14, 201, 252, 0.42);
+      box-shadow: 0 0 26px rgba(14, 201, 252, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .feat-icon--right {
+      border: 1px solid rgba(167, 139, 250, 0.45);
+      box-shadow: 0 0 26px rgba(129, 140, 248, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .feat-icon svg {
+      width: 1.35rem; height: 1.35rem; stroke: url(#featIconGrad); fill: none;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+    .feat-copy { flex: 0 1 16.75rem; min-width: 0; }
+    .feat-copy--left { text-align: left; }
+    .feat-copy--right { text-align: right; }
+    .feat-copy h3 {
+      font-size: 0.96rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.38rem; line-height: 1.28;
+    }
+    .feat-copy p { font-size: 0.8125rem; color: #94a3b8; line-height: 1.58; margin: 0; }
+    @media (max-width: 900px) {
+      .features-stage {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        row-gap: 1.35rem;
+        padding: 0;
+      }
+      .features-wires { display: none; }
+      .features-hub-cell {
+        grid-column: 1; grid-row: 1; width: auto; margin: 0 auto 0.75rem;
+      }
+      .features-hub-outer { width: 6.75rem; height: 6.75rem; }
+      .features-hub-core { width: 62%; height: 62%; }
+      .feat-group--left,
+      .feat-group--right {
+        grid-column: 1;
+        justify-content: flex-start;
+      }
+      .feat-group--right { flex-direction: row; }
+      .feat-copy--right { text-align: left; flex: 1; }
+      .feat-row-1 { grid-row: 2; }
+      .feat-group--right.feat-row-1 { grid-row: 3; }
+      .feat-row-2 { grid-row: 4; }
+      .feat-group--right.feat-row-2 { grid-row: 5; }
+      .feat-row-3 { grid-row: 6; }
+      .feat-group--right.feat-row-3 { grid-row: 7; }
+    }
+    .features-footer-banner {
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 1.25rem 2rem; align-items: center;
+      margin-top: 3.5rem; padding: 1.15rem clamp(1.5rem, 3vw, 2.5rem);
+      background: linear-gradient(145deg, rgba(10, 16, 28, 0.92), rgba(16, 24, 40, 0.96));
+      border: 1px solid rgba(14, 201, 252, 0.18); border-radius: 999px;
+      box-shadow:
+        0 0 0 1px rgba(139, 90, 242, 0.07) inset,
+        0 12px 40px rgba(0, 0, 0, 0.24);
+    }
+    @media (max-width: 768px) {
+      .features-footer-banner {
+        grid-template-columns: 1fr; text-align: center; gap: 1rem;
+        border-radius: 1.25rem; padding: 1.35rem 1.25rem;
+      }
+      .features-footer-left { justify-content: center; }
+      .features-footer-divider { display: none; }
+      .features-footer-right p { text-align: center; }
+    }
+    .features-footer-left {
+      display: flex; align-items: center; gap: 0.9rem;
+    }
+    .features-footer-shield-wrap {
+      flex-shrink: 0; width: 2.75rem; height: 2.75rem; color: #0ec9fc;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      background: rgba(6, 10, 22, 0.82);
+      border: 1px solid rgba(14, 201, 252, 0.35);
+      box-shadow: 0 0 20px rgba(14, 201, 252, 0.16);
+    }
+    .features-footer-shield-wrap svg { width: 1.35rem; height: 1.35rem; }
+    .features-footer-left strong {
+      display: block; font-size: 0.9rem; color: #f1f5f9; margin-bottom: 0.15rem;
+    }
+    .features-footer-left p { font-size: 0.78rem; color: #64748b; margin: 0; line-height: 1.45; }
+    .features-footer-divider {
+      width: 1px; height: 2.5rem;
+      background: linear-gradient(180deg, transparent, rgba(100, 116, 139, 0.55), transparent);
+    }
+    .features-footer-right p {
+      font-size: 0.9rem; color: #cbd5e1; line-height: 1.55; margin: 0; text-align: center;
+    }
     .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2rem; }
     @media (max-width: 768px) { .steps { grid-template-columns: 1fr; } }
     .step {
@@ -899,7 +1065,7 @@ LANDING_EXTRA_CSS = """
     .step-num {
       display: inline-flex; align-items: center; justify-content: center;
       width: 2.5rem; height: 2.5rem; border-radius: 50%;
-      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      background: linear-gradient(135deg, #0090f8, #8b5af2);
       color: #fff; font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem;
     }
     .step h3 { font-size: 1rem; font-weight: 600; color: #f1f5f9; margin-bottom: 0.5rem; }
@@ -923,7 +1089,7 @@ LANDING_EXTRA_CSS = """
     }
     #install::before {
       content: ""; position: absolute; right: -8%; bottom: -20%; width: 52%; height: 70%;
-      background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.1) 0%, rgba(99, 102, 241, 0.06) 35%, transparent 72%);
+      background: radial-gradient(ellipse at center, rgba(14, 201, 252, 0.1) 0%, rgba(139, 90, 242, 0.06) 35%, transparent 72%);
       pointer-events: none;
     }
     .install-header { margin-bottom: 1.35rem; }
@@ -932,7 +1098,7 @@ LANDING_EXTRA_CSS = """
       line-height: 1.22; letter-spacing: -0.02em; margin-bottom: 0.45rem;
     }
     .install-title-accent {
-      background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #a855f7 100%);
+      background: linear-gradient(135deg, #0ec9fc 0%, #0090f8 50%, #a855f7 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .install-desc { color: #94a3b8; font-size: 0.88rem; max-width: 36rem; line-height: 1.5; }
@@ -946,23 +1112,23 @@ LANDING_EXTRA_CSS = """
     }
     .install-panel {
       position: relative;
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.82), rgba(22, 32, 50, 0.9));
-      border: 1px solid rgba(56, 189, 248, 0.14); border-radius: 0.85rem;
+      background: linear-gradient(145deg, rgba(0, 8, 20, 0.82), rgba(22, 32, 50, 0.9));
+      border: 1px solid rgba(14, 201, 252, 0.14); border-radius: 0.85rem;
       padding: 1.1rem 1.15rem;
-      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.05) inset, 0 20px 40px rgba(0, 0, 0, 0.28);
+      box-shadow: 0 0 0 1px rgba(139, 90, 242, 0.05) inset, 0 20px 40px rgba(0, 0, 0, 0.28);
       backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     }
     .install-download-btn {
       display: flex; align-items: center; justify-content: center; gap: 0.5rem;
       width: 100%; padding: 0.65rem 1rem; border-radius: 0.55rem;
-      background: linear-gradient(90deg, #0ea5e9 0%, #6366f1 100%);
+      background: linear-gradient(90deg, #0090f8 0%, #8b5af2 100%);
       color: #fff !important; font-size: 0.84rem; font-weight: 600; text-decoration: none !important;
-      box-shadow: 0 6px 18px rgba(14, 165, 233, 0.24);
+      box-shadow: 0 6px 18px rgba(14, 201, 252, 0.24);
       transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
     }
     .install-download-btn:hover {
       opacity: 0.96; transform: translateY(-1px);
-      box-shadow: 0 10px 28px rgba(14, 165, 233, 0.36);
+      box-shadow: 0 10px 28px rgba(14, 201, 252, 0.36);
     }
     .install-download-btn svg { flex-shrink: 0; width: 16px; height: 16px; }
     .install-download-chevron { margin-left: auto; opacity: 0.9; width: 16px !important; height: 16px !important; }
@@ -978,7 +1144,7 @@ LANDING_EXTRA_CSS = """
     }
     .install-build-pill code {
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 0.72rem; color: #38bdf8; background: none; padding: 0;
+      font-size: 0.72rem; color: #0ec9fc; background: none; padding: 0;
     }
     .install-copy-btn {
       display: inline-flex; align-items: center; justify-content: center;
@@ -998,13 +1164,13 @@ LANDING_EXTRA_CSS = """
     .install-step-num {
       flex-shrink: 0; width: 1.35rem; height: 1.35rem; margin-top: 0.05rem;
       display: inline-flex; align-items: center; justify-content: center;
-      border-radius: 50%; border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 50%; border: 1px solid rgba(14, 201, 252, 0.35);
       font-size: 0.65rem; font-weight: 700; color: #7dd3fc;
-      background: rgba(14, 165, 233, 0.08);
+      background: rgba(14, 201, 252, 0.08);
     }
     .install-steps code {
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 0.74rem; color: #38bdf8; background: rgba(15, 23, 42, 0.55);
+      font-size: 0.74rem; color: #0ec9fc; background: rgba(0, 8, 20, 0.55);
       padding: 0.05rem 0.3rem; border-radius: 0.25rem;
     }
     .install-notice {
@@ -1014,7 +1180,7 @@ LANDING_EXTRA_CSS = """
       border-radius: 0.55rem; font-size: 0.76rem; color: #94a3b8; line-height: 1.45;
     }
     .install-notice svg {
-      flex-shrink: 0; width: 0.95rem; height: 0.95rem; margin-top: 0.1rem; color: #38bdf8;
+      flex-shrink: 0; width: 0.95rem; height: 0.95rem; margin-top: 0.1rem; color: #0ec9fc;
     }
     .install-stores {
       display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; margin-top: 0.85rem;
@@ -1053,7 +1219,7 @@ LANDING_EXTRA_CSS = """
     }
     .install-browser-window {
       position: relative; z-index: 1; width: 100%;
-      background: linear-gradient(145deg, rgba(15, 23, 42, 0.78), rgba(10, 15, 30, 0.88));
+      background: linear-gradient(145deg, rgba(0, 8, 20, 0.78), rgba(10, 15, 30, 0.88));
       border: 1px solid rgba(148, 163, 184, 0.16); border-radius: 1.15rem;
       overflow: visible;
       box-shadow: 0 28px 56px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -1062,7 +1228,7 @@ LANDING_EXTRA_CSS = """
     .install-window-bar {
       display: flex; align-items: center; gap: 0.7rem;
       padding: 0.8rem 1rem; border-bottom: 1px solid rgba(51, 65, 85, 0.55);
-      background: rgba(15, 23, 42, 0.72);
+      background: rgba(0, 8, 20, 0.72);
       border-radius: 1.15rem 1.15rem 0 0;
       position: relative; z-index: 2; overflow: visible;
     }
@@ -1082,24 +1248,24 @@ LANDING_EXTRA_CSS = """
     .install-window-ext {
       flex-shrink: 0; width: 1.85rem; height: 1.85rem; border-radius: 0.45rem;
       display: flex; align-items: center; justify-content: center;
-      background: rgba(10, 15, 30, 0.8); border: 1px solid rgba(56, 189, 248, 0.25);
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.18);
+      background: rgba(10, 15, 30, 0.8); border: 1px solid rgba(14, 201, 252, 0.25);
+      box-shadow: 0 0 12px rgba(14, 201, 252, 0.18);
     }
     .install-window-ext-anchor { position: relative; flex-shrink: 0; z-index: 4; }
-    .install-window-ext img { width: 1.2rem; height: 1.2rem; object-fit: contain; }
+    .install-window-ext img { width: 1.45rem; height: 1.45rem; object-fit: contain; }
     .install-window-content {
       position: relative; min-height: 18rem; padding: 1.75rem 1.5rem 2.25rem;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
     .install-page-brand { text-align: center; z-index: 1; }
     .install-page-logo {
-      width: clamp(100px, 26vw, 128px); height: auto; object-fit: contain;
-      filter: drop-shadow(0 0 28px rgba(56, 189, 248, 0.35)) drop-shadow(0 0 18px rgba(168, 85, 247, 0.25));
+      width: clamp(120px, 30vw, 152px); height: auto; object-fit: contain;
+      filter: drop-shadow(0 0 28px rgba(14, 201, 252, 0.35)) drop-shadow(0 0 18px rgba(139, 90, 242, 0.25));
       animation: install-page-logo-glow 6s ease-in-out infinite;
     }
     @keyframes install-page-logo-glow {
-      0%, 100% { filter: drop-shadow(0 0 28px rgba(56, 189, 248, 0.35)) drop-shadow(0 0 18px rgba(168, 85, 247, 0.25)); }
-      50% { filter: drop-shadow(0 0 36px rgba(56, 189, 248, 0.48)) drop-shadow(0 0 24px rgba(168, 85, 247, 0.38)); }
+      0%, 100% { filter: drop-shadow(0 0 28px rgba(14, 201, 252, 0.35)) drop-shadow(0 0 18px rgba(139, 90, 242, 0.25)); }
+      50% { filter: drop-shadow(0 0 36px rgba(14, 201, 252, 0.48)) drop-shadow(0 0 24px rgba(139, 90, 242, 0.38)); }
     }
     .install-page-title {
       margin-top: 0.75rem; font-size: clamp(1.5rem, 3.8vw, 1.85rem); font-weight: 800;
@@ -1120,9 +1286,9 @@ LANDING_EXTRA_CSS = """
       position: absolute; z-index: 3;
       top: calc(100% + 0.5rem); right: 0;
       width: 200px;
-      background: linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(22, 32, 50, 0.96));
-      border: 1px solid rgba(56, 189, 248, 0.22); border-radius: 0.85rem;
-      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.5), 0 0 32px rgba(56, 189, 248, 0.1);
+      background: linear-gradient(160deg, rgba(0, 8, 20, 0.92), rgba(22, 32, 50, 0.96));
+      border: 1px solid rgba(14, 201, 252, 0.22); border-radius: 0.85rem;
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.5), 0 0 32px rgba(14, 201, 252, 0.1);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       animation: install-popup-float 5s ease-in-out infinite;
     }
@@ -1133,9 +1299,9 @@ LANDING_EXTRA_CSS = """
     .install-popup-pointer {
       position: absolute; top: -0.42rem; right: 0.5rem;
       width: 0.85rem; height: 0.85rem;
-      background: linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(22, 32, 50, 0.96));
-      border-left: 1px solid rgba(56, 189, 248, 0.22);
-      border-top: 1px solid rgba(56, 189, 248, 0.22);
+      background: linear-gradient(160deg, rgba(0, 8, 20, 0.92), rgba(22, 32, 50, 0.96));
+      border-left: 1px solid rgba(14, 201, 252, 0.22);
+      border-top: 1px solid rgba(14, 201, 252, 0.22);
       transform: rotate(45deg);
     }
     .install-popup-bar {
@@ -1149,8 +1315,8 @@ LANDING_EXTRA_CSS = """
       padding: 0.25rem 0.85rem 0.9rem; display: flex; flex-direction: column; align-items: center; gap: 0.55rem;
     }
     .install-popup-logo {
-      width: 2.75rem; height: 2.75rem; object-fit: contain;
-      filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.3));
+      width: 3.25rem; height: 3.25rem; object-fit: contain;
+      filter: drop-shadow(0 0 14px rgba(14, 201, 252, 0.3));
     }
     .install-popup-skeleton { width: 100%; display: flex; flex-direction: column; gap: 0.35rem; }
     .install-popup-skeleton span {
@@ -1167,8 +1333,8 @@ LANDING_EXTRA_CSS = """
     .install-popup-field svg { width: 0.9rem; height: 0.9rem; color: #94a3b8; flex-shrink: 0; }
     .install-popup-btn {
       width: 100%; height: 1.65rem; border-radius: 0.45rem;
-      background: linear-gradient(90deg, #0ea5e9 0%, #6366f1 100%);
-      box-shadow: 0 4px 16px rgba(14, 165, 233, 0.28);
+      background: linear-gradient(90deg, #0090f8 0%, #8b5af2 100%);
+      box-shadow: 0 4px 16px rgba(14, 201, 252, 0.28);
     }
     @media (max-width: 960px) {
       .install-extension-popup { width: 190px; }
@@ -1189,7 +1355,7 @@ LANDING_EXTRA_CSS = """
     .stores { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
     .store-badge {
       display: inline-flex; align-items: center; gap: 0.5rem;
-      background: #162032; border: 1px dashed #475569; color: #94a3b8;
+      background: #0a1220; border: 1px dashed #475569; color: #94a3b8;
       padding: 0.65rem 1.25rem; border-radius: 0.5rem; font-size: 0.9rem;
     }
     .store-badge svg { width: 20px; height: 20px; opacity: 0.5; }
@@ -1202,7 +1368,7 @@ LANDING_EXTRA_CSS = """
     .support-pill {
       display: inline-flex; align-items: center; gap: 0.4rem;
       padding: 0.35rem 1rem; margin-bottom: 2.5rem;
-      border: 1px solid rgba(56, 189, 248, 0.45); border-radius: 999px;
+      border: 1px solid rgba(14, 201, 252, 0.45); border-radius: 999px;
       font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em;
       text-transform: uppercase; color: #7dd3fc;
     }
@@ -1218,7 +1384,7 @@ LANDING_EXTRA_CSS = """
       .support-meta { justify-content: center; }
     }
     .support-brand { display: flex; flex-direction: column; align-items: center; }
-    .support-brand-logo { width: 112px; height: 112px; object-fit: contain; margin-bottom: 0.75rem; }
+    .support-brand-logo { width: 132px; height: 132px; object-fit: contain; margin-bottom: 0.75rem; }
     .support-brand .brand-title { font-size: 2.5rem; }
     .support-brand .brand-slogan {
       letter-spacing: 0.22em; font-size: 0.65rem; color: #64748b;
@@ -1277,7 +1443,7 @@ LANDING_EXTRA_CSS = """
       display: flex; align-items: center; justify-content: center; margin-bottom: 0.85rem;
     }
     .support-benefit-icon svg { width: 1.35rem; height: 1.35rem; }
-    .support-benefit-icon--cyan { background: rgba(34, 211, 238, 0.12); color: #22d3ee; }
+    .support-benefit-icon--cyan { background: rgba(34, 211, 238, 0.12); color: #0ec9fc; }
     .support-benefit-icon--purple { background: rgba(167, 139, 250, 0.12); color: #a78bfa; }
     .support-benefit-icon--teal { background: rgba(45, 212, 191, 0.12); color: #2dd4bf; }
     .support-benefit-icon--pink { background: rgba(244, 114, 182, 0.12); color: #f472b6; }
@@ -1298,8 +1464,8 @@ def extension_popup_mockup_html(wrapper_class: str = "hero-mockup") -> str:
             <div class="{wrapper_class}" aria-hidden="true">
             <div class="mockup-header">
               <div class="mockup-brand">
-                <img src="{LOGO_ICON}" alt="" width="22" height="22" />
-                <span>VaultSync</span>
+                <img src="{LOGO_ICON}" alt="" width="28" height="28" />
+                <span>VaultHarbor</span>
               </div>
               <div class="mockup-actions">
                 <span class="mockup-btn">+</span>
@@ -1366,8 +1532,8 @@ def hero_section_html() -> str:
     orbit_svg = """<svg class="hero-orbit-svg" viewBox="0 0 300 400" fill="none" aria-hidden="true">
       <defs>
         <linearGradient id="heroOrbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.65"/>
-          <stop offset="50%" stop-color="#6366f1" stop-opacity="0.45"/>
+          <stop offset="0%" stop-color="#0ec9fc" stop-opacity="0.65"/>
+          <stop offset="50%" stop-color="#8b5af2" stop-opacity="0.45"/>
           <stop offset="100%" stop-color="#a855f7" stop-opacity="0.3"/>
         </linearGradient>
       </defs>
@@ -1407,7 +1573,7 @@ def hero_section_html() -> str:
             <span class="hero-title-gradient">Your control.</span>
           </h1>
           <p class="hero-desc">
-            VaultSync is a zero-knowledge password manager. Credentials are encrypted on your device
+            VaultHarbor is a zero-knowledge password manager. Credentials are encrypted on your device
             before they ever leave. The server only stores opaque blobs it cannot read.
           </p>
           <div class="hero-actions">
@@ -1434,7 +1600,7 @@ def hero_section_html() -> str:
             <div class="hero-visual-glow" aria-hidden="true"></div>
             {orbit_svg}
             {extension_popup_mockup_html()}
-          <img class="hero-float-logo" src="{ICON_128}" alt="" width="88" height="88" />
+          <img class="hero-float-logo" src="{ICON_128}" alt="" width="108" height="108" />
           </div>
         </div>
       </div>
@@ -1486,13 +1652,13 @@ def about_section_html() -> str:
           <div class="about-divider" aria-hidden="true"></div>
           <div class="about-text">
             <p>
-              VaultSync keeps your logins, passwords, and secure notes in an encrypted vault
+              VaultHarbor keeps your logins, passwords, and secure notes in an encrypted vault
               that lives on your devices. When you save a credential, it is encrypted locally
               with keys derived from your master password, then synced to the cloud as
               unreadable data.
             </p>
             <p>
-              The browser extension brings VaultSync into your daily workflow: autofill on
+              The browser extension brings VaultHarbor into your daily workflow: autofill on
               login pages, save new credentials as you sign up, update passwords when they
               change, and unlock your vault with a single master password.
             </p>
@@ -1503,9 +1669,9 @@ def about_section_html() -> str:
           </div>
         </div>
         <div class="about-visual">
-          <img class="about-brand-logo" src="{ICON_128}" alt="" width="176" height="176" loading="lazy" decoding="async" />
+          <img class="about-brand-logo" src="{ICON_128}" alt="" width="208" height="208" loading="lazy" decoding="async" />
           <h2 class="brand-title">
-            <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Sync</span>
+            <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Harbor</span>
           </h2>
           <p class="brand-slogan">Secure. Sync. Everywhere.</p>
         </div>
@@ -1519,8 +1685,8 @@ def install_visual_html() -> str:
     orbit_svg = """<svg class="install-orbit-bg" viewBox="0 0 400 360" fill="none" aria-hidden="true">
       <defs>
         <linearGradient id="installOrbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.5"/>
-          <stop offset="50%" stop-color="#6366f1" stop-opacity="0.35"/>
+          <stop offset="0%" stop-color="#0ec9fc" stop-opacity="0.5"/>
+          <stop offset="50%" stop-color="#8b5af2" stop-opacity="0.35"/>
           <stop offset="100%" stop-color="#a855f7" stop-opacity="0.25"/>
         </linearGradient>
       </defs>
@@ -1551,7 +1717,7 @@ def install_visual_html() -> str:
                 <div class="install-window-address">vaultsync.manojhankare.in/login</div>
                 <div class="install-window-ext-anchor">
                   <div class="install-window-ext">
-                    <img src="{LOGO_ICON}" alt="" width="18" height="18" />
+                    <img src="{LOGO_ICON}" alt="" width="22" height="22" />
                   </div>
                   <div class="install-extension-popup">
                     <div class="install-popup-pointer"></div>
@@ -1561,7 +1727,7 @@ def install_visual_html() -> str:
                       <span class="install-popup-dot install-popup-dot--green"></span>
                     </div>
                     <div class="install-popup-body">
-                      <img class="install-popup-logo" src="{ICON_128}" alt="" width="44" height="44" />
+                      <img class="install-popup-logo" src="{ICON_128}" alt="" width="52" height="52" />
                       <div class="install-popup-skeleton">
                         <span></span><span></span>
                       </div>
@@ -1576,9 +1742,9 @@ def install_visual_html() -> str:
               </div>
               <div class="install-window-content">
                 <div class="install-page-brand">
-                  <img class="install-page-logo" src="{ICON_128}" alt="" width="128" height="128" />
+                  <img class="install-page-logo" src="{ICON_128}" alt="" width="152" height="152" />
                   <h3 class="install-page-title">
-                    <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Sync</span>
+                    <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Harbor</span>
                   </h3>
                 </div>
                 <div class="install-page-skeleton">
@@ -1602,7 +1768,7 @@ def install_section_html() -> str:
     <div class="container">
       <div class="install-header">
         <p class="section-label">Install</p>
-        <h2 class="install-title">Get <span class="install-title-accent">VaultSync</span> on your browser</h2>
+        <h2 class="install-title">Get <span class="install-title-accent">VaultHarbor</span> on your browser</h2>
         <p class="install-desc">Available for Chromium browsers: Chrome, Microsoft Edge, and Brave.</p>
       </div>
       <div class="install-grid">
@@ -1644,7 +1810,7 @@ def install_section_html() -> str:
             </li>
             <li>
               <span class="install-step-num">6</span>
-              <span>Pin VaultSync to your toolbar and sign in to get started.</span>
+              <span>Pin VaultHarbor to your toolbar and sign in to get started.</span>
             </li>
           </ol>
           <div class="install-notice">
@@ -1680,6 +1846,140 @@ def install_section_html() -> str:
   </section>"""
 
 
+def _feature_row(
+    row: int,
+    left_icon: str,
+    left_title: str,
+    left_desc: str,
+    right_icon: str,
+    right_title: str,
+    right_desc: str,
+) -> str:
+    return f"""
+        <div class="feat-group feat-group--left feat-row-{row}">
+          <div class="feat-icon feat-icon--left">{left_icon}</div>
+          <div class="feat-copy feat-copy--left">
+            <h3>{left_title}</h3>
+            <p>{left_desc}</p>
+          </div>
+        </div>
+        <div class="feat-group feat-group--right feat-row-{row}">
+          <div class="feat-copy feat-copy--right">
+            <h3>{right_title}</h3>
+            <p>{right_desc}</p>
+          </div>
+          <div class="feat-icon feat-icon--right">{right_icon}</div>
+        </div>"""
+
+
+def features_section_html() -> str:
+    icon_lock = """<svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="15.3" r="1.1" fill="url(#featIconGrad)" stroke="none"/><path d="M12 16.3v2.1"/></svg>"""
+    icon_sync = """<svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="2" y="4" width="12" height="9" rx="1.5"/><rect x="10" y="9" width="12" height="11" rx="1.5"/><path d="M14 14.5a2.5 2.5 0 115 0"/><path d="M16.5 14.5V13"/><path d="M16.5 16v1.5"/></svg>"""
+    icon_key = """<svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M7 11a4 4 0 118 0 4 4 0 01-8 0z"/><path d="M11 14v7"/><path d="M9 21h4"/></svg>"""
+    icon_autofill = """<svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M13 4h4a2 2 0 012 2v12a2 2 0 01-2 2h-4"/><path d="M3 12h12"/><path d="M11 8l4 4-4 4"/></svg>"""
+    icon_bell = """<svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M17 8A5.5 5.5 0 006 8c0 6.25-2.5 8-2.5 8h13"/><path d="M12.7 19.5a1.8 1.8 0 01-3.1 0"/><circle cx="18" cy="17" r="4" fill="url(#featIconGrad)" stroke="none"/><path d="M16.3 17.15l1.15 1.15 2.25-2.3" stroke="#050914" stroke-width="1.4" fill="none"/></svg>"""
+    icon_server = """<svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="2" y="3" width="16" height="6" rx="1.5"/><rect x="2" y="15" width="16" height="6" rx="1.5"/><path d="M5 6h.01"/><path d="M5 18h.01"/><path d="M18.5 13.3l3 1.2v2.9c0 2.15-1.3 3.5-3 4.1-1.7-.6-3-1.95-3-4.1v-2.9z" fill="url(#featIconGrad)" stroke="none"/><path d="M17.15 16.75l1 .95 1.7-1.85" stroke="#050914" stroke-width="1.3" fill="none"/></svg>"""
+    icon_keyhole = """<svg class="features-hub-keyhole" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.75a5.25 5.25 0 00-5.25 5.25c0 2.28 1.45 4.22 3.48 4.93L9.5 18.5h5l-.73-6.57A5.25 5.25 0 0012 1.75zm0 2a3.25 3.25 0 110 6.5 3.25 3.25 0 010-6.5z"/><rect x="10" y="18.5" width="4" height="4" rx="0.85"/></svg>"""
+    icon_shield_keyhole = """<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="url(#featIconGrad)" stroke="none"/><circle cx="12" cy="10.5" r="1.75" fill="#050914" stroke="none"/><path d="M11 12.2v3.3h2v-3.3" fill="#050914" stroke="none"/></svg>"""
+    feature_wires = """<svg class="features-wires" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="featWireCyan" x1="100%" y1="0%" x2="0%" y2="0%">
+          <stop offset="0%" stop-color="#0ec9fc" stop-opacity="0.85"/>
+          <stop offset="50%" stop-color="#0ec9fc" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#0ec9fc" stop-opacity="0.04"/>
+        </linearGradient>
+        <linearGradient id="featWirePurple" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#a855f7" stop-opacity="0.85"/>
+          <stop offset="50%" stop-color="#8b5af2" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#a855f7" stop-opacity="0.04"/>
+        </linearGradient>
+        <linearGradient id="featIconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0ec9fc"/>
+          <stop offset="55%" stop-color="#8b5af2"/>
+          <stop offset="100%" stop-color="#a855f7"/>
+        </linearGradient>
+      </defs>
+      <path d="M 46.5 50 C 42.5 50, 38 50, 32.5 50" stroke="url(#featWireCyan)" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
+      <path d="M 46.5 50 C 43.5 43, 38.5 24, 32.5 17" stroke="url(#featWireCyan)" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
+      <path d="M 46.5 50 C 43.5 57, 38.5 76, 32.5 83" stroke="url(#featWireCyan)" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
+      <path d="M 53.5 50 C 57.5 50, 62 50, 67.5 50" stroke="url(#featWirePurple)" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
+      <path d="M 53.5 50 C 56.5 43, 61.5 24, 67.5 17" stroke="url(#featWirePurple)" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
+      <path d="M 53.5 50 C 56.5 57, 61.5 76, 67.5 83" stroke="url(#featWirePurple)" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
+      <circle cx="32.5" cy="17" r="0.9" fill="#0ec9fc" opacity="0.9"/>
+      <circle cx="32.5" cy="50" r="0.9" fill="#0ec9fc" opacity="0.9"/>
+      <circle cx="32.5" cy="83" r="0.9" fill="#0ec9fc" opacity="0.9"/>
+      <circle cx="67.5" cy="17" r="0.9" fill="#a855f7" opacity="0.9"/>
+      <circle cx="67.5" cy="50" r="0.9" fill="#a855f7" opacity="0.9"/>
+      <circle cx="67.5" cy="83" r="0.9" fill="#a855f7" opacity="0.9"/>
+    </svg>"""
+
+    rows_html = "".join([
+        _feature_row(
+            1, icon_lock,
+            "Zero-knowledge encryption",
+            "Your vault is encrypted with AES-GCM on your device. The server stores ciphertext it can never decrypt.",
+            icon_autofill,
+            "One-click autofill",
+            "Fill usernames and passwords on any site. VaultHarbor detects login fields and offers matching credentials instantly.",
+        ),
+        _feature_row(
+            2, icon_sync,
+            "Cross-device sync",
+            "Sign in on any browser with the extension. Your encrypted vault syncs automatically across all your devices.",
+            icon_bell,
+            "Save &amp; update prompts",
+            "Capture new logins as you sign up. When a password changes, VaultHarbor asks whether to update the existing entry.",
+        ),
+        _feature_row(
+            3, icon_key,
+            "Master password unlock",
+            "One master password derives your vault key locally. It never travels to the server, not even as a hash.",
+            icon_server,
+            "Self-hosted backend",
+            "Run your own sync server or use the hosted instance. Your encrypted data stays under your infrastructure.",
+        ),
+    ])
+
+    return f"""
+  <section id="features">
+    <div class="container">
+      <div class="features-header">
+        <p class="section-label">Features</p>
+        <h2 class="features-title">
+          The <span class="features-accent-cyan">essentials,</span> <span class="features-accent-purple">secured.</span> Nothing extra.
+        </h2>
+        <p class="features-desc">
+          VaultHarbor includes only what matters in a password manager, so you can stay focused, safe, and in control.
+        </p>
+      </div>
+      <div class="features-stage">
+        {feature_wires}
+{rows_html}
+        <div class="features-hub-cell">
+          <div class="features-hub-outer">
+            <div class="features-hub-core">
+              {icon_keyhole}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="features-footer-banner">
+        <div class="features-footer-left">
+          <div class="features-footer-shield-wrap">{icon_shield_keyhole}</div>
+          <div>
+            <strong>Privacy first. Performance always.</strong>
+            <p>No tracking. No ads. No unnecessary extras.</p>
+          </div>
+        </div>
+        <div class="features-footer-divider" aria-hidden="true"></div>
+        <div class="features-footer-right">
+          <p>Just a <span class="features-accent-cyan">secure</span> password manager that <span class="features-accent-purple">works the way it should.</span></p>
+        </div>
+      </div>
+    </div>
+  </section>"""
+
+
 def support_section_html() -> str:
     github_icon = """<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>"""
     heart_icon = """<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>"""
@@ -1692,18 +1992,18 @@ def support_section_html() -> str:
 
       <div class="support-hero">
         <div class="support-brand">
-          <img class="support-brand-logo" src="{ICON_128}" alt="VaultSync" width="112" height="112" />
+          <img class="support-brand-logo" src="{ICON_128}" alt="VaultHarbor" width="132" height="132" />
           <h2 class="brand-title">
-            <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Sync</span>
+            <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Harbor</span>
           </h2>
           <p class="brand-slogan">Secure · Sync · Everywhere</p>
         </div>
 
         <div class="support-copy">
           <p class="support-eyebrow">Keep it free &amp; independent</p>
-          <h3 class="support-heading">Support VaultSync</h3>
+          <h3 class="support-heading">Support VaultHarbor</h3>
           <p class="support-desc">
-            VaultSync is open source and free to use. Your support helps maintain our
+            VaultHarbor is open source and free to use. Your support helps maintain our
             infrastructure, publish on official browser stores, and ship new features for everyone.
           </p>
           <a class="btn-sponsor-gh" href="{GITHUB_SPONSORS}"{EXT_LINK}>
@@ -1762,9 +2062,9 @@ def nav_html(active: str = "") -> str:
   <nav class="nav">
     <div class="container nav-inner">
       <a class="nav-brand" href="/">
-        <img src="{LOGO_ICON}" alt="" width="30" height="30" />
+        <img src="{LOGO_ICON}" alt="" width="36" height="36" />
         <span class="nav-brand-title">
-          <span class="nav-brand-vault">Vault</span><span class="nav-brand-sync">Sync</span>
+          <span class="nav-brand-vault">Vault</span><span class="nav-brand-sync">Harbor</span>
         </span>
       </a>
       <ul class="nav-links">
@@ -1784,8 +2084,8 @@ def footer_html() -> str:
   <footer>
     <div class="container">
       <div class="footer-brand">
-        <img src="{LOGO_ICON}" alt="" width="24" height="24" />
-        VaultSync
+        <img src="{LOGO_ICON}" alt="" width="30" height="30" />
+        VaultHarbor
       </div>
       <div class="footer-links">
         <a href="/faq">FAQ</a>
@@ -1796,7 +2096,7 @@ def footer_html() -> str:
         <a href="{GITHUB_REPO}/blob/main/CONTRIBUTING.md"{EXT_LINK}>Contributing</a>
         <a href="{GITHUB_REPO}"{EXT_LINK}>GitHub</a>
       </div>
-      <p class="footer-copy">&copy; 2026 VaultSync. Built by <a href="{AUTHOR_SITE}"{EXT_LINK}>Manoj Hankare</a>.</p>
+      <p class="footer-copy">&copy; 2026 VaultHarbor. Built by <a href="{AUTHOR_SITE}"{EXT_LINK}>Manoj Hankare</a>.</p>
     </div>
   </footer>"""
 
@@ -1808,15 +2108,15 @@ def head_html(title: str, description: str, path: str = "/") -> str:
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content="{description}" />
-  <meta name="keywords" content="password manager, zero-knowledge, browser extension, VaultSync, privacy" />
+  <meta name="keywords" content="password manager, zero-knowledge, browser extension, VaultHarbor, VaultSync, privacy" />
   <meta name="author" content="Manoj Hankare" />
-  <meta name="theme-color" content="#0f172a" />
+  <meta name="theme-color" content="#000814" />
   <meta name="robots" content="index, follow" />
   <link rel="icon" type="image/png" href="{LOGO_ICON}" />
   <link rel="canonical" href="{canonical}" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="VaultSync" />
+  <meta property="og:site_name" content="VaultHarbor" />
   <meta property="og:title" content="{title}" />
   <meta property="og:description" content="{description}" />
   <meta property="og:url" content="{canonical}" />
@@ -1826,7 +2126,7 @@ def head_html(title: str, description: str, path: str = "/") -> str:
   <meta name="twitter:title" content="{title}" />
   <meta name="twitter:description" content="{description}" />
   <meta name="twitter:image" content="{OG_IMAGE}" />
-  <meta name="apple-mobile-web-app-title" content="VaultSync" />
+  <meta name="apple-mobile-web-app-title" content="VaultHarbor" />
   <link rel="apple-touch-icon" href="{ICON_128}" />"""
 
 
@@ -1851,20 +2151,20 @@ def build_page(title: str, description: str, path: str, body: str, extra_css: st
 def faq_items_html() -> str:
     items = [
         (
-            "What is VaultSync?",
-            "VaultSync is a zero-knowledge password manager. Your credentials are encrypted on your "
+            "What is VaultHarbor?",
+            "VaultHarbor is a zero-knowledge password manager. Your credentials are encrypted on your "
             "device before they are synced. The server stores only opaque encrypted blobs; it never "
             "sees your master password or plaintext vault contents.",
         ),
         (
-            "Can VaultSync or the server see my passwords?",
+            "Can VaultHarbor or the server see my passwords?",
             "No. Your master password and decrypted vault never leave your device. The server stores "
-            "only encrypted data it cannot read. VaultSync is designed so that even the operator cannot "
+            "only encrypted data it cannot read. VaultHarbor is designed so that even the operator cannot "
             "access your secrets without your master password.",
         ),
         (
             "What is the difference between my account password and master password?",
-            "Your <strong>account password</strong> signs you in to VaultSync and enables sync across "
+            "Your <strong>account password</strong> signs you in to VaultHarbor and enables sync across "
             "devices. It is stored on the server as a secure hash. Your <strong>master password</strong> "
             "encrypts and decrypts your vault locally and is <strong>never</strong> sent to the server.",
         ),
@@ -1882,7 +2182,7 @@ def faq_items_html() -> str:
         ),
         (
             "Which browsers are supported?",
-            "The VaultSync extension works on Chromium browsers: Google Chrome, Microsoft Edge, and "
+            "The VaultHarbor extension works on Chromium browsers: Google Chrome, Microsoft Edge, and "
             "Brave. Firefox support is experimental and not yet verified for production use.",
         ),
         (
@@ -1899,18 +2199,18 @@ def faq_items_html() -> str:
             "download and reload a newer version yourself.",
         ),
         (
-            "Is VaultSync open source?",
-            f'Yes. The source code is available on <a href="{GITHUB_REPO}"{EXT_LINK}>GitHub</a> under the '
-            "VaultSync repository. You can review the encryption design and self-host the backend.",
+            "Is VaultHarbor open source?",
+            f'Yes. The source code is available on <a href="{GITHUB_REPO}"{EXT_LINK}>GitHub</a>. '
+            "You can review the encryption design and self-host the backend.",
         ),
         (
-            "Can I self-host VaultSync?",
+            "Can I self-host VaultHarbor?",
             "Yes. The backend is a Flask API that can be deployed to your own infrastructure. Point "
             "the extension at your server URL during configuration. Your encrypted vault data stays "
             "under your control.",
         ),
         (
-            "What data does VaultSync collect?",
+            "What data does VaultHarbor collect?",
             "We store your email, account password hash, encrypted vault blob, device name/type for "
             "sync, and sync metadata (timestamps, revision numbers). We do not collect master passwords, "
             "recovery keys, or plaintext credentials. See our "
@@ -1923,7 +2223,7 @@ def faq_items_html() -> str:
             "records will be deleted from our servers.",
         ),
         (
-            "Does VaultSync use cookies or tracking?",
+            "Does VaultHarbor use cookies or tracking?",
             "The marketing website at vaultsync.manojhankare.in does not use analytics cookies or "
             "third-party trackers. The extension uses local storage on your device for session tokens "
             "and vault cache, not advertising cookies.",

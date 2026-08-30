@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BrandHeader } from "../components/BrandHeader";
+import { BackendSettingsPanel } from "../components/BackendSettingsPanel";
 import { ForgotPasswordPanel } from "../components/ForgotPasswordPanel";
 import { PasswordRequirements } from "../components/PasswordRequirements";
 import { LoadingButton, TransitionScreen } from "../components/LoadingSpinner";
@@ -20,6 +21,12 @@ export function LoginPage({ onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
   const [transitionMessage, setTransitionMessage] = useState<string | null>(null);
   const [resetNotice, setResetNotice] = useState<string | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.toggle("auth-popup-active", advancedOpen);
+    return () => document.body.classList.remove("auth-popup-active");
+  }, [advancedOpen]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -143,6 +150,7 @@ export function LoginPage({ onSuccess }: Props) {
               {mode === "login" ? "Create account" : "Already have an account? Login"}
             </button>
           </p>
+          <BackendSettingsPanel onAdvancedOpenChange={setAdvancedOpen} />
         </>
       )}
     </div>

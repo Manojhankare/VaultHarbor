@@ -1,4 +1,5 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+/** Build-time default; runtime override via chrome.storage.local (see config/api-base-url.ts). */
+export const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 export const VAULT_VERSION = 1;
 export const AUTO_LOCK_MINUTES = 15;
@@ -26,6 +27,8 @@ export const STORAGE_KEYS = {
   VAULT_UNLOCKED: "vault_unlocked",
   /** When true, auto-lock alarm is skipped until browser session ends or manual lock. */
   KEEP_UNLOCKED: "keep_unlocked",
+  /** Runtime override for API origin; absent means DEFAULT_API_BASE_URL. */
+  API_BASE_URL: "api_base_url",
 } as const;
 
 export const IDB_NAME = "vaultsync";
