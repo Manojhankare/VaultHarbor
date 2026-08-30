@@ -8,7 +8,9 @@ from flask import Flask, request
 def register_security_headers(app: Flask) -> None:
     @app.after_request
     def apply_security_headers(response):
-        if request.path in ("/", "/faq", "/privacy", "/terms", "/manifest.webmanifest"):
+        if request.path in ("/", "/faq", "/privacy", "/terms", "/manifest.webmanifest") or request.path.startswith(
+            "/pages-static/"
+        ):
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
                 "style-src 'self' 'unsafe-inline'; "

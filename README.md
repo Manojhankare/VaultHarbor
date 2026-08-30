@@ -2,7 +2,12 @@
 
 Zero-knowledge password manager — encrypted vault on the client, opaque sync on the server.
 
-**Author:** [Manoj Hankare](https://manojhankare.in) — made by [manojhankare.in](https://manojhankare.in)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-pink?logo=github)](https://github.com/sponsors/Manojhankare)
+
+**Built by** [Manoj Hankare](https://manojhankare.in)
+
+**Open source:** [github.com/Manojhankare/VaultSync](https://github.com/Manojhankare/VaultSync) — issues, pull requests, and self-hosting welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Components
 
@@ -54,3 +59,17 @@ $env:FLASK_APP = "wsgi.py"
 flask db upgrade
 python run.py
 ```
+
+## License
+
+VaultSync is [MIT licensed](LICENSE). You may use, modify, and self-host the code. Keep the copyright notice and please [credit the project](CONTRIBUTING.md#self-hosting-and-reuse) when you ship a public fork or deployment.
+
+## Contributing
+
+Bug reports, feature ideas, and pull requests are welcome on [GitHub](https://github.com/Manojhankare/VaultSync). Read [CONTRIBUTING.md](CONTRIBUTING.md) for issue/PR guidelines and self-hosting credit expectations.
+
+## Support the project
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-pink?logo=github)](https://github.com/sponsors/Manojhankare)
+
+Donations help pay for **Chrome Web Store** and **Microsoft Edge** developer listings, hosting, and new features. Sponsorship is optional — the project remains MIT licensed and self-hostable.

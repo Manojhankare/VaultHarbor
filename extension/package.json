@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "author": "Manoj Hankare <manojhankare2@gmail.com> (https://manojhankare.in)",
   "homepage": "https://manojhankare.in",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Manojhankare/VaultSync.git"
+  },
   "private": true,
   "type": "module",
   "scripts": {

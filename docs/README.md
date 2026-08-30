@@ -31,6 +31,8 @@ VaultSync/
 | [Extension branding](../branding/README.md) | Master icon/logo sources and regen workflow |
 | [Web (planned)](web/README.md) | Future web vault placeholder |
 | [Changelog](CHANGELOG.md) | Notable project changes |
+| [License (MIT)](../LICENSE) | Open source terms |
+| [Contributing](../CONTRIBUTING.md) | Issues, PRs, self-hosting, attribution |
 
 ## Backend technical docs (source of truth)
 

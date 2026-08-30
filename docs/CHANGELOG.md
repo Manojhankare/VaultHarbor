@@ -2,12 +2,39 @@
 
 All notable VaultSync project changes. Update this file with each significant release or deployment change.
 
+## 2026-08-29 — Landing page hero redesign
+
+### Changed
+
+- Landing hero (`GET /`): two-column layout with privacy badge, gradient headline, extension UI mockup (demo data only), browser availability row, trust feature strip, and ABOUT scroll indicator; responsive stack on mobile
+- Site header nav: split VaultSync wordmark (white + blue gradient), white nav links, pill Install CTA, frosted-glass backdrop
+- Hero visual: shield + multi-plane orbital rings (equatorial, polar, inclined) in a plus/star lattice around the mockup; hover lifts card and speeds rotation
+- Hero availability row uses vendored official browser SVGs (Chrome, Edge, Brave, Chrome Web Store) from Wikimedia Commons, served at `/pages-static/browser-icons/`
+- About section (`/#about`): two-column layout with gradient-accent headline, divider, body copy (including self-hosted backend), branded logo card, and subtle entrance/glow animations
+- Public page copy: replaced em dashes with clearer punctuation and phrasing
+
+## 2026-08-29 — Open source license and contributing
+
+### Added
+
+- [LICENSE](../LICENSE) (MIT) and [CONTRIBUTING.md](../CONTRIBUTING.md) at repo root — issues, PRs, self-hosting, and attribution guidance
+- [`.github/FUNDING.yml`](../.github/FUNDING.yml) — GitHub Sponsors badge and repo Sponsor button
+- README/CONTRIBUTING support sections; landing page **Support** section (`/#support`) for store listing & hosting donations
+
+### Changed
+
+- Removed Buy Me a Coffee (limited in India); GitHub Sponsors + UPI via email for Indian supporters
+- Landing footer: product-first links; subtle “Built by Manoj Hankare” credit (portfolio de-emphasized)
+- Sponsor: split hero support section with logo, GitHub CTA, and four benefit columns (`/#support`)
+- README license/contributing sections; `license` in `backend/pyproject.toml` and `extension/package.json`
+
 ## 2026-08-29 — Extension landing page
 
 ### Added
 
 - Root route `GET /` on the backend — full marketing site with logo, feature icons, about/security/how-it-works sections, extension install steps, FAQ preview, Chrome/Edge store placeholders, SEO meta tags, and `GET /manifest.webmanifest`
 - Legal/info pages: `GET /faq`, `GET /privacy`, `GET /terms` with shared nav and footer
+- Site footer links to GitHub LICENSE and CONTRIBUTING.md
 
 ## 2026-08-29 — Vault popup UI (NordPass-style list)
 

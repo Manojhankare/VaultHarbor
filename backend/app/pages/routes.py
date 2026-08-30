@@ -5,33 +5,39 @@ from __future__ import annotations
 from flask import Blueprint, jsonify
 
 from app.pages.site_html import (
-    AUTHOR_SITE,
     CONTACT_EMAIL,
+    EXT_LINK,
     GITHUB_RELEASES,
     GITHUB_REPO,
     ICON_128,
     LANDING_EXTRA_CSS,
-    OG_IMAGE,
     SITE_URL,
+    about_section_html,
     build_page,
     faq_items_html,
     faq_preview_html,
-    hero_brand_html,
+    hero_section_html,
+    support_section_html,
 )
 
-pages_bp = Blueprint("pages", __name__)
+pages_bp = Blueprint(
+    "pages",
+    __name__,
+    static_folder="static",
+    static_url_path="/pages-static",
+)
 
-PAGE_TITLE = "VaultSync — Zero-Knowledge Password Manager"
+PAGE_TITLE = "VaultSync: Zero-Knowledge Password Manager"
 PAGE_DESCRIPTION = (
-    "VaultSync is a zero-knowledge password manager. Your vault is encrypted on your device — "
-    "the server only stores opaque blobs. Install the browser extension for Chrome, Edge, and Brave."
+    "VaultSync is a zero-knowledge password manager. Your vault is encrypted on your device before "
+    "sync. The server only stores opaque blobs. Install the browser extension for Chrome, Edge, and Brave."
 )
 
 WEB_MANIFEST = {
     "name": "VaultSync",
     "short_name": "VaultSync",
     "description": (
-        "Zero-knowledge password manager — encrypted vault on the client, opaque sync on the server."
+        "Zero-knowledge password manager with encrypted vault on the client and opaque sync on the server."
     ),
     "start_url": "/",
     "scope": "/",
@@ -50,56 +56,15 @@ WEB_MANIFEST = {
 }
 
 LANDING_BODY = f"""
-  <header class="hero">
-    <div class="container">
-{hero_brand_html()}
-      <p class="hero-tagline">
-        VaultSync is a zero-knowledge password manager. Credentials are encrypted on your device
-        before they ever leave — the server only stores opaque blobs it cannot read.
-      </p>
-      <div class="hero-actions">
-        <a class="btn-primary" href="#install">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Get the extension
-        </a>
-        <a class="btn-secondary" href="#about">Learn more</a>
-      </div>
-    </div>
-  </header>
+{hero_section_html()}
 
-  <section id="about">
-    <div class="container">
-      <p class="section-label">About</p>
-      <h2 class="section-title">A password manager built on trust, not access</h2>
-      <div class="about-grid">
-        <div class="about-text">
-          <p>
-            VaultSync keeps your logins, passwords, and secure notes in an encrypted vault
-            that lives on your devices. When you save a credential, it is encrypted locally
-            with keys derived from your master password — then synced to the cloud as
-            unreadable data.
-          </p>
-          <p>
-            The browser extension brings VaultSync into your daily workflow: autofill on
-            login pages, save new credentials as you sign up, update passwords when they
-            change, and unlock your vault with a single master password.
-          </p>
-          <p>
-            Built for Chrome, Edge, and Brave. Self-hosted backend — you own your data layer.
-          </p>
-        </div>
-        <div class="about-visual">
-          <img src="{OG_IMAGE}" alt="VaultSync — zero-knowledge password manager" />
-        </div>
-      </div>
-    </div>
-  </section>
+{about_section_html()}
 
   <section id="features">
     <div class="container">
       <p class="section-label">Features</p>
       <h2 class="section-title">Everything you need, nothing you don't</h2>
-      <p class="section-desc">Designed for everyday use — fast autofill, reliable sync, and security you can verify.</p>
+      <p class="section-desc">Designed for everyday use with fast autofill, reliable sync, and security you can verify.</p>
       <div class="features-grid">
         <div class="feature-card">
           <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
@@ -124,7 +89,7 @@ LANDING_BODY = f"""
         <div class="feature-card">
           <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
           <h3>Master password unlock</h3>
-          <p>One master password derives your vault key locally. It never travels to the server — not even as a hash.</p>
+          <p>One master password derives your vault key locally. It never travels to the server, not even as a hash.</p>
         </div>
         <div class="feature-card">
           <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
@@ -143,12 +108,12 @@ LANDING_BODY = f"""
         <div class="step">
           <div class="step-num">1</div>
           <h3>Create your account</h3>
-          <p>Register with email and an account password. This authenticates you to the sync server — it does not encrypt your vault.</p>
+          <p>Register with email and an account password. This authenticates you to the sync server; it does not encrypt your vault.</p>
         </div>
         <div class="step">
           <div class="step-num">2</div>
           <h3>Set a master password</h3>
-          <p>Choose a strong master password. VaultSync derives encryption keys locally and wraps your vault — the master password never leaves your device.</p>
+          <p>Choose a strong master password. VaultSync derives encryption keys locally and wraps your vault so the master password never leaves your device.</p>
         </div>
         <div class="step">
           <div class="step-num">3</div>
@@ -168,12 +133,12 @@ LANDING_BODY = f"""
         <div class="sec-card">
           <span class="sec-badge badge-green">Stored as hash only</span>
           <h3>Account password</h3>
-          <p>Used to sign in to VaultSync and sync your vault across devices. Stored on the server as an Argon2id hash — never in plaintext.</p>
+          <p>Used to sign in to VaultSync and sync your vault across devices. Stored on the server as an Argon2id hash, never in plaintext.</p>
         </div>
         <div class="sec-card">
           <span class="sec-badge badge-red">Never sent to server</span>
           <h3>Master password</h3>
-          <p>Derives the key that encrypts and decrypts your vault. Exists only on your device. VaultSync cannot recover it — only you can unlock your data.</p>
+          <p>Derives the key that encrypts and decrypts your vault. Exists only on your device. VaultSync cannot recover it; only you can unlock your data.</p>
         </div>
         <div class="sec-card">
           <span class="sec-badge badge-green">Client-side only</span>
@@ -183,7 +148,7 @@ LANDING_BODY = f"""
         <div class="sec-card">
           <span class="sec-badge badge-green">Recovery option</span>
           <h3>Recovery key</h3>
-          <p>If you forget your master password, a recovery key can re-wrap your vault key. Store it safely — VaultSync shows it once during setup.</p>
+          <p>If you forget your master password, a recovery key can re-wrap your vault key. Store it safely; VaultSync shows it once during setup.</p>
         </div>
       </div>
     </div>
@@ -193,16 +158,16 @@ LANDING_BODY = f"""
     <div class="container">
       <p class="section-label">Install</p>
       <h2 class="section-title">Get VaultSync on your browser</h2>
-      <p class="section-desc">Available for Chromium browsers — Chrome, Microsoft Edge, and Brave.</p>
+      <p class="section-desc">Available for Chromium browsers: Chrome, Microsoft Edge, and Brave.</p>
       <div class="install-card">
-        <a class="btn-primary" href="{GITHUB_RELEASES}">
+        <a class="btn-primary" href="{GITHUB_RELEASES}"{EXT_LINK}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Download from GitHub Releases
         </a>
         <p class="note">Latest build: <code>vaultsync-extension-0.1.0-chrome.zip</code></p>
         <ol>
-          <li>Download the release zip from <a href="{GITHUB_RELEASES}">GitHub Releases</a>.</li>
-          <li>Unzip to a permanent folder — it must contain <code>manifest.json</code> at the root.</li>
+          <li>Download the release zip from <a href="{GITHUB_RELEASES}"{EXT_LINK}>GitHub Releases</a>.</li>
+          <li>Unzip to a permanent folder; it must contain <code>manifest.json</code> at the root.</li>
           <li>Open <code>chrome://extensions</code> (Microsoft Edge: <code>edge://extensions</code>).</li>
           <li>Enable <strong>Developer mode</strong> (toggle in the top-right corner).</li>
           <li>Click <strong>Load unpacked</strong> and select the unzipped folder.</li>
@@ -212,11 +177,11 @@ LANDING_BODY = f"""
         <div class="stores">
           <span class="store-badge">
             <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-            Chrome Web Store — Coming soon
+            Chrome Web Store (Coming soon)
           </span>
           <span class="store-badge">
             <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-            Microsoft Edge Add-ons — Coming soon
+            Microsoft Edge Add-ons (Coming soon)
           </span>
         </div>
       </div>
@@ -234,6 +199,7 @@ LANDING_BODY = f"""
       </div>
     </div>
   </section>
+{support_section_html()}
 """
 
 FAQ_BODY = f"""
@@ -273,14 +239,14 @@ PRIVACY_BODY = f"""
     <h2>2. Information we collect</h2>
     <p>When you create an account and use VaultSync, we may store:</p>
     <ul>
-      <li><strong>Account information</strong> — email address and a one-way hash of your account password (Argon2id). We never store your account password in plaintext.</li>
-      <li><strong>Encrypted vault data</strong> — your vault as an opaque, encrypted blob and wrapped encryption keys. We cannot decrypt this data.</li>
-      <li><strong>Key derivation metadata</strong> — salts and KDF parameters required for client-side key derivation. These do not reveal your master password.</li>
-      <li><strong>Device information</strong> — device name, type (e.g. browser), and an opaque device identifier for sync and session management.</li>
-      <li><strong>Sync metadata</strong> — vault revision numbers, sync timestamps, and event records. These contain no plaintext credentials.</li>
-      <li><strong>Authentication tokens</strong> — hashed refresh tokens for secure session management.</li>
-      <li><strong>Password reset tokens</strong> — hashed, time-limited codes when you request an account password reset.</li>
-      <li><strong>Server logs</strong> — request metadata (timestamps, HTTP method, path, status code, request ID) for reliability and security. We do not log master passwords, vault plaintext, authorization headers, or raw tokens.</li>
+      <li><strong>Account information</strong>: email address and a one-way hash of your account password (Argon2id). We never store your account password in plaintext.</li>
+      <li><strong>Encrypted vault data</strong>: your vault as an opaque, encrypted blob and wrapped encryption keys. We cannot decrypt this data.</li>
+      <li><strong>Key derivation metadata</strong>: salts and KDF parameters required for client-side key derivation. These do not reveal your master password.</li>
+      <li><strong>Device information</strong>: device name, type (e.g. browser), and an opaque device identifier for sync and session management.</li>
+      <li><strong>Sync metadata</strong>: vault revision numbers, sync timestamps, and event records. These contain no plaintext credentials.</li>
+      <li><strong>Authentication tokens</strong>: hashed refresh tokens for secure session management.</li>
+      <li><strong>Password reset tokens</strong>: hashed, time-limited codes when you request an account password reset.</li>
+      <li><strong>Server logs</strong>: request metadata (timestamps, HTTP method, path, status code, request ID) for reliability and security. We do not log master passwords, vault plaintext, authorization headers, or raw tokens.</li>
     </ul>
 
     <h2>3. Information we do not collect</h2>
@@ -313,9 +279,9 @@ PRIVACY_BODY = f"""
     <h2>6. Third-party services</h2>
     <p>VaultSync relies on the following infrastructure providers:</p>
     <ul>
-      <li><strong>Vercel</strong> — hosts the VaultSync API</li>
-      <li><strong>Supabase (PostgreSQL)</strong> — stores account and encrypted vault data</li>
-      <li><strong>Brevo</strong> — sends transactional emails (e.g. password reset codes)</li>
+      <li><strong>Vercel</strong>: hosts the VaultSync API</li>
+      <li><strong>Supabase (PostgreSQL)</strong>: stores account and encrypted vault data</li>
+      <li><strong>Brevo</strong>: sends transactional emails (e.g. password reset codes)</li>
     </ul>
     <p>
       These providers process data on our behalf under their own privacy policies and
@@ -335,7 +301,7 @@ PRIVACY_BODY = f"""
     <p>
       The VaultSync marketing website does not use analytics cookies or third-party advertising
       trackers. The browser extension stores session tokens and cached vault data locally in
-      your browser — not in cross-site tracking cookies.
+      your browser, not in cross-site tracking cookies.
     </p>
 
     <h2>9. Your rights</h2>
@@ -348,7 +314,7 @@ PRIVACY_BODY = f"""
     </ul>
     <p>
       To exercise these rights, contact <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.
-      Because we cannot decrypt your vault, we cannot provide plaintext credential exports —
+      Because we cannot decrypt your vault, we cannot provide plaintext credential exports;
       only the encrypted blob stored on our servers.
     </p>
 
@@ -376,8 +342,7 @@ PRIVACY_BODY = f"""
     <h2>13. Contact</h2>
     <p>
       Manoj Hankare<br />
-      Email: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a><br />
-      Website: <a href="{AUTHOR_SITE}">{AUTHOR_SITE.replace('https://', '')}</a>
+      Email: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> (VaultSync support)
     </p>
   </div>
 """
@@ -436,7 +401,7 @@ TERMS_BODY = f"""
     <h2>6. Open source and self-hosting</h2>
     <p>
       VaultSync source code is available on
-      <a href="{GITHUB_REPO}">GitHub</a>. You may self-host the backend subject to the
+      <a href="{GITHUB_REPO}"{EXT_LINK}>GitHub</a>. You may self-host the backend subject to the
       project&rsquo;s open-source license. Self-hosted deployments are operated by you, not by us.
     </p>
 
@@ -459,7 +424,7 @@ TERMS_BODY = f"""
     <p>
       To the maximum extent permitted by law, Manoj Hankare shall not be liable for any
       indirect, incidental, special, consequential, or punitive damages, or any loss of
-      profits, data, or goodwill, arising from your use of VaultSync — including loss of
+      profits, data, or goodwill, arising from your use of VaultSync, including loss of
       access due to a forgotten master password or recovery key.
     </p>
 
@@ -492,8 +457,7 @@ TERMS_BODY = f"""
     <h2>14. Contact</h2>
     <p>
       Manoj Hankare<br />
-      Email: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a><br />
-      Website: <a href="{AUTHOR_SITE}">{AUTHOR_SITE.replace('https://', '')}</a>
+      Email: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> (VaultSync support)
     </p>
   </div>
 """
@@ -506,22 +470,22 @@ def landing():
 
 @pages_bp.get("/faq")
 def faq():
-    title = "FAQ — VaultSync"
+    title = "FAQ: VaultSync"
     desc = "Frequently asked questions about VaultSync security, installation, sync, and your data."
     return build_page(title, desc, "/faq", FAQ_BODY, nav_active="faq")
 
 
 @pages_bp.get("/privacy")
 def privacy():
-    title = "Privacy Policy — VaultSync"
-    desc = "VaultSync Privacy Policy — what data we collect, zero-knowledge encryption, and your rights."
+    title = "Privacy Policy: VaultSync"
+    desc = "VaultSync Privacy Policy: what data we collect, zero-knowledge encryption, and your rights."
     return build_page(title, desc, "/privacy", PRIVACY_BODY)
 
 
 @pages_bp.get("/terms")
 def terms():
-    title = "Terms of Service — VaultSync"
-    desc = "VaultSync Terms of Service — rules for using the password manager and sync service."
+    title = "Terms of Service: VaultSync"
+    desc = "VaultSync Terms of Service: rules for using the password manager and sync service."
     return build_page(title, desc, "/terms", TERMS_BODY)
 
 
