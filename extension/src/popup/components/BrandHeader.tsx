@@ -8,7 +8,7 @@ export function BrandHeader({ compact = false, actions }: Props) {
     return (
       <div className="header brand-header brand-header--compact">
         <div className="brand-header__row">
-          <img src="/logo-icon.png" alt="" className="brand-icon" width={28} height={28} />
+          <img src="/icons/icon128.png" alt="" className="brand-icon" width={32} height={32} />
           <h1 className="brand-title brand-title--compact">
             <span className="brand-title-vault">Vault</span>
             <span className="brand-title-sync">Harbor</span>
@@ -21,7 +21,7 @@ export function BrandHeader({ compact = false, actions }: Props) {
 
   return (
     <div className="brand-header brand-header--hero">
-      <img src="/icons/icon128.png" alt="" className="brand-icon brand-icon--hero" width={84} height={84} />
+      <img src="/icons/icon512.png" alt="" className="brand-icon brand-icon--hero" width={96} height={96} />
       <h1 className="brand-title brand-title--hero">
         <span className="brand-title-vault">Vault</span>
         <span className="brand-title-sync">Harbor</span>

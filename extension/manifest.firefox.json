@@ -55,7 +55,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["picker.html", "save-prompt.html", "logo-icon.png"],
+      "resources": ["picker.html", "save-prompt.html", "logo-icon.png", "icons/icon128.png"],
       "matches": ["http://*/*", "https://*/*"],
       "use_dynamic_url": true
     }

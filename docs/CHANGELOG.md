@@ -2,11 +2,30 @@
 
 All notable VaultHarbor project changes. Update this file with each significant release or deployment change.
 
+## 2026-08-30 — Vault list scrollbar
+
+### Fixed
+
+- Broken CSS `rgba(14, 201, 252), …)` values (from an earlier color remap) that disabled custom scrollbar styling
+
+### Changed
+
+- Vault list and picker scrollbars: dark track, cyan thumb, no arrow buttons; list body max-height raised for longer vaults
+
+## 2026-08-30 — Sharper marketing logos
+
+### Changed
+
+- Icon generator emits `icon256` / `icon512` and copies brand PNGs to `backend/app/pages/static/brand/`
+- Marketing site loads logos from `/pages-static/brand/` (not GitHub raw); large placements use `icon512` for Retina sharpness
+- Lockup `logo.png` export increased to 640px wide for OG/Twitter
+- Extension popup/save-prompt/autofill pill use `icon128`/`icon512` (not 32px `logo-icon`) with slightly larger brand marks
+
 ## 2026-08-30 — Larger toolbar icons
 
 ### Changed
 
-- Manifest / toolbar icons use ~4% padding (was ~10%) so the VaultHarbor mark fills more of the slot in the browser toolbar and extensions menu
+- Manifest / toolbar icons use ~2% padding so the VaultHarbor mark fills the browser toolbar and extensions menu
 - Marketing site brand logos enlarged (nav, footer, hero float, about, install mockups, support)
 - Site glow/border accents remapped from sky-blue leftovers to Harbor cyan/purple; GitHub release title and recovery-key download filename use VaultHarbor
 

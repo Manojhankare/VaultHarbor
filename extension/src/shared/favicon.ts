@@ -1,4 +1,4 @@
-const FALLBACK_ICON = () => chrome.runtime.getURL("logo-icon.png");
+const FALLBACK_ICON = () => chrome.runtime.getURL("icons/icon128.png");
 
 export function faviconUrl(uri: string): string {
   try {

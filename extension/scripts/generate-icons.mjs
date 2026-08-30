@@ -10,6 +10,7 @@ const brandingDir = resolve(repoRoot, "branding");
 const publicDir = resolve(root, "public");
 const iconsDir = resolve(publicDir, "icons");
 const storeDir = resolve(publicDir, "store");
+const siteBrandDir = resolve(repoRoot, "backend", "app", "pages", "static", "brand");
 
 const iconSrc = resolve(brandingDir, "vaultharborlogo_icon.png");
 const logoSrc = resolve(brandingDir, "vaultharborlogo.png");
@@ -27,6 +28,7 @@ if (!existsSync(iconSrc) || !existsSync(logoSrc)) {
 
 mkdirSync(iconsDir, { recursive: true });
 mkdirSync(storeDir, { recursive: true });
+mkdirSync(siteBrandDir, { recursive: true });
 
 /** Trimmed transparent master — reused for every icon size. */
 let trimmedMaster = null;
@@ -40,10 +42,10 @@ async function getTrimmedMaster() {
 
 /**
  * Sharp transparent icon at exact `size`×`size`.
- * Light padding (~4%) so the mark fills the toolbar / extensions menu like peers.
+ * Minimal padding (~2%) so the mark reads large in the toolbar and extensions menu.
  */
 async function buildIcon(size, destPath) {
-  const pad = Math.max(1, Math.round(size * 0.04));
+  const pad = Math.max(1, Math.round(size * 0.02));
   const inner = size - pad * 2;
 
   await sharp(await getTrimmedMaster())
@@ -77,6 +79,7 @@ async function validateTransparentIcon(filePath, expectedSize) {
 }
 
 const manifestSizes = [16, 32, 48, 128];
+const webSizes = [256, 512];
 
 console.log("Generating transparent manifest icons...");
 for (const size of manifestSizes) {
@@ -87,16 +90,24 @@ for (const size of manifestSizes) {
   }
 }
 
+console.log("Generating high-res web icons...");
+for (const size of webSizes) {
+  const dest = resolve(iconsDir, `icon${size}.png`);
+  await buildIcon(size, dest);
+  await validateTransparentIcon(dest, size);
+}
+
 console.log("Generating logo-icon.png (32×32)...");
 const logoIconPath = resolve(publicDir, "logo-icon.png");
 await buildIcon(32, logoIconPath);
 await validateTransparentIcon(logoIconPath, 32);
 
 console.log("Generating logo.png (full lockup)...");
+const logoPath = resolve(publicDir, "logo.png");
 await sharp(logoSrc)
-  .resize(280, null, { fit: "inside" })
+  .resize(640, null, { fit: "inside" })
   .png({ compressionLevel: 9 })
-  .toFile(resolve(publicDir, "logo.png"));
+  .toFile(logoPath);
 console.log("  ✓ public/logo.png (full lockup, baked background OK)");
 
 console.log("Generating store assets...");
@@ -141,4 +152,17 @@ await sharp({
   .toFile(resolve(storeDir, "promo-440x280.png"));
 console.log("  ✓ public/store/promo-440x280.png");
 
-console.log("\nBrand assets generated → public/icons/, public/logo.png, public/store/");
+console.log("Copying brand assets → backend pages static...");
+const siteCopies = [
+  [resolve(iconsDir, "icon128.png"), "icon128.png"],
+  [resolve(iconsDir, "icon256.png"), "icon256.png"],
+  [resolve(iconsDir, "icon512.png"), "icon512.png"],
+  [logoIconPath, "logo-icon.png"],
+  [logoPath, "logo.png"],
+];
+for (const [src, name] of siteCopies) {
+  copyFileSync(src, resolve(siteBrandDir, name));
+  console.log(`  ✓ backend/app/pages/static/brand/${name}`);
+}
+
+console.log("\nBrand assets generated → public/icons/, public/logo.png, public/store/, backend static/brand/");

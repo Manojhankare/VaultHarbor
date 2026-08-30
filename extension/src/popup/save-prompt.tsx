@@ -24,7 +24,7 @@ function SavePromptHeader({ onClose }: { onClose: () => void }) {
   return (
     <div className="save-prompt__header">
       <div className="save-prompt__header-left">
-        <img src="/logo-icon.png" alt="" width={22} height={22} />
+        <img src="/icons/icon128.png" alt="" width={26} height={26} />
         <span className="save-prompt__brand">
           <span className="brand-title-vault">Vault</span>
           <span className="brand-title-sync">Harbor</span>

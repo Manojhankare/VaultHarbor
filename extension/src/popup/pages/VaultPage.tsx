@@ -294,7 +294,7 @@ export function VaultPage({
         <>
           <div className="vault-header">
             <div className="vault-header__brand">
-              <img src="/logo-icon.png" alt="" width={24} height={24} className="brand-icon" />
+              <img src="/icons/icon128.png" alt="" width={28} height={28} className="brand-icon" />
               <div className="vault-header__meta">
                 <h1 className="brand-title brand-title--compact" style={{ margin: 0 }}>
                   <span className="brand-title-vault">Vault</span>

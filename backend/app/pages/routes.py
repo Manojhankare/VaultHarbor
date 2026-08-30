@@ -9,6 +9,7 @@ from app.pages.site_html import (
     EXT_LINK,
     GITHUB_REPO,
     ICON_128,
+    ICON_512,
     LANDING_EXTRA_CSS,
     SITE_URL,
     about_section_html,
@@ -52,7 +53,13 @@ WEB_MANIFEST = {
             "sizes": "128x128",
             "type": "image/png",
             "purpose": "any",
-        }
+        },
+        {
+            "src": ICON_512,
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any",
+        },
     ],
 }
 

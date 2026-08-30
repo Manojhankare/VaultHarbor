@@ -2,15 +2,15 @@ import { detectLoginFields } from "./detector";
 import { BRAND } from "../shared/brand";
 
 const ICON_ID = "vaultsync-fill-icon";
-const LOGO_URL = () => chrome.runtime.getURL("logo-icon.png");
+const LOGO_URL = () => chrome.runtime.getURL("icons/icon128.png");
 
 let iconClickHandler: (() => void) | null = null;
 let iconAnchorEl: HTMLInputElement | null = null;
 let pillBtn: HTMLButtonElement | null = null;
 let chevronEl: SVGElement | null = null;
 
-const PILL_WIDTH = 58;
-const PILL_HEIGHT = 26;
+const PILL_WIDTH = 52;
+const PILL_HEIGHT = 32;
 const INSIDE_INSET = 6;
 const PASSWORD_EYE_RESERVE = 38;
 
@@ -80,7 +80,7 @@ function injectPillStyles(shadow: ShadowRoot): void {
       width: 100%;
       height: 100%;
       margin: 0;
-      padding: 0 7px 0 5px;
+      padding: 0 5px 0 4px;
       border: 1px solid rgba(14, 201, 252, 0.32);
       border-radius: 999px;
       background: linear-gradient(145deg, #0a1220 0%, #000814 100%);
@@ -88,7 +88,7 @@ function injectPillStyles(shadow: ShadowRoot): void {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 3px;
+      gap: 2px;
       box-shadow:
         0 1px 2px rgba(0, 0, 0, 0.35),
         0 0 0 1px rgba(0, 0, 0, 0.12),
@@ -115,8 +115,8 @@ function injectPillStyles(shadow: ShadowRoot): void {
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
     .vs-pill__logo {
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       object-fit: contain;
       flex-shrink: 0;
       pointer-events: none;

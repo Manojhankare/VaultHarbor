@@ -1,6 +1,6 @@
 # VaultHarbor branding assets
 
-Source of truth for extension icons and logos. **Do not edit generated files in `extension/public/` by hand.**
+Source of truth for extension icons and logos. **Do not edit generated files in `extension/public/` or `backend/app/pages/static/brand/` by hand.**
 
 ## Files
 
@@ -14,7 +14,8 @@ Archived VaultSync masters live in [`branding/archive/`](archive/) (not used by 
 ## Two-layer rule
 
 - **Toolbar / manifest / in-app icon** (`icon16`, `icon48`, `icon128`, `logo-icon.png`): always **transparent**. The browser or CSS (`--vs-bg` on popup) provides the background.
-- **Full popup header** (`logo.png`): lockup export kept for marketing/OG; **popup UI uses CSS hero** (icon + gradient title + tagline) for readability at 360px width.
+- **Marketing site large logos** (`icon256`, `icon512`): high-res transparent icons so hero/about/support stay sharp on Retina (CSS size ~108–208px).
+- **Full lockup** (`logo.png`): kept for OG/Twitter; **popup UI uses CSS hero** (icon + gradient title + tagline).
 - **Edge store promo** (`extension/public/store/promo-440x280.png`): marketing composite with intentional brand background.
 
 ## Colors (sampled from lockup)
@@ -34,10 +35,13 @@ node scripts/generate-icons.mjs
 npm run build:chrome
 ```
 
+This also copies `icon128`, `icon256`, `icon512`, `logo-icon.png`, and `logo.png` into
+`backend/app/pages/static/brand/` for the marketing site (`/pages-static/brand/...`).
+
 ## Do not
 
-- Copy or paste PNGs into `extension/public/` or `extension/dist/`
+- Copy or paste PNGs into `extension/public/` or `extension/dist/` by hand
 - Bake `#000814` into icon PNGs manually
 - Skip `generate-icons.mjs` before `npm run release:chrome`
 
-Pipeline: `branding/` → `scripts/generate-icons.mjs` → `extension/public/` → `npm run build:chrome` → `extension/dist/chrome/`
+Pipeline: `branding/` → `scripts/generate-icons.mjs` → `extension/public/` + `backend/.../static/brand/` → build / deploy

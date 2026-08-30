@@ -5,11 +5,12 @@ from __future__ import annotations
 SITE_URL = "https://vaultsync.manojhankare.in"
 GITHUB_REPO = "https://github.com/Manojhankare/VaultSync"
 GITHUB_RELEASES = "https://github.com/Manojhankare/VaultSync/releases"
-GITHUB_RAW = "https://raw.githubusercontent.com/Manojhankare/VaultSync/main/extension/public"
-LOGO_ICON = f"{GITHUB_RAW}/logo-icon.png"
-ICON_128 = f"{GITHUB_RAW}/icons/icon128.png"
-LOGO_FULL = f"{GITHUB_RAW}/logo.png"
-OG_IMAGE = LOGO_FULL
+# Served by Flask pages blueprint (synced from extension generate-icons.mjs).
+LOGO_ICON = "/pages-static/brand/icon128.png"
+ICON_128 = "/pages-static/brand/icon128.png"
+ICON_512 = "/pages-static/brand/icon512.png"
+LOGO_FULL = "/pages-static/brand/logo.png"
+OG_IMAGE = f"{SITE_URL.rstrip('/')}{LOGO_FULL}"
 AUTHOR_SITE = "https://manojhankare.in"
 CONTACT_EMAIL = "manojhankare2@gmail.com"
 GITHUB_SPONSORS = "https://github.com/sponsors/Manojhankare"
@@ -1600,7 +1601,7 @@ def hero_section_html() -> str:
             <div class="hero-visual-glow" aria-hidden="true"></div>
             {orbit_svg}
             {extension_popup_mockup_html()}
-          <img class="hero-float-logo" src="{ICON_128}" alt="" width="108" height="108" />
+          <img class="hero-float-logo" src="{ICON_512}" alt="" width="108" height="108" />
           </div>
         </div>
       </div>
@@ -1669,7 +1670,7 @@ def about_section_html() -> str:
           </div>
         </div>
         <div class="about-visual">
-          <img class="about-brand-logo" src="{ICON_128}" alt="" width="208" height="208" loading="lazy" decoding="async" />
+          <img class="about-brand-logo" src="{ICON_512}" alt="" width="208" height="208" loading="lazy" decoding="async" />
           <h2 class="brand-title">
             <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Harbor</span>
           </h2>
@@ -1742,7 +1743,7 @@ def install_visual_html() -> str:
               </div>
               <div class="install-window-content">
                 <div class="install-page-brand">
-                  <img class="install-page-logo" src="{ICON_128}" alt="" width="152" height="152" />
+                  <img class="install-page-logo" src="{ICON_512}" alt="" width="152" height="152" />
                   <h3 class="install-page-title">
                     <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Harbor</span>
                   </h3>
@@ -1992,7 +1993,7 @@ def support_section_html() -> str:
 
       <div class="support-hero">
         <div class="support-brand">
-          <img class="support-brand-logo" src="{ICON_128}" alt="VaultHarbor" width="132" height="132" />
+          <img class="support-brand-logo" src="{ICON_512}" alt="VaultHarbor" width="132" height="132" />
           <h2 class="brand-title">
             <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Harbor</span>
           </h2>
@@ -2127,7 +2128,7 @@ def head_html(title: str, description: str, path: str = "/") -> str:
   <meta name="twitter:description" content="{description}" />
   <meta name="twitter:image" content="{OG_IMAGE}" />
   <meta name="apple-mobile-web-app-title" content="VaultHarbor" />
-  <link rel="apple-touch-icon" href="{ICON_128}" />"""
+  <link rel="apple-touch-icon" href="{ICON_512}" />"""
 
 
 def build_page(title: str, description: str, path: str, body: str, extra_css: str = "", nav_active: str = "") -> str:
