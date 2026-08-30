@@ -18,6 +18,7 @@ BROWSER_ICON_CHROME = "/pages-static/browser-icons/chrome.svg"
 BROWSER_ICON_EDGE = "/pages-static/browser-icons/edge.svg"
 BROWSER_ICON_BRAVE = "/pages-static/browser-icons/brave.svg"
 BROWSER_ICON_STORE = "/pages-static/browser-icons/chromewebstore.svg"
+EXTENSION_RELEASE_ZIP = "vaultsync-extension-0.1.0-chrome.zip"
 
 BASE_CSS = """
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -917,8 +918,273 @@ LANDING_EXTRA_CSS = """
     .install-card {
       background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; padding: 2rem; margin-top: 2rem;
     }
-    ol { padding-left: 1.25rem; color: #e2e8f0; }
-    ol li { margin-bottom: 0.5rem; }
+    #install {
+      position: relative; padding: 4.5rem 0; overflow: hidden;
+    }
+    #install::before {
+      content: ""; position: absolute; right: -8%; bottom: -20%; width: 52%; height: 70%;
+      background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.1) 0%, rgba(99, 102, 241, 0.06) 35%, transparent 72%);
+      pointer-events: none;
+    }
+    .install-header { margin-bottom: 1.35rem; }
+    .install-title {
+      font-size: clamp(1.55rem, 3.5vw, 2rem); font-weight: 700; color: #f1f5f9;
+      line-height: 1.22; letter-spacing: -0.02em; margin-bottom: 0.45rem;
+    }
+    .install-title-accent {
+      background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #a855f7 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .install-desc { color: #94a3b8; font-size: 0.88rem; max-width: 36rem; line-height: 1.5; }
+    .install-grid {
+      display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(1.25rem, 3vw, 2rem);
+      align-items: start;
+    }
+    @media (max-width: 960px) {
+      .install-grid { grid-template-columns: 1fr; }
+      .install-visual { order: -1; }
+    }
+    .install-panel {
+      position: relative;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.82), rgba(22, 32, 50, 0.9));
+      border: 1px solid rgba(56, 189, 248, 0.14); border-radius: 0.85rem;
+      padding: 1.1rem 1.15rem;
+      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.05) inset, 0 20px 40px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    }
+    .install-download-btn {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      width: 100%; padding: 0.65rem 1rem; border-radius: 0.55rem;
+      background: linear-gradient(90deg, #0ea5e9 0%, #6366f1 100%);
+      color: #fff !important; font-size: 0.84rem; font-weight: 600; text-decoration: none !important;
+      box-shadow: 0 6px 18px rgba(14, 165, 233, 0.24);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+    .install-download-btn:hover {
+      opacity: 0.96; transform: translateY(-1px);
+      box-shadow: 0 10px 28px rgba(14, 165, 233, 0.36);
+    }
+    .install-download-btn svg { flex-shrink: 0; width: 16px; height: 16px; }
+    .install-download-chevron { margin-left: auto; opacity: 0.9; width: 16px !important; height: 16px !important; }
+    .install-build {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;
+      margin: 0.65rem 0 0.85rem; font-size: 0.78rem; color: #94a3b8;
+    }
+    .install-build-pill {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.25rem 0.4rem 0.25rem 0.55rem;
+      background: rgba(10, 15, 30, 0.75); border: 1px solid rgba(51, 65, 85, 0.8);
+      border-radius: 0.4rem;
+    }
+    .install-build-pill code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem; color: #38bdf8; background: none; padding: 0;
+    }
+    .install-copy-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 1.45rem; height: 1.45rem; padding: 0; border: none; border-radius: 0.3rem;
+      background: rgba(30, 41, 59, 0.8); color: #94a3b8; cursor: pointer;
+      transition: color 0.2s ease, background 0.2s ease;
+    }
+    .install-copy-btn:hover { color: #e2e8f0; background: rgba(51, 65, 85, 0.9); }
+    .install-copy-btn svg { width: 12px; height: 12px; }
+    .install-steps {
+      list-style: none; display: flex; flex-direction: column; gap: 0.5rem; margin: 0; padding: 0;
+    }
+    .install-steps li {
+      display: flex; gap: 0.6rem; align-items: flex-start;
+      font-size: 0.8rem; color: #cbd5e1; line-height: 1.45;
+    }
+    .install-step-num {
+      flex-shrink: 0; width: 1.35rem; height: 1.35rem; margin-top: 0.05rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 50%; border: 1px solid rgba(56, 189, 248, 0.35);
+      font-size: 0.65rem; font-weight: 700; color: #7dd3fc;
+      background: rgba(14, 165, 233, 0.08);
+    }
+    .install-steps code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.74rem; color: #38bdf8; background: rgba(15, 23, 42, 0.55);
+      padding: 0.05rem 0.3rem; border-radius: 0.25rem;
+    }
+    .install-notice {
+      display: flex; gap: 0.55rem; align-items: flex-start;
+      margin-top: 0.85rem; padding: 0.65rem 0.75rem;
+      background: rgba(10, 15, 30, 0.55); border: 1px solid rgba(51, 65, 85, 0.75);
+      border-radius: 0.55rem; font-size: 0.76rem; color: #94a3b8; line-height: 1.45;
+    }
+    .install-notice svg {
+      flex-shrink: 0; width: 0.95rem; height: 0.95rem; margin-top: 0.1rem; color: #38bdf8;
+    }
+    .install-stores {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; margin-top: 0.85rem;
+    }
+    @media (max-width: 520px) { .install-stores { grid-template-columns: 1fr; } }
+    .install-store-card {
+      display: flex; align-items: center; gap: 0.55rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(10, 15, 30, 0.45); border: 1px solid rgba(51, 65, 85, 0.65);
+      border-radius: 0.55rem;
+    }
+    .install-store-card img { width: 22px; height: 22px; flex-shrink: 0; }
+    .install-store-card strong {
+      display: block; font-size: 0.76rem; font-weight: 600; color: #e2e8f0; line-height: 1.25;
+    }
+    .install-store-card span { font-size: 0.68rem; color: #64748b; }
+    .install-help {
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+      margin-top: 1.5rem; font-size: 0.82rem; color: #94a3b8; text-align: center;
+    }
+    .install-help svg { width: 0.9rem; height: 0.9rem; color: #64748b; flex-shrink: 0; }
+    .install-visual { position: relative; min-height: 28rem; overflow: visible; }
+    .install-scene {
+      position: relative; width: min(100%, 480px); min-height: 26rem; margin: 0 auto;
+      overflow: visible;
+    }
+    .install-orbit-bg {
+      position: absolute; inset: -22% -28% -18% -28%; width: 156%; height: 148%;
+      pointer-events: none; opacity: 0.62;
+      animation: install-orbit-drift 28s linear infinite;
+      transform-origin: center center;
+    }
+    @keyframes install-orbit-drift {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .install-browser-window {
+      position: relative; z-index: 1; width: 100%;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.78), rgba(10, 15, 30, 0.88));
+      border: 1px solid rgba(148, 163, 184, 0.16); border-radius: 1.15rem;
+      overflow: visible;
+      box-shadow: 0 28px 56px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+    .install-window-bar {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding: 0.8rem 1rem; border-bottom: 1px solid rgba(51, 65, 85, 0.55);
+      background: rgba(15, 23, 42, 0.72);
+      border-radius: 1.15rem 1.15rem 0 0;
+      position: relative; z-index: 2; overflow: visible;
+    }
+    .install-window-dots { display: flex; gap: 0.35rem; flex-shrink: 0; }
+    .install-window-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; }
+    .install-window-dot--red { background: #ff5f57; }
+    .install-window-dot--yellow { background: #febc2e; }
+    .install-window-dot--green { background: #28c840; }
+    .install-window-address {
+      flex: 1; min-width: 0; height: 1.5rem; border-radius: 0.45rem;
+      background: rgba(10, 15, 30, 0.75); border: 1px solid rgba(51, 65, 85, 0.65);
+      padding: 0 0.55rem; display: flex; align-items: center;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.68rem; color: #64748b;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .install-window-ext {
+      flex-shrink: 0; width: 1.85rem; height: 1.85rem; border-radius: 0.45rem;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(10, 15, 30, 0.8); border: 1px solid rgba(56, 189, 248, 0.25);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.18);
+    }
+    .install-window-ext-anchor { position: relative; flex-shrink: 0; z-index: 4; }
+    .install-window-ext img { width: 1.2rem; height: 1.2rem; object-fit: contain; }
+    .install-window-content {
+      position: relative; min-height: 18rem; padding: 1.75rem 1.5rem 2.25rem;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .install-page-brand { text-align: center; z-index: 1; }
+    .install-page-logo {
+      width: clamp(100px, 26vw, 128px); height: auto; object-fit: contain;
+      filter: drop-shadow(0 0 28px rgba(56, 189, 248, 0.35)) drop-shadow(0 0 18px rgba(168, 85, 247, 0.25));
+      animation: install-page-logo-glow 6s ease-in-out infinite;
+    }
+    @keyframes install-page-logo-glow {
+      0%, 100% { filter: drop-shadow(0 0 28px rgba(56, 189, 248, 0.35)) drop-shadow(0 0 18px rgba(168, 85, 247, 0.25)); }
+      50% { filter: drop-shadow(0 0 36px rgba(56, 189, 248, 0.48)) drop-shadow(0 0 24px rgba(168, 85, 247, 0.38)); }
+    }
+    .install-page-title {
+      margin-top: 0.75rem; font-size: clamp(1.5rem, 3.8vw, 1.85rem); font-weight: 800;
+      letter-spacing: -0.02em; line-height: 1;
+    }
+    .install-page-skeleton {
+      position: absolute; left: 1.35rem; bottom: 1.5rem;
+      display: flex; flex-direction: column; gap: 0.45rem; width: 42%;
+    }
+    .install-page-skeleton span {
+      display: block; height: 0.45rem; border-radius: 999px;
+      background: rgba(51, 65, 85, 0.55);
+    }
+    .install-page-skeleton span:nth-child(1) { width: 88%; }
+    .install-page-skeleton span:nth-child(2) { width: 72%; }
+    .install-page-skeleton span:nth-child(3) { width: 56%; }
+    .install-extension-popup {
+      position: absolute; z-index: 3;
+      top: calc(100% + 0.5rem); right: 0;
+      width: 200px;
+      background: linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(22, 32, 50, 0.96));
+      border: 1px solid rgba(56, 189, 248, 0.22); border-radius: 0.85rem;
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.5), 0 0 32px rgba(56, 189, 248, 0.1);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      animation: install-popup-float 5s ease-in-out infinite;
+    }
+    @keyframes install-popup-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .install-popup-pointer {
+      position: absolute; top: -0.42rem; right: 0.5rem;
+      width: 0.85rem; height: 0.85rem;
+      background: linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(22, 32, 50, 0.96));
+      border-left: 1px solid rgba(56, 189, 248, 0.22);
+      border-top: 1px solid rgba(56, 189, 248, 0.22);
+      transform: rotate(45deg);
+    }
+    .install-popup-bar {
+      display: flex; gap: 0.3rem; padding: 0.55rem 0.7rem 0.35rem;
+    }
+    .install-popup-dot { width: 0.42rem; height: 0.42rem; border-radius: 50%; }
+    .install-popup-dot--red { background: #ff5f57; }
+    .install-popup-dot--yellow { background: #febc2e; }
+    .install-popup-dot--green { background: #28c840; }
+    .install-popup-body {
+      padding: 0.25rem 0.85rem 0.9rem; display: flex; flex-direction: column; align-items: center; gap: 0.55rem;
+    }
+    .install-popup-logo {
+      width: 2.75rem; height: 2.75rem; object-fit: contain;
+      filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.3));
+    }
+    .install-popup-skeleton { width: 100%; display: flex; flex-direction: column; gap: 0.35rem; }
+    .install-popup-skeleton span {
+      display: block; height: 0.38rem; border-radius: 999px; background: rgba(51, 65, 85, 0.65);
+    }
+    .install-popup-skeleton span:nth-child(1) { width: 78%; margin: 0 auto; }
+    .install-popup-skeleton span:nth-child(2) { width: 62%; margin: 0 auto; }
+    .install-popup-field {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 0.45rem 0.55rem; border-radius: 0.45rem;
+      background: rgba(10, 15, 30, 0.85); border: 1px solid rgba(51, 65, 85, 0.75);
+    }
+    .install-popup-dots { font-size: 0.72rem; letter-spacing: 0.12em; color: #64748b; }
+    .install-popup-field svg { width: 0.9rem; height: 0.9rem; color: #94a3b8; flex-shrink: 0; }
+    .install-popup-btn {
+      width: 100%; height: 1.65rem; border-radius: 0.45rem;
+      background: linear-gradient(90deg, #0ea5e9 0%, #6366f1 100%);
+      box-shadow: 0 4px 16px rgba(14, 165, 233, 0.28);
+    }
+    @media (max-width: 960px) {
+      .install-extension-popup { width: 190px; }
+    }
+    @media (max-width: 520px) {
+      .install-extension-popup {
+        position: absolute; top: calc(100% + 0.5rem); right: 0; width: min(72vw, 200px);
+      }
+      .install-popup-pointer { display: none; }
+      .install-scene { min-height: auto; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .install-orbit-bg,
+      .install-page-logo,
+      .install-extension-popup { animation: none !important; }
+    }
     .note { margin-top: 1rem; font-size: 0.9rem; color: #94a3b8; }
     .stores { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
     .store-badge {
@@ -1020,16 +1286,82 @@ LANDING_EXTRA_CSS = """
 """
 
 
-def hero_section_html() -> str:
-    download_svg = """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>"""
+def extension_popup_mockup_html(wrapper_class: str = "hero-mockup") -> str:
     search_icon = """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>"""
     chevron_icon = """<svg class="mockup-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>"""
-    
     github_logo = """<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 4.31 3.435 7.97 8.205 9.56.6.11.82-.26.82-.58 0-.28-.01-1.02-.01-2-3.338.73-4.043-1.61-4.043-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.74.084-.73.084-.73 1.205.08 1.838 1.24 1.838 1.24 1.07 1.83 2.79 1.3 3.47.99.11-.77.45-1.3.82-1.6-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.465-2.38 1.235-3.22-.135-.3-.54-1.525.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 19.97 24 16.307 24 12c0-6.63-5.37-12-12-12z"/></svg>"""
     notion_logo = """<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M4.6 2.025h14.8c1.425 0 2.6 1.175 2.6 2.6v14.75c0 1.425-1.175 2.6-2.6 2.6H4.6c-1.425 0-2.6-1.175-2.6-2.6V4.625c0-1.425 1.175-2.6 2.6-2.6zm3.175 4.3v11.35h2.15v-5.95l3.8 5.95h2.475V6.325h-2.15v5.95l-3.8-5.95H7.775z"/></svg>"""
     google_logo = """<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22-.19-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>"""
     slack_logo = """<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#36C5F0" d="M5 10.5c0-1.38 1.12-2.5 2.5-2.5h2.5v2.5c0 1.38-1.12 2.5-2.5 2.5H5v-2.5zm5 0c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v2.5h-2.5c-1.38 0-2.5-1.12-2.5-2.5v-2.5z"/><path fill="#2EB67D" d="M13.5 5c1.38 0 2.5 1.12 2.5 2.5v2.5h-2.5C12.12 10 11 8.88 11 7.5S12.12 5 13.5 5zm0 5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5h-2.5v-2.5c0-1.38 1.12-2.5 2.5-2.5z"/><path fill="#ECB22E" d="M19 13.5c0 1.38-1.12 2.5-2.5 2.5h-2.5v-2.5c0-1.38 1.12-2.5 2.5-2.5H19v2.5zm-5 0c0 1.38-1.12 2.5-2.5 2.5s-2.5-1.12-2.5-2.5v-2.5h2.5c1.38 0 2.5 1.12 2.5 2.5v-2.5z"/><path fill="#E01E5A" d="M10.5 19c-1.38 0-2.5-1.12-2.5-2.5v-2.5h2.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5zm0-5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5h2.5v2.5c0 1.38-1.12 2.5-2.5 2.5z"/></svg>"""
     microsoft_logo = """<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M13 1h10v10H13z"/><path fill="#00a4ef" d="M1 13h10v10H1z"/><path fill="#ffb900" d="M13 13h10v10H13z"/></svg>"""
+    return f"""
+            <div class="{wrapper_class}" aria-hidden="true">
+            <div class="mockup-header">
+              <div class="mockup-brand">
+                <img src="{LOGO_ICON}" alt="" width="22" height="22" />
+                <span>VaultSync</span>
+              </div>
+              <div class="mockup-actions">
+                <span class="mockup-btn">+</span>
+                <span class="mockup-btn">⋯</span>
+              </div>
+            </div>
+            <div class="mockup-search">
+              {search_icon}
+              <span>Search passwords…</span>
+            </div>
+            <div class="mockup-list">
+              <div class="mockup-row">
+                <div class="mockup-favicon mockup-favicon--gh">{github_logo}</div>
+                <div class="mockup-row-body">
+                  <div class="mockup-row-name">GitHub</div>
+                  <div class="mockup-row-email">dev@example.com</div>
+                </div>
+                <span class="mockup-dots">•••••</span>
+                {chevron_icon}
+              </div>
+              <div class="mockup-row">
+                <div class="mockup-favicon mockup-favicon--no">{notion_logo}</div>
+                <div class="mockup-row-body">
+                  <div class="mockup-row-name">Notion</div>
+                  <div class="mockup-row-email">workspace@example.com</div>
+                </div>
+                <span class="mockup-dots">•••••</span>
+                {chevron_icon}
+              </div>
+              <div class="mockup-row">
+                <div class="mockup-favicon mockup-favicon--go">{google_logo}</div>
+                <div class="mockup-row-body">
+                  <div class="mockup-row-name">Google</div>
+                  <div class="mockup-row-email">user@example.com</div>
+                </div>
+                <span class="mockup-dots">•••••</span>
+                {chevron_icon}
+              </div>
+              <div class="mockup-row">
+                <div class="mockup-favicon mockup-favicon--sl">{slack_logo}</div>
+                <div class="mockup-row-body">
+                  <div class="mockup-row-name">Slack</div>
+                  <div class="mockup-row-email">team@example.com</div>
+                </div>
+                <span class="mockup-dots">•••••</span>
+                {chevron_icon}
+              </div>
+              <div class="mockup-row">
+                <div class="mockup-favicon mockup-favicon--ms">{microsoft_logo}</div>
+                <div class="mockup-row-body">
+                  <div class="mockup-row-name">Microsoft</div>
+                  <div class="mockup-row-email">office@example.com</div>
+                </div>
+                <span class="mockup-dots">•••••</span>
+                {chevron_icon}
+              </div>
+            </div>
+          </div>"""
+
+
+def hero_section_html() -> str:
+    download_svg = """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>"""
 
     orbit_svg = """<svg class="hero-orbit-svg" viewBox="0 0 300 400" fill="none" aria-hidden="true">
       <defs>
@@ -1101,69 +1433,7 @@ def hero_section_html() -> str:
           <div class="hero-orbit-stage">
             <div class="hero-visual-glow" aria-hidden="true"></div>
             {orbit_svg}
-            <div class="hero-mockup" aria-hidden="true">
-            <div class="mockup-header">
-              <div class="mockup-brand">
-                <img src="{LOGO_ICON}" alt="" width="22" height="22" />
-                <span>VaultSync</span>
-              </div>
-              <div class="mockup-actions">
-                <span class="mockup-btn">+</span>
-                <span class="mockup-btn">⋯</span>
-              </div>
-            </div>
-            <div class="mockup-search">
-              {search_icon}
-              <span>Search passwords…</span>
-            </div>
-            <div class="mockup-list">
-              <div class="mockup-row">
-                <div class="mockup-favicon mockup-favicon--gh">{github_logo}</div>
-                <div class="mockup-row-body">
-                  <div class="mockup-row-name">GitHub</div>
-                  <div class="mockup-row-email">dev@example.com</div>
-                </div>
-                <span class="mockup-dots">•••••</span>
-                {chevron_icon}
-              </div>
-              <div class="mockup-row">
-                <div class="mockup-favicon mockup-favicon--no">{notion_logo}</div>
-                <div class="mockup-row-body">
-                  <div class="mockup-row-name">Notion</div>
-                  <div class="mockup-row-email">workspace@example.com</div>
-                </div>
-                <span class="mockup-dots">•••••</span>
-                {chevron_icon}
-              </div>
-              <div class="mockup-row">
-                <div class="mockup-favicon mockup-favicon--go">{google_logo}</div>
-                <div class="mockup-row-body">
-                  <div class="mockup-row-name">Google</div>
-                  <div class="mockup-row-email">user@example.com</div>
-                </div>
-                <span class="mockup-dots">•••••</span>
-                {chevron_icon}
-              </div>
-              <div class="mockup-row">
-                <div class="mockup-favicon mockup-favicon--sl">{slack_logo}</div>
-                <div class="mockup-row-body">
-                  <div class="mockup-row-name">Slack</div>
-                  <div class="mockup-row-email">team@example.com</div>
-                </div>
-                <span class="mockup-dots">•••••</span>
-                {chevron_icon}
-              </div>
-              <div class="mockup-row">
-                <div class="mockup-favicon mockup-favicon--ms">{microsoft_logo}</div>
-                <div class="mockup-row-body">
-                  <div class="mockup-row-name">Microsoft</div>
-                  <div class="mockup-row-email">office@example.com</div>
-                </div>
-                <span class="mockup-dots">•••••</span>
-                {chevron_icon}
-              </div>
-            </div>
-          </div>
+            {extension_popup_mockup_html()}
           <img class="hero-float-logo" src="{ICON_128}" alt="" width="88" height="88" />
           </div>
         </div>
@@ -1240,6 +1510,172 @@ def about_section_html() -> str:
           <p class="brand-slogan">Secure. Sync. Everywhere.</p>
         </div>
       </div>
+    </div>
+  </section>"""
+
+
+def install_visual_html() -> str:
+    lock_svg = """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>"""
+    orbit_svg = """<svg class="install-orbit-bg" viewBox="0 0 400 360" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="installOrbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.5"/>
+          <stop offset="50%" stop-color="#6366f1" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#a855f7" stop-opacity="0.25"/>
+        </linearGradient>
+      </defs>
+      <g transform="translate(200 180)">
+        <ellipse cx="0" cy="0" rx="182" ry="54" stroke="url(#installOrbitGrad)" stroke-width="1.2" opacity="0.58"/>
+        <ellipse cx="0" cy="0" rx="148" ry="42" stroke="url(#installOrbitGrad)" stroke-width="0.95" opacity="0.44"/>
+        <ellipse cx="0" cy="0" rx="118" ry="34" stroke="url(#installOrbitGrad)" stroke-width="0.75" opacity="0.32"/>
+        <ellipse cx="0" cy="0" rx="182" ry="54" stroke="url(#installOrbitGrad)" stroke-width="1.2" transform="rotate(58)" opacity="0.5"/>
+        <ellipse cx="0" cy="0" rx="148" ry="42" stroke="url(#installOrbitGrad)" stroke-width="0.95" transform="rotate(58)" opacity="0.38"/>
+        <ellipse cx="0" cy="0" rx="118" ry="34" stroke="url(#installOrbitGrad)" stroke-width="0.75" transform="rotate(58)" opacity="0.28"/>
+        <ellipse cx="0" cy="0" rx="182" ry="54" stroke="url(#installOrbitGrad)" stroke-width="1.2" transform="rotate(-58)" opacity="0.5"/>
+        <ellipse cx="0" cy="0" rx="148" ry="42" stroke="url(#installOrbitGrad)" stroke-width="0.95" transform="rotate(-58)" opacity="0.38"/>
+        <ellipse cx="0" cy="0" rx="118" ry="34" stroke="url(#installOrbitGrad)" stroke-width="0.75" transform="rotate(-58)" opacity="0.28"/>
+        <ellipse cx="0" cy="0" rx="172" ry="50" stroke="url(#installOrbitGrad)" stroke-width="1" transform="rotate(90)" opacity="0.42"/>
+        <ellipse cx="0" cy="0" rx="138" ry="40" stroke="url(#installOrbitGrad)" stroke-width="0.85" transform="rotate(90)" opacity="0.3"/>
+      </g>
+    </svg>"""
+    return f"""
+          <div class="install-scene" aria-hidden="true">
+            {orbit_svg}
+            <div class="install-browser-window">
+              <div class="install-window-bar">
+                <div class="install-window-dots">
+                  <span class="install-window-dot install-window-dot--red"></span>
+                  <span class="install-window-dot install-window-dot--yellow"></span>
+                  <span class="install-window-dot install-window-dot--green"></span>
+                </div>
+                <div class="install-window-address">vaultsync.manojhankare.in/login</div>
+                <div class="install-window-ext-anchor">
+                  <div class="install-window-ext">
+                    <img src="{LOGO_ICON}" alt="" width="18" height="18" />
+                  </div>
+                  <div class="install-extension-popup">
+                    <div class="install-popup-pointer"></div>
+                    <div class="install-popup-bar">
+                      <span class="install-popup-dot install-popup-dot--red"></span>
+                      <span class="install-popup-dot install-popup-dot--yellow"></span>
+                      <span class="install-popup-dot install-popup-dot--green"></span>
+                    </div>
+                    <div class="install-popup-body">
+                      <img class="install-popup-logo" src="{ICON_128}" alt="" width="44" height="44" />
+                      <div class="install-popup-skeleton">
+                        <span></span><span></span>
+                      </div>
+                      <div class="install-popup-field">
+                        <span class="install-popup-dots">••••••••</span>
+                        {lock_svg}
+                      </div>
+                      <div class="install-popup-btn"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="install-window-content">
+                <div class="install-page-brand">
+                  <img class="install-page-logo" src="{ICON_128}" alt="" width="128" height="128" />
+                  <h3 class="install-page-title">
+                    <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Sync</span>
+                  </h3>
+                </div>
+                <div class="install-page-skeleton">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+            </div>
+          </div>"""
+
+
+def install_section_html() -> str:
+    download_svg = """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>"""
+    chevron_svg = """<svg class="install-download-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>"""
+    copy_svg = """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>"""
+    info_svg = """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>"""
+    help_svg = """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>"""
+    zip_name = EXTENSION_RELEASE_ZIP
+
+    return f"""
+  <section id="install">
+    <div class="container">
+      <div class="install-header">
+        <p class="section-label">Install</p>
+        <h2 class="install-title">Get <span class="install-title-accent">VaultSync</span> on your browser</h2>
+        <p class="install-desc">Available for Chromium browsers: Chrome, Microsoft Edge, and Brave.</p>
+      </div>
+      <div class="install-grid">
+        <div class="install-panel">
+          <a class="install-download-btn" href="{GITHUB_RELEASES}"{EXT_LINK}>
+            {download_svg}
+            Download from GitHub Releases
+            {chevron_svg}
+          </a>
+          <div class="install-build">
+            <span>Latest build:</span>
+            <span class="install-build-pill">
+              <code id="install-zip-name">{zip_name}</code>
+              <button type="button" class="install-copy-btn" onclick="navigator.clipboard.writeText('{zip_name}')" aria-label="Copy filename">
+                {copy_svg}
+              </button>
+            </span>
+          </div>
+          <ol class="install-steps">
+            <li>
+              <span class="install-step-num">1</span>
+              <span>Download the release zip from <a href="{GITHUB_RELEASES}"{EXT_LINK}>GitHub Releases</a>.</span>
+            </li>
+            <li>
+              <span class="install-step-num">2</span>
+              <span>Unzip to a permanent folder; it must contain <code>manifest.json</code> at the root.</span>
+            </li>
+            <li>
+              <span class="install-step-num">3</span>
+              <span>Open <code>chrome://extensions</code> (Microsoft Edge: <code>edge://extensions</code>).</span>
+            </li>
+            <li>
+              <span class="install-step-num">4</span>
+              <span>Enable <strong>Developer mode</strong> (toggle in the top-right corner).</span>
+            </li>
+            <li>
+              <span class="install-step-num">5</span>
+              <span>Click <strong>Load unpacked</strong> and select the unzipped folder.</span>
+            </li>
+            <li>
+              <span class="install-step-num">6</span>
+              <span>Pin VaultSync to your toolbar and sign in to get started.</span>
+            </li>
+          </ol>
+          <div class="install-notice">
+            {info_svg}
+            <span>Manual installs do not auto-update. Official store listings below will enable automatic updates once published.</span>
+          </div>
+          <div class="install-stores">
+            <div class="install-store-card">
+              <img src="{BROWSER_ICON_CHROME}" alt="" width="28" height="28" loading="lazy" decoding="async" />
+              <div>
+                <strong>Chrome Web Store</strong>
+                <span>Coming soon</span>
+              </div>
+            </div>
+            <div class="install-store-card">
+              <img src="{BROWSER_ICON_EDGE}" alt="" width="28" height="28" loading="lazy" decoding="async" />
+              <div>
+                <strong>Microsoft Edge Add-ons</strong>
+                <span>Coming soon</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="install-visual">
+{install_visual_html()}
+        </div>
+      </div>
+      <p class="install-help">
+        {help_svg}
+        <span>Need help? Check the <a href="/faq">FAQ</a> or contact <a href="/#support">support</a>.</span>
+      </p>
     </div>
   </section>"""
 

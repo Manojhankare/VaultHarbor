@@ -12,6 +12,7 @@ All notable VaultSync project changes. Update this file with each significant re
 - Hero availability row uses vendored official browser SVGs (Chrome, Edge, Brave, Chrome Web Store) from Wikimedia Commons, served at `/pages-static/browser-icons/`
 - About section (`/#about`): two-column layout with gradient-accent headline, divider, body copy (including self-hosted backend), branded logo card, and subtle entrance/glow animations
 - Public page copy: replaced em dashes with clearer punctuation and phrasing
+- Install section (`/#install`): two-column glass panel with GitHub download CTA, numbered steps, store cards, and browser scene with VaultSync branding plus extension unlock popup
 
 ## 2026-08-29 — Open source license and contributing
 

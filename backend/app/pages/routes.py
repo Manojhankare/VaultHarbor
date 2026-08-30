@@ -7,7 +7,6 @@ from flask import Blueprint, jsonify
 from app.pages.site_html import (
     CONTACT_EMAIL,
     EXT_LINK,
-    GITHUB_RELEASES,
     GITHUB_REPO,
     ICON_128,
     LANDING_EXTRA_CSS,
@@ -17,6 +16,7 @@ from app.pages.site_html import (
     faq_items_html,
     faq_preview_html,
     hero_section_html,
+    install_section_html,
     support_section_html,
 )
 
@@ -154,39 +154,7 @@ LANDING_BODY = f"""
     </div>
   </section>
 
-  <section id="install">
-    <div class="container">
-      <p class="section-label">Install</p>
-      <h2 class="section-title">Get VaultSync on your browser</h2>
-      <p class="section-desc">Available for Chromium browsers: Chrome, Microsoft Edge, and Brave.</p>
-      <div class="install-card">
-        <a class="btn-primary" href="{GITHUB_RELEASES}"{EXT_LINK}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download from GitHub Releases
-        </a>
-        <p class="note">Latest build: <code>vaultsync-extension-0.1.0-chrome.zip</code></p>
-        <ol>
-          <li>Download the release zip from <a href="{GITHUB_RELEASES}"{EXT_LINK}>GitHub Releases</a>.</li>
-          <li>Unzip to a permanent folder; it must contain <code>manifest.json</code> at the root.</li>
-          <li>Open <code>chrome://extensions</code> (Microsoft Edge: <code>edge://extensions</code>).</li>
-          <li>Enable <strong>Developer mode</strong> (toggle in the top-right corner).</li>
-          <li>Click <strong>Load unpacked</strong> and select the unzipped folder.</li>
-          <li>Pin VaultSync to your toolbar and sign in to get started.</li>
-        </ol>
-        <p class="note">Manual installs do not auto-update. Official store listings below will enable automatic updates once published.</p>
-        <div class="stores">
-          <span class="store-badge">
-            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-            Chrome Web Store (Coming soon)
-          </span>
-          <span class="store-badge">
-            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-            Microsoft Edge Add-ons (Coming soon)
-          </span>
-        </div>
-      </div>
-    </div>
-  </section>
+{install_section_html()}
 
   <section id="faq-preview">
     <div class="container">
