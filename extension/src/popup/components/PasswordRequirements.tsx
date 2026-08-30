@@ -12,11 +12,11 @@ export function PasswordRequirements({ password, confirm, label }: Props) {
   const match = !showMatch || password === confirm;
 
   const items: { ok: boolean; text: string }[] = [
-    { ok: checks.minLength, text: "At least 12 characters" },
-    { ok: checks.uppercase, text: "One uppercase letter" },
-    { ok: checks.lowercase, text: "One lowercase letter" },
-    { ok: checks.digit, text: "One digit" },
-    { ok: checks.special, text: "One special character" },
+    { ok: checks.minLength, text: "12+ chars" },
+    { ok: checks.uppercase, text: "Uppercase" },
+    { ok: checks.lowercase, text: "Lowercase" },
+    { ok: checks.digit, text: "Digit" },
+    { ok: checks.special, text: "Symbol" },
   ];
 
   if (showMatch) {

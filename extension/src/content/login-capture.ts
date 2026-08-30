@@ -163,6 +163,9 @@ export function bindLoginFormCapture(): void {
 
   const { form, username, password } = detected;
   const bindTarget = form ?? password;
+  if (!bindTarget || !password) {
+    return;
+  }
   if (bindTarget.dataset.vaultsyncBound === "1") {
     syncTrackedValues();
     return;

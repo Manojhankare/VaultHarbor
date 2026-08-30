@@ -1,10 +1,25 @@
-import type { LoginItem, NewLoginItem } from "../vault/vault-types";
+import type { LoginItem, NewLoginItem, NewSecureNoteItem, VaultItem, VaultItemType, VaultListFilter, VaultListSort } from "../vault/vault-types";
 
 export type CredentialSummary = {
   id: string;
   name: string;
   username: string;
   uri: string;
+};
+
+export type VaultItemSummary = {
+  id: string;
+  type: VaultItemType;
+  name: string;
+  subtitle: string;
+  uri?: string;
+  updated_at: string;
+  deleted_at?: string | null;
+};
+
+export type SyncStatus = {
+  pendingChanges: number;
+  hasConflict: boolean;
 };
 
 export type BackgroundRequest =
@@ -21,6 +36,13 @@ export type BackgroundRequest =
   | { type: "ADD_CREDENTIAL"; item: NewLoginItem }
   | { type: "UPDATE_CREDENTIAL"; item: LoginItem }
   | { type: "DELETE_CREDENTIAL"; id: string }
+  | { type: "LIST_VAULT_ITEMS"; query?: string; filter?: VaultListFilter; sort?: VaultListSort }
+  | { type: "GET_VAULT_ITEM"; id: string }
+  | { type: "ADD_SECURE_NOTE"; item: NewSecureNoteItem }
+  | { type: "UPDATE_VAULT_ITEM"; item: VaultItem }
+  | { type: "DELETE_VAULT_ITEM"; id: string }
+  | { type: "RESTORE_VAULT_ITEM"; id: string }
+  | { type: "GET_SYNC_STATUS" }
   | { type: "GET_CURRENT_SITE" }
   | { type: "GET_MATCHING_CREDENTIALS"; tabId: number }
   | { type: "FILL_CREDENTIAL"; tabId: number; credentialId: string }

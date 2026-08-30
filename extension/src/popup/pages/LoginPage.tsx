@@ -1,19 +1,53 @@
 import { useEffect, useState } from "react";
 import { BrandHeader } from "../components/BrandHeader";
-import { BackendSettingsPanel } from "../components/BackendSettingsPanel";
+import { ConnectionSettingsFull } from "../components/ConnectionSettingsFull";
 import { ForgotPasswordPanel } from "../components/ForgotPasswordPanel";
-import { PasswordRequirements } from "../components/PasswordRequirements";
+import { ServerConnectionBar } from "../components/ServerConnectionBar";
+import { AuthField } from "../components/auth/AuthField";
+import { AuthFormHeader } from "../components/auth/AuthFormHeader";
+import { AuthPasswordRequirements } from "../components/auth/AuthPasswordRequirements";
+import { AuthSubmitButton } from "../components/auth/AuthSubmitButton";
+import { AuthTips } from "../components/auth/AuthTips";
+import { PasswordMatchHint, PasswordStrengthMeter } from "../components/auth/PasswordStrength";
 import { LoadingButton, TransitionScreen } from "../components/LoadingSpinner";
+import { useBackendSettings } from "../hooks/useBackendSettings";
 import { bg } from "../api";
 import { validateNewPassword } from "../../shared/password-validation";
+import { clearVaultAppHash, openVaultAppTab } from "../../shared/open-vault-tab";
 
 type Props = {
   onSuccess: () => void | Promise<void>;
+  openForgotInTab?: boolean;
+  isPopup?: boolean;
 };
 
-export function LoginPage({ onSuccess }: Props) {
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [showForgot, setShowForgot] = useState(false);
+const FORGOT_HASH = "#forgot";
+const CONNECTION_HASH = "#connection";
+const REGISTER_HASH = "#register";
+
+function readInitialHashState(): {
+  showForgot: boolean;
+  connectionOpen: boolean;
+  registerMode: boolean;
+} {
+  if (typeof window === "undefined") {
+    return { showForgot: false, connectionOpen: false, registerMode: false };
+  }
+  const hash = window.location.hash;
+  return {
+    showForgot: hash === FORGOT_HASH,
+    connectionOpen: hash === CONNECTION_HASH,
+    registerMode: hash === REGISTER_HASH,
+  };
+}
+
+export function LoginPage({ onSuccess, openForgotInTab = false, isPopup = false }: Props) {
+  const initialHash = readInitialHashState();
+  const [mode, setMode] = useState<"login" | "register">(
+    initialHash.registerMode ? "register" : "login"
+  );
+  const [showForgot, setShowForgot] = useState(initialHash.showForgot);
+  const [connectionOpen, setConnectionOpen] = useState(initialHash.connectionOpen);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,12 +55,29 @@ export function LoginPage({ onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
   const [transitionMessage, setTransitionMessage] = useState<string | null>(null);
   const [resetNotice, setResetNotice] = useState<string | null>(null);
-  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const serverSettings = useBackendSettings();
 
   useEffect(() => {
-    document.body.classList.toggle("auth-popup-active", advancedOpen);
-    return () => document.body.classList.remove("auth-popup-active");
-  }, [advancedOpen]);
+    function applyHash() {
+      const hash = window.location.hash;
+      if (hash === FORGOT_HASH) {
+        setShowForgot(true);
+        setConnectionOpen(false);
+        setMode("login");
+      } else if (hash === CONNECTION_HASH) {
+        setShowForgot(false);
+        setConnectionOpen(true);
+        setMode("login");
+      } else if (hash === REGISTER_HASH) {
+        setShowForgot(false);
+        setConnectionOpen(false);
+        setMode("register");
+      }
+    }
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,19 +111,24 @@ export function LoginPage({ onSuccess }: Props) {
     return <TransitionScreen message={transitionMessage} />;
   }
 
-  return (
-    <div className="app">
+  const isAuthFlow = showForgot || mode === "register";
+
+  const loginBody = (
+    <>
       <BrandHeader />
-      <p className="muted" style={{ textAlign: "center", marginBottom: 16 }}>
-        Secure password manager
-      </p>
+      <p className="muted login-tagline">Secure password manager</p>
       {showForgot ? (
         <ForgotPasswordPanel
-          onBack={() => setShowForgot(false)}
+          onBack={() => {
+            setShowForgot(false);
+            clearVaultAppHash();
+          }}
           onDone={(addr) => {
             setShowForgot(false);
+            clearVaultAppHash();
             setEmail(addr);
             setPassword("");
+            setConfirmPassword("");
             setMode("login");
             setResetNotice("Password reset. Sign in with your new password.");
           }}
@@ -80,79 +136,189 @@ export function LoginPage({ onSuccess }: Props) {
       ) : (
         <>
           {resetNotice && <p className="muted">{resetNotice}</p>}
+          {mode === "register" && !isPopup && (
+            <button
+              type="button"
+              className="link auth-form-back"
+              onClick={() => {
+                setMode("login");
+                setConfirmPassword("");
+                setError(null);
+                if (window.location.hash === REGISTER_HASH) {
+                  clearVaultAppHash();
+                }
+              }}
+            >
+              ← Back to login
+            </button>
+          )}
+          {mode === "register" && (
+            <AuthFormHeader
+              title="Create"
+              accent="your account"
+              subtitle="Set up VaultHarbor to sync your vault securely across devices."
+            />
+          )}
           <form onSubmit={(e) => void submit(e)}>
-            <div className="field">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={12}
-                autoComplete={mode === "login" ? "current-password" : "new-password"}
-              />
-            </div>
-            {mode === "register" && (
+            {mode === "register" ? (
+              <>
+                <AuthField
+                  id="email"
+                  label="Email"
+                  type="email"
+                  icon="mail"
+                  value={email}
+                  onChange={setEmail}
+                  required
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                />
+                <AuthField
+                  id="password"
+                  label="Password"
+                  type="password"
+                  icon="lock"
+                  value={password}
+                  onChange={setPassword}
+                  required
+                  autoComplete="new-password"
+                />
+                <PasswordStrengthMeter password={password} />
+                <AuthField
+                  id="confirm-password"
+                  label="Confirm password"
+                  type="password"
+                  icon="lock"
+                  value={confirmPassword}
+                  onChange={setConfirmPassword}
+                  required
+                  autoComplete="new-password"
+                />
+                <PasswordMatchHint password={password} confirm={confirmPassword} />
+                <AuthPasswordRequirements password={password} confirm={confirmPassword} />
+              </>
+            ) : (
               <>
                 <div className="field">
-                  <label htmlFor="confirm-password">Confirm password</label>
+                  <label htmlFor="email">Email</label>
                   <input
-                    id="confirm-password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
-                    minLength={12}
-                    autoComplete="new-password"
+                    autoComplete="email"
                   />
                 </div>
-                <PasswordRequirements password={password} confirm={confirmPassword} />
+                <div className="field">
+                  <label htmlFor="password">Password</label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={12}
+                    autoComplete="current-password"
+                  />
+                </div>
               </>
             )}
-            {error && <p className="error">{error}</p>}
-            <LoadingButton
-              loading={loading}
-              loadingLabel={mode === "login" ? "Signing in..." : "Creating account..."}
-              style={{ width: "100%" }}
-            >
-              {mode === "login" ? "Login" : "Create account"}
-            </LoadingButton>
+            {error && <p className="error auth-form-error">{error}</p>}
+            {mode === "register" ? (
+              <AuthSubmitButton loading={loading} loadingLabel="Creating account...">
+                Create account
+              </AuthSubmitButton>
+            ) : (
+              <LoadingButton
+                loading={loading}
+                loadingLabel="Signing in..."
+                style={{ width: "100%" }}
+              >
+                Login
+              </LoadingButton>
+            )}
           </form>
+          {mode === "register" && <AuthTips body="Use a unique password you don't reuse on other sites." />}
           {mode === "login" && (
-            <p style={{ marginTop: 8, textAlign: "center" }}>
-              <button type="button" className="link" onClick={() => setShowForgot(true)}>
+            <p className="login-links">
+              <button
+                type="button"
+                className="link"
+                onClick={() => {
+                  if (openForgotInTab) {
+                    void openVaultAppTab(FORGOT_HASH);
+                    return;
+                  }
+                  setShowForgot(true);
+                }}
+              >
                 Forgot password?
               </button>
             </p>
           )}
-          <p style={{ marginTop: 16, textAlign: "center" }}>
+          <p className="login-links login-links--switch">
             <button
               type="button"
               className="link"
               onClick={() => {
-                setMode(mode === "login" ? "register" : "login");
+                if (mode === "login") {
+                  if (isPopup) {
+                    void openVaultAppTab(REGISTER_HASH);
+                    return;
+                  }
+                  setMode("register");
+                  return;
+                }
+                setMode("login");
                 setConfirmPassword("");
                 setError(null);
+                if (window.location.hash === REGISTER_HASH) {
+                  clearVaultAppHash();
+                }
               }}
             >
               {mode === "login" ? "Create account" : "Already have an account? Login"}
             </button>
           </p>
-          <BackendSettingsPanel onAdvancedOpenChange={setAdvancedOpen} />
+          {!showForgot && mode === "login" && (
+            <ServerConnectionBar
+              active={serverSettings.active}
+              compact={isPopup}
+              onOpen={() => {
+                if (isPopup) {
+                  void openVaultAppTab(CONNECTION_HASH);
+                  return;
+                }
+                setConnectionOpen(true);
+              }}
+            />
+          )}
         </>
       )}
-    </div>
+    </>
   );
+
+  const appClass = isAuthFlow ? "app auth-flow" : "app";
+
+  if (!isPopup && connectionOpen && !showForgot) {
+    return (
+      <div className="vault-auth-split">
+        <div className="vault-auth-split__login">
+          <div className={appClass}>{loginBody}</div>
+        </div>
+        <ConnectionSettingsFull
+          settings={serverSettings}
+          onClose={() => {
+            setConnectionOpen(false);
+            if (window.location.hash === CONNECTION_HASH) {
+              clearVaultAppHash();
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  return <div className={appClass}>{loginBody}</div>;
 }

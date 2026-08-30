@@ -25,13 +25,24 @@ export type LoginItem = BaseVaultItem & {
   uri: string;
 };
 
-export type VaultItem = LoginItem | (BaseVaultItem & Record<string, unknown>);
+export type SecureNoteItem = BaseVaultItem & {
+  type: "secure_note";
+  content: string;
+};
+
+export type VaultItem = LoginItem | SecureNoteItem | (BaseVaultItem & Record<string, unknown>);
 
 export type NewLoginItem = {
   name: string;
   username: string;
   password: string;
   uri: string;
+  notes?: string;
+};
+
+export type NewSecureNoteItem = {
+  name: string;
+  content: string;
   notes?: string;
 };
 
@@ -53,8 +64,21 @@ export type EncryptedVaultMeta = {
   recovery_kdf_iterations?: number | null;
 };
 
+export type VaultListFilter = "all" | "login" | "secure_note" | "trash" | "other";
+export type VaultListSort = "name" | "updated";
+
+export type ListVaultItemsOptions = {
+  query?: string;
+  filter?: VaultListFilter;
+  sort?: VaultListSort;
+};
+
 export function isLoginItem(item: VaultItem): item is LoginItem {
   return item.type === "login" && !item.deleted_at;
+}
+
+export function isSecureNoteItem(item: VaultItem): item is SecureNoteItem {
+  return item.type === "secure_note" && !item.deleted_at;
 }
 
 export function isActiveItem(item: VaultItem): boolean {

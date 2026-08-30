@@ -17,6 +17,11 @@ import {
   addCredential,
   updateCredential,
   deleteCredential,
+  listVaultItems,
+  getVaultItem,
+  addSecureNote,
+  updateVaultItem,
+  restoreVaultItem,
   setupMasterPassword,
   loadDecryptedFromStorage,
   recoverWithRecoveryKey,
@@ -28,8 +33,9 @@ import * as authApi from "../api/auth-api";
 import { syncNow, resolveConflict, getPendingChangeCount } from "../sync/sync";
 import { uploadVault } from "../sync/sync";
 import { getAccessToken } from "../auth/tokens";
-import { getEncryptedVault } from "../vault/storage";
+import { getEncryptedVault, getLatestConflict } from "../vault/storage";
 import { findMatchesForPage, toCredentialSummary, classifyLoginCapture } from "../domain/credentials";
+import { toVaultItemSummary } from "../domain/vault-items";
 import { getActiveTab, queryTabs } from "../shared/browser";
 import { generatePassword } from "../password-generator/generator";
 import { copyViaOffscreen, scheduleClipboardClear } from "./clipboard";
@@ -62,6 +68,14 @@ async function getTabUrl(tabId: number): Promise<string | null> {
   return tab?.url ?? null;
 }
 
+async function persistVaultUpload(): Promise<void> {
+  const accessToken = await getAccessToken();
+  if (accessToken) {
+    const stored = await getEncryptedVault();
+    await uploadVault(accessToken, stored?.revision ?? 0);
+  }
+}
+
 async function validateTabOrigin(
   tabId: number,
   credential: LoginItem
@@ -70,6 +84,40 @@ async function validateTabOrigin(
   if (!url) return false;
   const { hostnameMatches } = await import("../domain/matching");
   return hostnameMatches(credential.uri, url);
+}
+
+function isExtensionPageUrl(url: string | null): boolean {
+  if (!url) return true;
+  return url.startsWith("chrome-extension:") || url.startsWith("moz-extension:");
+}
+
+async function resolveFillTabId(
+  preferredTabId: number | undefined,
+  credential: LoginItem
+): Promise<number> {
+  if (preferredTabId) {
+    const url = await getTabUrl(preferredTabId);
+    if (url && !isExtensionPageUrl(url)) {
+      const valid = await validateTabOrigin(preferredTabId, credential);
+      if (valid) return preferredTabId;
+      throw new ExtensionError(
+        "INVALID_ORIGIN",
+        "Can't fill — open the matching site first."
+      );
+    }
+  }
+  const { hostnameMatches } = await import("../domain/matching");
+  const tabs = await queryTabs({});
+  for (const tab of tabs) {
+    if (!tab.id || !tab.url || isExtensionPageUrl(tab.url)) continue;
+    if (hostnameMatches(credential.uri, tab.url)) {
+      return tab.id;
+    }
+  }
+  throw new ExtensionError(
+    "INVALID_ORIGIN",
+    "Can't fill — open the matching site first."
+  );
 }
 
 export async function handleBackgroundMessage(
@@ -202,32 +250,67 @@ export async function handleBackgroundMessage(
 
       case "ADD_CREDENTIAL": {
         const item = await addCredential(request.item);
-        const accessToken = await getAccessToken();
-        if (accessToken) {
-          const stored = await getEncryptedVault();
-          await uploadVault(accessToken, stored?.revision ?? 0);
-        }
+        await persistVaultUpload();
         return { ok: true, data: item };
       }
 
       case "UPDATE_CREDENTIAL": {
         const item = await updateCredential(request.item);
-        const accessToken = await getAccessToken();
-        if (accessToken) {
-          const stored = await getEncryptedVault();
-          await uploadVault(accessToken, stored?.revision ?? 0);
-        }
+        await persistVaultUpload();
         return { ok: true, data: item };
       }
 
       case "DELETE_CREDENTIAL": {
         await deleteCredential(request.id);
-        const accessToken = await getAccessToken();
-        if (accessToken) {
-          const stored = await getEncryptedVault();
-          await uploadVault(accessToken, stored?.revision ?? 0);
-        }
+        await persistVaultUpload();
         return { ok: true };
+      }
+
+      case "LIST_VAULT_ITEMS": {
+        const items = await listVaultItems({
+          query: request.query,
+          filter: request.filter,
+          sort: request.sort,
+        });
+        return { ok: true, data: items.map(toVaultItemSummary) };
+      }
+
+      case "GET_VAULT_ITEM": {
+        const item = await getVaultItem(request.id, true);
+        return { ok: true, data: item };
+      }
+
+      case "ADD_SECURE_NOTE": {
+        const item = await addSecureNote(request.item);
+        await persistVaultUpload();
+        return { ok: true, data: item };
+      }
+
+      case "UPDATE_VAULT_ITEM": {
+        const item = await updateVaultItem(request.item);
+        await persistVaultUpload();
+        return { ok: true, data: item };
+      }
+
+      case "DELETE_VAULT_ITEM": {
+        await deleteCredential(request.id);
+        await persistVaultUpload();
+        return { ok: true };
+      }
+
+      case "RESTORE_VAULT_ITEM": {
+        const item = await restoreVaultItem(request.id);
+        await persistVaultUpload();
+        return { ok: true, data: item };
+      }
+
+      case "GET_SYNC_STATUS": {
+        const pending = await getPendingChangeCount();
+        const conflict = await getLatestConflict();
+        return {
+          ok: true,
+          data: { pendingChanges: pending, hasConflict: Boolean(conflict) },
+        };
       }
 
       case "GET_CURRENT_SITE": {
@@ -259,10 +342,6 @@ export async function handleBackgroundMessage(
       }
 
       case "FILL_CREDENTIAL": {
-        const tabId = sender.tab?.id ?? request.tabId;
-        if (!tabId) {
-          throw new ExtensionError("INVALID_ORIGIN", "Unable to determine tab.");
-        }
         const credential = await getCredential(request.credentialId);
         if (!credential) {
           throw new ExtensionError(
@@ -270,13 +349,10 @@ export async function handleBackgroundMessage(
             "Credential not found."
           );
         }
-        const valid = await validateTabOrigin(tabId, credential);
-        if (!valid) {
-          throw new ExtensionError(
-            "INVALID_ORIGIN",
-            "Origin does not match saved credential."
-          );
-        }
+        const tabId = await resolveFillTabId(
+          sender.tab?.id ?? request.tabId,
+          credential
+        );
         await chrome.tabs.sendMessage(tabId, {
           type: "FILL_FIELDS",
           username: credential.username,
@@ -293,11 +369,7 @@ export async function handleBackgroundMessage(
           uri: request.credential.uri || url || "",
         };
         const added = await addCredential(item);
-        const accessToken = await getAccessToken();
-        if (accessToken) {
-          const stored = await getEncryptedVault();
-          await uploadVault(accessToken, stored?.revision ?? 0);
-        }
+        await persistVaultUpload();
         return { ok: true, data: added };
       }
 

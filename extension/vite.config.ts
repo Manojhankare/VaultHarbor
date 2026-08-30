@@ -74,6 +74,7 @@ export default defineConfig(({ mode }) => {
     rollupOptions: {
       input: {
         popup: resolve(root, "popup.html"),
+        vault: resolve(root, "vault.html"),
         picker: resolve(root, "picker.html"),
         "save-prompt": resolve(root, "save-prompt.html"),
         offscreen: resolve(root, "offscreen.html"),

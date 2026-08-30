@@ -7,7 +7,6 @@ const LOGO_URL = () => chrome.runtime.getURL("icons/icon128.png");
 let iconClickHandler: (() => void) | null = null;
 let iconAnchorEl: HTMLInputElement | null = null;
 let pillBtn: HTMLButtonElement | null = null;
-let chevronEl: SVGElement | null = null;
 
 const PILL_WIDTH = 52;
 const PILL_HEIGHT = 32;
@@ -55,7 +54,6 @@ function buildPillButton(): HTMLButtonElement {
   chevron.setAttribute("aria-hidden", "true");
   chevron.innerHTML =
     '<path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
-  chevronEl = chevron;
 
   btn.append(img, chevron);
   return btn;
@@ -217,7 +215,6 @@ export function removeFillIcon(): void {
   iconClickHandler = null;
   iconAnchorEl = null;
   pillBtn = null;
-  chevronEl = null;
   document.getElementById(ICON_ID)?.remove();
   window.removeEventListener("scroll", repositionFillIcon, true);
   window.removeEventListener("resize", repositionFillIcon);

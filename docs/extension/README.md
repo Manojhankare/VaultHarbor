@@ -28,7 +28,11 @@ Load `extension/dist/chrome/` unpacked.
 
 ## Vault popup (unlocked)
 
-The main vault list uses a compact layout: sticky search header, scrollable rows with site favicons and action menus, and a bottom icon bar (sync, add). Fill from the popup works only for credentials matching the active tab (same as before).
+The toolbar popup stays compact: sticky search, current-site matches, fill, sync, and add. Use **Open Vault** (external-link icon) to open the full-screen vault manager in a tab (`vault.html`). **Forgot password?** on the popup login screen also opens that tab (`#forgot`) for the account reset flow. Fill from the popup still requires an origin-matching active tab.
+
+## Full-screen vault
+
+The full-screen page is the primary place to search, filter, create, edit, and trash items (logins and secure notes). It uses the same service-worker crypto/sync pipeline as the popup — not a second vault. Folders, shared items, and passkeys are shown as coming-soon placeholders when the data model does not support them yet.
 
 Edit sources in [`branding/`](../branding/README.md) only (`vaultharborlogo_icon.png`). Run `node scripts/generate-icons.mjs` before build — transparent icons for toolbar/manifest; CSS `--vs-bg` provides popup backgrounds. Store promo is `extension/public/store/promo-440x280.png`.
 

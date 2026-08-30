@@ -13,6 +13,23 @@ from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 from sqlalchemy.pool import NullPool, QueuePool
 
 
+def bootstrap_env() -> None:
+    """Load backend/.env before reading Config. Skipped on Vercel."""
+    if os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"):
+        return
+    try:
+        from pathlib import Path
+
+        from dotenv import load_dotenv
+
+        load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=True)
+    except ImportError:
+        pass
+
+
+bootstrap_env()
+
+
 def _normalize_database_url(url: str) -> str:
     """Ensure psycopg3 driver scheme and sslmode=require."""
     if url.startswith("postgres://"):

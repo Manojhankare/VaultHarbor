@@ -26,6 +26,13 @@ class BrevoEmailSender:
         if message.html_body:
             payload["htmlContent"] = message.html_body
 
+        current_app.logger.info(
+            "Brevo send to %s from %s <%s>",
+            message.to_email,
+            current_app.config["EMAIL_FROM_NAME"],
+            current_app.config["EMAIL_FROM_ADDRESS"],
+        )
+
         post_json(
             "https://api.brevo.com/v3/smtp/email",
             headers={"api-key": api_key},

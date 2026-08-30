@@ -28,7 +28,7 @@ Single encrypted blob per user, monotonic `revision`, optimistic locking via `ba
 1. Fetch latest server vault
 2. Merge per-item last-write-wins on `updated_at`; tombstones win ties
 3. If `wrapped_vault_key` changed and local DEK cannot unwrap → lock vault (master password changed elsewhere)
-4. Surface conflict to user; never silently discard credentials
+4. Surface conflict to user (full-screen vault **Resolve** banner; `RESOLVE_CONFLICT` keep local / keep remote); never silently discard credentials
 
 ## Offline
 

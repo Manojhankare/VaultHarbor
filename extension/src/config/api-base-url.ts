@@ -15,6 +15,7 @@ export { normalizeApiBaseUrl, isUnencryptedHttpUrl } from "../shared/api-url-val
 
 const FORGOT_PASSWORD_STEP_KEY = "forgot_password_step";
 const FORGOT_PASSWORD_EMAIL_KEY = "forgot_password_email";
+const FORGOT_PASSWORD_SENT_AT_KEY = "forgot_password_sent_at";
 
 let cachedUrl: string | null = null;
 let switchMutex: Promise<void> = Promise.resolve();
@@ -67,6 +68,7 @@ async function clearSessionStateOnServerSwitch(): Promise<void> {
     STORAGE_KEYS.KEEP_UNLOCKED,
     FORGOT_PASSWORD_STEP_KEY,
     FORGOT_PASSWORD_EMAIL_KEY,
+    FORGOT_PASSWORD_SENT_AT_KEY,
   ]);
 }
 

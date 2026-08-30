@@ -14,7 +14,7 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.auth import auth_bp
-from app.config import get_config
+from app.config import bootstrap_env, get_config
 from app.devices import devices_bp
 from app.docs import docs_bp
 from app.extensions import cors, db, limiter, migrate
@@ -98,12 +98,7 @@ def register_request_hooks(app: Flask) -> None:
 
 
 def _load_dotenv() -> None:
-    try:
-        from dotenv import load_dotenv
-
-        load_dotenv()
-    except ImportError:
-        pass
+    bootstrap_env()
 
 
 def create_app(config_name: str | None = None) -> Flask:
@@ -131,6 +126,11 @@ def create_app(config_name: str | None = None) -> Flask:
         )
 
     configure_logging(app)
+    app.logger.info(
+        "Email sender configured as %s <%s>",
+        app.config["EMAIL_FROM_NAME"],
+        app.config["EMAIL_FROM_ADDRESS"],
+    )
     db.init_app(app)
     migrate.init_app(app, db)
     limiter.init_app(app)

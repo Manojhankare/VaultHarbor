@@ -3,7 +3,7 @@ import { bg } from "../api";
 import { CredentialRow } from "../components/CredentialRow";
 import type { MenuAction } from "../components/CredentialRowMenu";
 import { IconButton } from "../components/IconButton";
-import { IconLock, IconLogOut, IconSearch, IconX } from "../components/icons/Icon";
+import { IconExternalLink, IconLock, IconLogOut, IconSearch, IconX } from "../components/icons/Icon";
 import { VaultShell } from "../components/VaultShell";
 import { VaultToolbar } from "../components/VaultToolbar";
 import { AddCredentialPage } from "./AddCredentialPage";
@@ -13,6 +13,7 @@ import { PasswordGenerator } from "../components/PasswordGenerator";
 import type { CredentialSummary } from "../../shared/messages";
 import type { LoginItem } from "../../vault/vault-types";
 import { isValidHttpUrl } from "../../shared/favicon";
+import { openVaultAppTab } from "../../shared/open-vault-tab";
 
 type SiteInfo = {
   url: string;
@@ -304,6 +305,14 @@ export function VaultPage({
               </div>
             </div>
             <div className="vault-header__actions">
+              <IconButton
+                label="Open vault"
+                onClick={() => {
+                  void openVaultAppTab();
+                }}
+              >
+                <IconExternalLink size={17} />
+              </IconButton>
               <IconButton label="Lock vault" onClick={() => void handleLock()}>
                 <IconLock size={17} />
               </IconButton>

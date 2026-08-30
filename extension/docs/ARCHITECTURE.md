@@ -14,7 +14,9 @@ Popup ─────────────────→ Service worker
 | Layer | Role |
 |-------|------|
 | `src/background/` | Auth, vault lock, sync, message routing |
-| `src/popup/` | React UI (login, unlock, vault CRUD) |
+| `src/popup/` | Compact toolbar popup (quick fill, Open Vault) |
+| `src/vault-app/` | Full-screen vault manager (`vault.html`) |
+| `src/ui/` | Shared AuthRoot + vault layout components |
 | `src/content/` | Form detection, autofill icon, save prompt iframes |
 | `src/vault/` | Crypto, codec, IndexedDB |
 | `src/api/` | Typed REST client |

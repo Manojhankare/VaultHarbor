@@ -2,6 +2,72 @@
 
 All notable VaultHarbor project changes. Update this file with each significant release or deployment change.
 
+## 2026-08-30 — Master password full-screen auth flows
+
+### Changed
+
+- Popup **Forgot master password?** opens `vault.html#recover-master` (full-screen recovery with recovery key + new master password)
+- **Create master password** (post-signup) and **recover / update master** use the premium auth layout: strength meter, requirement pills, icon inputs, and tips
+- Popup defers vault setup to the full-screen tab (`vault.html#setup-master`); reset-vault destructive flow uses the same auth styling on full-screen
+
+## 2026-08-30 — Premium auth form UX
+
+### Changed
+
+- **Create account** and **forgot / reset password** use a shared premium auth layout: gradient title, icon inputs with show/hide, segmented strength meter, requirement pills, lock CTA, and tips accordion (full-screen tab)
+
+## 2026-08-30 — Full-screen server connection picker
+
+### Added
+
+- Full-screen login (`vault.html`): **Server connection** bar on the login card; gear opens a side **Connection** panel (VaultHarbor Cloud vs self-hosted/custom URL) matching the popup Advanced flow
+
+### Changed
+
+- Popup login: **Server connection** bar replaces inline Advanced editor; shows **Using VaultHarbor Cloud** or **Using self-hosted server**; gear opens `vault.html#connection`
+- Popup **Create account** opens `vault.html#register` (full-screen signup with password requirements)
+- Custom server **Save** requires a successful connection test first (full-screen and popup flows)
+
+## 2026-08-30 — Compact reset form
+
+### Changed
+
+- Account reset screen: compact header, two-column fields, password rules only after you start typing
+
+## 2026-08-30 — Resend reset code
+
+### Added
+
+- **Resend code** on the account-password reset form (same `forgot-password` API, 60s cooldown)
+
+## 2026-08-30 — Reset-password form scroll
+
+### Fixed
+
+- Full-screen forgot/reset flow can scroll so **Reset password** is reachable
+- Password-rule checklist is compact chips instead of a tall stacked list
+
+## 2026-08-30 — Forgot password opens full-screen vault
+
+### Changed
+
+- Popup **Forgot password?** opens `vault.html#forgot` in a browser tab (reuses an existing vault tab when present) so the reset-code flow is not cramped in the 360px popup
+
+## 2026-08-30 — Full-screen vault manager
+
+### Added
+
+- Extension full-screen vault page (`vault.html`) for searching, filtering, creating, editing, and trashing vault items
+- Secure note create/edit in the vault manager (encrypted with the existing vault blob)
+- Trash view with restore (existing 90-day tombstones)
+- Sync status and conflict resolution UI using the existing sync/ETag pipeline
+- Popup **Open Vault** control to launch the full-screen page
+
+### Changed
+
+- Shared auth routing (`AuthRoot`) between popup and vault page
+- Fill-from-extension can target another open tab that already matches the credential origin (matching rules unchanged)
+
 ## 2026-08-30 — Vault list scrollbar
 
 ### Fixed

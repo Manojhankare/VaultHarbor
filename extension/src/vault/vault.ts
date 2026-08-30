@@ -8,7 +8,12 @@ import {
   pruneTombstones,
   addLoginItem,
   updateLoginItem,
+  addSecureNoteItem,
+  updateSecureNoteItem,
   deleteLoginItem,
+  restoreVaultItem as restoreVaultItemInDoc,
+  listVaultItems as listVaultItemsInDoc,
+  getVaultItemById,
   searchVault,
   getLoginById,
 } from "./codec";
@@ -38,9 +43,13 @@ import {
 } from "../background/session-key";
 import * as vaultApi from "../api/vault-api";
 import type {
+  ListVaultItemsOptions,
   LoginItem,
   NewLoginItem,
+  NewSecureNoteItem,
+  SecureNoteItem,
   VaultDocument,
+  VaultItem,
   EncryptedVaultMeta,
 } from "./vault-types";
 
@@ -266,7 +275,11 @@ export async function addCredential(item: NewLoginItem): Promise<LoginItem> {
   const vault = await requireUnlockedVault();
   const updated = addLoginItem(vault, item);
   decryptedVaultCache = updated;
-  return getLoginById(updated, updated.items[updated.items.length - 1]!.id)!;
+  const created = updated.items[updated.items.length - 1];
+  if (!created || created.type !== "login") {
+    throw new ExtensionError("VALIDATION_ERROR", "Failed to create login.");
+  }
+  return created as LoginItem;
 }
 
 export async function updateCredential(item: LoginItem): Promise<LoginItem> {
@@ -278,6 +291,65 @@ export async function updateCredential(item: LoginItem): Promise<LoginItem> {
 export async function deleteCredential(id: string): Promise<void> {
   const vault = await requireUnlockedVault();
   decryptedVaultCache = deleteLoginItem(vault, id);
+}
+
+export async function listVaultItems(
+  opts?: ListVaultItemsOptions
+): Promise<VaultItem[]> {
+  const vault = await requireUnlockedVault();
+  return listVaultItemsInDoc(vault, opts);
+}
+
+export async function getVaultItem(
+  id: string,
+  includeDeleted = true
+): Promise<VaultItem | null> {
+  const vault = await requireUnlockedVault();
+  return getVaultItemById(vault, id, includeDeleted);
+}
+
+export async function addSecureNote(
+  item: NewSecureNoteItem
+): Promise<SecureNoteItem> {
+  const vault = await requireUnlockedVault();
+  const updated = addSecureNoteItem(vault, item);
+  decryptedVaultCache = updated;
+  const created = updated.items[updated.items.length - 1];
+  if (!created || created.type !== "secure_note") {
+    throw new ExtensionError("VALIDATION_ERROR", "Failed to create secure note.");
+  }
+  return created as SecureNoteItem;
+}
+
+export async function updateSecureNote(
+  item: SecureNoteItem
+): Promise<SecureNoteItem> {
+  const vault = await requireUnlockedVault();
+  decryptedVaultCache = updateSecureNoteItem(vault, item);
+  return getVaultItemById(decryptedVaultCache, item.id) as SecureNoteItem;
+}
+
+export async function updateVaultItem(item: VaultItem): Promise<VaultItem> {
+  if (item.type === "login") {
+    return updateCredential(item as LoginItem);
+  }
+  if (item.type === "secure_note") {
+    return updateSecureNote(item as SecureNoteItem);
+  }
+  throw new ExtensionError(
+    "VALIDATION_ERROR",
+    "This item type cannot be edited yet. Existing data is preserved."
+  );
+}
+
+export async function deleteVaultItem(id: string): Promise<void> {
+  await deleteCredential(id);
+}
+
+export async function restoreVaultItem(id: string): Promise<VaultItem | null> {
+  const vault = await requireUnlockedVault();
+  decryptedVaultCache = restoreVaultItemInDoc(vault, id);
+  return getVaultItemById(decryptedVaultCache, id, true);
 }
 
 export async function encryptCurrentVault(): Promise<{

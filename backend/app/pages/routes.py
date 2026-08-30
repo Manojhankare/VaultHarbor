@@ -141,14 +141,16 @@ LANDING_BODY = f"""
 """
 
 FAQ_BODY = f"""
-  <div class="page-hero">
-    <div class="container">
-      <h1>Frequently Asked Questions</h1>
-      <p>Answers about VaultHarbor security, installation, sync, and your data.</p>
+  <div class="faq-page">
+    <div class="page-hero">
+      <div class="container">
+        <h1>Frequently Asked Questions</h1>
+        <p>Answers about VaultHarbor security, installation, sync, and your data.</p>
+      </div>
     </div>
-  </div>
-  <div class="faq-list">
+    <div class="faq-list">
 {faq_items_html()}
+    </div>
   </div>
 """
 

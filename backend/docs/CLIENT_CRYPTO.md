@@ -84,7 +84,7 @@ Both `encrypted_vault` and `wrapped_vault_key` use the same framing.
 | type | Fields |
 |------|--------|
 | `login` | name, username, password, uri, notes |
-| `secure_note` | name, notes |
+| `secure_note` | name, content, notes |
 | `api_credential` | name, api_key, notes |
 | `database_credential` | name, connection_string, username, password, notes |
 | `server_credential` | name, host, username, password, port, notes |

@@ -3,9 +3,9 @@
 VaultHarbor backend — Manoj Hankare (https://manojhankare.in)
 """
 
-from dotenv import load_dotenv
+from app.config import bootstrap_env
 
-load_dotenv()
+bootstrap_env()
 
 from app import create_app
 

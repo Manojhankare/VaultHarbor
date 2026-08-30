@@ -23,7 +23,11 @@ EXTENSION_RELEASE_ZIP = "vaultsync-extension-0.1.0-chrome.zip"
 
 BASE_CSS = """
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth; scroll-padding-top: 3.8rem;
+      scrollbar-width: none;
+    }
+    html::-webkit-scrollbar { display: none; }
     body {
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       background: #000814; color: #f1f5f9; line-height: 1.6; min-height: 100vh;
@@ -109,20 +113,28 @@ BASE_CSS = """
     .legal-body p, .legal-body li { color: #e2e8f0; font-size: 0.95rem; margin-bottom: 0.75rem; }
     .legal-body ul { padding-left: 1.25rem; margin-bottom: 1rem; }
     .legal-body .updated { font-size: 0.85rem; color: #64748b; margin-bottom: 2rem; }
-    .faq-list { max-width: 42rem; margin: 0 auto; padding: 0 1.25rem 3rem; }
+    .faq-list {
+      width: min(72rem, 94vw); max-width: 72rem; margin: 0 auto;
+      padding: 0 1.5rem 3.5rem;
+    }
     details.faq-item {
       background: #1e293b; border: 1px solid #334155; border-radius: 0.5rem;
-      margin-bottom: 0.75rem; overflow: hidden;
+      margin-bottom: 0.85rem; overflow: hidden;
     }
     details.faq-item summary {
-      padding: 1rem 1.25rem; cursor: pointer; font-weight: 600; color: #f1f5f9;
+      padding: 1.15rem 1.35rem; cursor: pointer; font-weight: 600; color: #f1f5f9;
       list-style: none; display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; line-height: 1.4;
     }
     details.faq-item summary::-webkit-details-marker { display: none; }
-    details.faq-item summary::after { content: "+"; color: #0ec9fc; font-size: 1.25rem; font-weight: 400; }
+    details.faq-item summary::after { content: "+"; color: #0ec9fc; font-size: 1.25rem; font-weight: 400; flex-shrink: 0; }
     details.faq-item[open] summary::after { content: "−"; }
-    details.faq-item .faq-answer { padding: 0 1.25rem 1.25rem; color: #cbd5e1; font-size: 0.95rem; }
+    details.faq-item .faq-answer {
+      padding: 0 1.35rem 1.35rem; color: #cbd5e1; font-size: 0.95rem; line-height: 1.65;
+    }
     details.faq-item .faq-answer a { color: #0ec9fc; }
+    .faq-page .page-hero { padding-bottom: 1.5rem; }
+    .faq-page .faq-list { margin-bottom: 0; }
     code {
       font-family: ui-monospace, monospace; font-size: 0.88em;
       background: #1e293b; padding: 0.1em 0.35em; border-radius: 0.25rem; color: #7dd3fc;
@@ -881,11 +893,11 @@ LANDING_EXTRA_CSS = """
         transform: none;
       }
     }
-    #features { padding: 4.5rem 0; }
-    .features-header { text-align: center; max-width: 44rem; margin: 0 auto 3rem; }
+    #features { padding: 3.75rem 0; }
+    .features-header { text-align: center; max-width: 44rem; margin: 0 auto 2.25rem; }
     .features-title {
-      font-size: clamp(1.85rem, 4.2vw, 2.5rem); font-weight: 700; color: #f8fafc;
-      line-height: 1.22; letter-spacing: -0.025em; margin-bottom: 0.85rem;
+      font-size: clamp(1.75rem, 4vw, 2.35rem); font-weight: 700; color: #f8fafc;
+      line-height: 1.22; letter-spacing: -0.025em; margin-bottom: 0.65rem;
     }
     .features-accent-cyan {
       background: linear-gradient(135deg, #0ec9fc 0%, #0ec9fc 55%, #0090f8 100%);
@@ -895,17 +907,18 @@ LANDING_EXTRA_CSS = """
       background: linear-gradient(135deg, #8b5af2 0%, #a855f7 55%, #c084fc 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .features-desc { color: #94a3b8; font-size: 0.95rem; line-height: 1.65; max-width: 36rem; margin: 0 auto; }
+    .features-desc { color: #94a3b8; font-size: 0.925rem; line-height: 1.58; max-width: 38rem; margin: 0 auto; }
+    .features-header .section-label { margin-bottom: 0.45rem; }
     .features-stage {
       position: relative;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-      grid-template-rows: repeat(3, auto);
-      column-gap: clamp(1.25rem, 3.5vw, 2.75rem);
-      row-gap: clamp(2.5rem, 4.5vw, 3.25rem);
+      grid-template-columns: minmax(0, 1fr) clamp(6.75rem, 11vw, 8.5rem) minmax(0, 1fr);
+      grid-template-rows: repeat(3, minmax(4.5rem, auto));
+      column-gap: clamp(1.25rem, 3vw, 2.5rem);
+      row-gap: clamp(1.75rem, 3.2vw, 2.35rem);
       align-items: center;
-      margin-top: 0.75rem;
-      padding: 0 0.25rem;
+      margin-top: 0.5rem;
+      width: 100%;
     }
     .features-wires {
       position: absolute; inset: 0; width: 100%; height: 100%;
@@ -915,7 +928,7 @@ LANDING_EXTRA_CSS = """
       grid-column: 2; grid-row: 1 / -1;
       display: flex; align-items: center; justify-content: center;
       position: relative; z-index: 2;
-      width: clamp(7.25rem, 12vw, 9.5rem);
+      width: 100%;
     }
     .features-hub-outer {
       position: relative; width: 100%; aspect-ratio: 1;
@@ -923,7 +936,7 @@ LANDING_EXTRA_CSS = """
       background: rgba(6, 10, 20, 0.96);
       border: 1px solid rgba(148, 163, 184, 0.22);
       clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
     }
     .features-hub-core {
       position: relative; width: 62%; aspect-ratio: 1;
@@ -951,44 +964,72 @@ LANDING_EXTRA_CSS = """
     }
     .feat-group {
       position: relative; z-index: 1;
-      display: flex; align-items: flex-start; gap: 0.85rem;
+      align-items: center;
+      gap: clamp(0.75rem, 1.5vw, 1.1rem);
     }
     .feat-group--left {
       grid-column: 1;
-      justify-content: flex-start;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      justify-items: end;
     }
     .feat-group--right {
       grid-column: 3;
-      justify-content: flex-end;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      justify-items: start;
     }
     .feat-row-1 { grid-row: 1; }
     .feat-row-2 { grid-row: 2; }
     .feat-row-3 { grid-row: 3; }
     .feat-icon {
-      flex-shrink: 0; width: 3.15rem; height: 3.15rem; border-radius: 50%;
+      flex-shrink: 0; width: 3rem; height: 3rem; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      background: rgba(6, 10, 22, 0.82);
+      background: rgba(6, 10, 22, 0.98);
       backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 2;
     }
+    .feat-icon--left { grid-column: 2; grid-row: 1; }
+    .feat-icon--right { grid-column: 1; grid-row: 1; }
     .feat-icon--left {
       border: 1px solid rgba(14, 201, 252, 0.42);
-      box-shadow: 0 0 26px rgba(14, 201, 252, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 0 0 3px rgba(14, 201, 252, 0.06),
+        0 0 24px rgba(14, 201, 252, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
     .feat-icon--right {
       border: 1px solid rgba(167, 139, 250, 0.45);
-      box-shadow: 0 0 26px rgba(129, 140, 248, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 0 0 3px rgba(168, 85, 247, 0.06),
+        0 0 24px rgba(129, 140, 248, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
     .feat-icon svg {
-      width: 1.35rem; height: 1.35rem; stroke: url(#featIconGrad); fill: none;
+      width: 1.3rem; height: 1.3rem; stroke: url(#featIconGrad); fill: none;
       stroke-linecap: round; stroke-linejoin: round;
     }
-    .feat-copy { flex: 0 1 16.75rem; min-width: 0; }
-    .feat-copy--left { text-align: left; }
-    .feat-copy--right { text-align: right; }
-    .feat-copy h3 {
-      font-size: 0.96rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.38rem; line-height: 1.28;
+    .feat-copy {
+      min-width: 0;
+      max-width: clamp(13.5rem, 28vw, 19.5rem);
     }
-    .feat-copy p { font-size: 0.8125rem; color: #94a3b8; line-height: 1.58; margin: 0; }
+    .feat-copy--left {
+      grid-column: 1; grid-row: 1;
+      text-align: right;
+      justify-self: end;
+      padding-right: 0.15rem;
+    }
+    .feat-copy--right {
+      grid-column: 2; grid-row: 1;
+      text-align: left;
+      justify-self: start;
+      padding-left: 0.15rem;
+    }
+    .feat-copy h3 {
+      font-size: 0.94rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.32rem; line-height: 1.3;
+    }
+    .feat-copy p { font-size: 0.8125rem; color: #94a3b8; line-height: 1.52; margin: 0; }
     @media (max-width: 900px) {
       .features-stage {
         grid-template-columns: 1fr;
@@ -1005,10 +1046,23 @@ LANDING_EXTRA_CSS = """
       .feat-group--left,
       .feat-group--right {
         grid-column: 1;
+        display: flex;
+        flex-direction: row;
         justify-content: flex-start;
+        justify-items: unset;
       }
       .feat-group--right { flex-direction: row; }
-      .feat-copy--right { text-align: left; flex: 1; }
+      .feat-icon--left,
+      .feat-icon--right { grid-column: unset; grid-row: unset; }
+      .feat-copy--left,
+      .feat-copy--right {
+        grid-column: unset; grid-row: unset;
+        text-align: left;
+        justify-self: unset;
+        flex: 1;
+        max-width: none;
+        padding: 0;
+      }
       .feat-row-1 { grid-row: 2; }
       .feat-group--right.feat-row-1 { grid-row: 3; }
       .feat-row-2 { grid-row: 4; }
@@ -1018,7 +1072,7 @@ LANDING_EXTRA_CSS = """
     }
     .features-footer-banner {
       display: grid; grid-template-columns: 1fr auto 1fr; gap: 1.25rem 2rem; align-items: center;
-      margin-top: 3.5rem; padding: 1.15rem clamp(1.5rem, 3vw, 2.5rem);
+      margin-top: 2.75rem; padding: 1.05rem clamp(1.5rem, 3vw, 2.25rem);
       background: linear-gradient(145deg, rgba(10, 16, 28, 0.92), rgba(16, 24, 40, 0.96));
       border: 1px solid rgba(14, 201, 252, 0.18); border-radius: 999px;
       box-shadow:
@@ -1030,32 +1084,34 @@ LANDING_EXTRA_CSS = """
         grid-template-columns: 1fr; text-align: center; gap: 1rem;
         border-radius: 1.25rem; padding: 1.35rem 1.25rem;
       }
-      .features-footer-left { justify-content: center; }
+      .features-footer-left { justify-content: center; justify-self: center; }
       .features-footer-divider { display: none; }
-      .features-footer-right p { text-align: center; }
+      .features-footer-right p { text-align: center; justify-self: center; }
     }
     .features-footer-left {
-      display: flex; align-items: center; gap: 0.9rem;
+      display: flex; align-items: center; gap: 0.85rem;
+      justify-self: start;
     }
     .features-footer-shield-wrap {
-      flex-shrink: 0; width: 2.75rem; height: 2.75rem; color: #0ec9fc;
+      flex-shrink: 0; width: 2.35rem; height: 2.35rem; color: #0ec9fc;
       display: flex; align-items: center; justify-content: center;
       border-radius: 50%;
       background: rgba(6, 10, 22, 0.82);
       border: 1px solid rgba(14, 201, 252, 0.35);
       box-shadow: 0 0 20px rgba(14, 201, 252, 0.16);
     }
-    .features-footer-shield-wrap svg { width: 1.35rem; height: 1.35rem; }
+    .features-footer-shield-wrap svg { width: 1.15rem; height: 1.15rem; }
     .features-footer-left strong {
-      display: block; font-size: 0.9rem; color: #f1f5f9; margin-bottom: 0.15rem;
+      display: block; font-size: 0.85rem; color: #f1f5f9; margin-bottom: 0.1rem;
     }
-    .features-footer-left p { font-size: 0.78rem; color: #64748b; margin: 0; line-height: 1.45; }
+    .features-footer-left p { font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.4; }
     .features-footer-divider {
-      width: 1px; height: 2.5rem;
+      width: 1px; height: 2rem;
       background: linear-gradient(180deg, transparent, rgba(100, 116, 139, 0.55), transparent);
     }
     .features-footer-right p {
-      font-size: 0.9rem; color: #cbd5e1; line-height: 1.55; margin: 0; text-align: center;
+      font-size: 0.875rem; color: #cbd5e1; line-height: 1.5; margin: 0;
+      text-align: right; justify-self: end;
     }
     .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2rem; }
     @media (max-width: 768px) { .steps { grid-template-columns: 1fr; } }
@@ -1360,7 +1416,7 @@ LANDING_EXTRA_CSS = """
       padding: 0.65rem 1.25rem; border-radius: 0.5rem; font-size: 0.9rem;
     }
     .store-badge svg { width: 20px; height: 20px; opacity: 0.5; }
-    .faq-preview { margin-top: 2rem; }
+    .faq-preview { margin: 2rem auto 0; max-width: 72rem; width: 100%; }
     .faq-preview .more-link { display: inline-block; margin-top: 1rem; font-weight: 600; }
     .support-section {
       padding: 4rem 0 3.5rem;
@@ -1858,18 +1914,18 @@ def _feature_row(
 ) -> str:
     return f"""
         <div class="feat-group feat-group--left feat-row-{row}">
-          <div class="feat-icon feat-icon--left">{left_icon}</div>
           <div class="feat-copy feat-copy--left">
             <h3>{left_title}</h3>
             <p>{left_desc}</p>
           </div>
+          <div class="feat-icon feat-icon--left">{left_icon}</div>
         </div>
         <div class="feat-group feat-group--right feat-row-{row}">
+          <div class="feat-icon feat-icon--right">{right_icon}</div>
           <div class="feat-copy feat-copy--right">
             <h3>{right_title}</h3>
             <p>{right_desc}</p>
           </div>
-          <div class="feat-icon feat-icon--right">{right_icon}</div>
         </div>"""
 
 
@@ -1900,36 +1956,30 @@ def features_section_html() -> str:
           <stop offset="100%" stop-color="#a855f7"/>
         </linearGradient>
       </defs>
-      <path d="M 46.5 50 C 42.5 50, 38 50, 32.5 50" stroke="url(#featWireCyan)" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
-      <path d="M 46.5 50 C 43.5 43, 38.5 24, 32.5 17" stroke="url(#featWireCyan)" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
-      <path d="M 46.5 50 C 43.5 57, 38.5 76, 32.5 83" stroke="url(#featWireCyan)" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
-      <path d="M 53.5 50 C 57.5 50, 62 50, 67.5 50" stroke="url(#featWirePurple)" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
-      <path d="M 53.5 50 C 56.5 43, 61.5 24, 67.5 17" stroke="url(#featWirePurple)" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
-      <path d="M 53.5 50 C 56.5 57, 61.5 76, 67.5 83" stroke="url(#featWirePurple)" stroke-width="0.35" vector-effect="non-scaling-stroke"/>
-      <circle cx="32.5" cy="17" r="0.9" fill="#0ec9fc" opacity="0.9"/>
-      <circle cx="32.5" cy="50" r="0.9" fill="#0ec9fc" opacity="0.9"/>
-      <circle cx="32.5" cy="83" r="0.9" fill="#0ec9fc" opacity="0.9"/>
-      <circle cx="67.5" cy="17" r="0.9" fill="#a855f7" opacity="0.9"/>
-      <circle cx="67.5" cy="50" r="0.9" fill="#a855f7" opacity="0.9"/>
-      <circle cx="67.5" cy="83" r="0.9" fill="#a855f7" opacity="0.9"/>
+      <path d="M 46.5 50 C 44.5 49.5, 43 49.5, 42.2 50" stroke="url(#featWireCyan)" stroke-width="0.38" vector-effect="non-scaling-stroke"/>
+      <path d="M 46.5 50 C 44.5 44.5, 43.2 24, 42.2 17" stroke="url(#featWireCyan)" stroke-width="0.38" vector-effect="non-scaling-stroke"/>
+      <path d="M 46.5 50 C 44.5 55.5, 43.2 76, 42.2 83" stroke="url(#featWireCyan)" stroke-width="0.38" vector-effect="non-scaling-stroke"/>
+      <path d="M 53.5 50 C 55.5 49.5, 57 49.5, 57.8 50" stroke="url(#featWirePurple)" stroke-width="0.38" vector-effect="non-scaling-stroke"/>
+      <path d="M 53.5 50 C 55.5 44.5, 56.8 24, 57.8 17" stroke="url(#featWirePurple)" stroke-width="0.38" vector-effect="non-scaling-stroke"/>
+      <path d="M 53.5 50 C 55.5 55.5, 56.8 76, 57.8 83" stroke="url(#featWirePurple)" stroke-width="0.38" vector-effect="non-scaling-stroke"/>
     </svg>"""
 
     rows_html = "".join([
         _feature_row(
             1, icon_lock,
             "Zero-knowledge encryption",
-            "Your vault is encrypted with AES-GCM on your device. The server stores ciphertext it can never decrypt.",
+            "Your vault is encrypted with AES-GCM on your device. The server only stores ciphertext it can never decrypt.",
             icon_autofill,
             "One-click autofill",
-            "Fill usernames and passwords on any site. VaultHarbor detects login fields and offers matching credentials instantly.",
+            "Fill usernames and passwords on any site. VaultHarbor detects login fields and offers matching credentials.",
         ),
         _feature_row(
             2, icon_sync,
             "Cross-device sync",
-            "Sign in on any browser with the extension. Your encrypted vault syncs automatically across all your devices.",
+            "Sign in on any browser with the extension. Your encrypted vault syncs automatically across devices.",
             icon_bell,
             "Save &amp; update prompts",
-            "Capture new logins as you sign up. When a password changes, VaultHarbor asks whether to update the existing entry.",
+            "Get prompted to save new logins when you sign up, and to update entries when a password changes.",
         ),
         _feature_row(
             3, icon_key,
@@ -1937,7 +1987,7 @@ def features_section_html() -> str:
             "One master password derives your vault key locally. It never travels to the server, not even as a hash.",
             icon_server,
             "Self-hosted backend",
-            "Run your own sync server or use the hosted instance. Your encrypted data stays under your infrastructure.",
+            "Run your own sync server or use the hosted instance. Your encrypted data stays under your control.",
         ),
     ])
 
@@ -2233,7 +2283,7 @@ def faq_items_html() -> str:
     parts = []
     for question, answer in items:
         parts.append(
-            f"""    <details class="faq-item">
+            f"""    <details class="faq-item" name="faq">
       <summary>{question}</summary>
       <div class="faq-answer"><p>{answer}</p></div>
     </details>"""
@@ -2243,8 +2293,8 @@ def faq_items_html() -> str:
 
 def faq_preview_html(count: int = 3) -> str:
     """First N FAQ items for the landing page."""
+    marker = '<details class="faq-item" name="faq">'
     full = faq_items_html()
-    items = full.split('<details class="faq-item">')
-    # items[0] is empty prefix; take count+1 slices rejoined
-    selected = ['<details class="faq-item">' + items[i] for i in range(1, min(count + 1, len(items)))]
+    items = full.split(marker)
+    selected = [marker + items[i] for i in range(1, min(count + 1, len(items)))]
     return "\n".join(selected)

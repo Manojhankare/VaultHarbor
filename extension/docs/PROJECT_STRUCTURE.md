@@ -16,9 +16,16 @@ extension/
 │   │   ├── autofill.ts         Field filling
 │   │   └── save-login.ts       Icon + iframe UI
 │   ├── popup/
-│   │   ├── App.tsx             Route by auth/vault state
+│   │   ├── App.tsx             AuthRoot wrapper + compact vault
 │   │   ├── pages/              Login, unlock, vault, CRUD
 │   │   └── components/         Password generator, BrandHeader, AuthorFooter
+│   ├── vault-app/
+│   │   ├── main.tsx            Full-screen vault.html entry
+│   │   ├── App.tsx             AuthRoot + VaultManagerApp
+│   │   └── vault-app.css       Full-viewport layout
+│   ├── ui/
+│   │   ├── AuthRoot.tsx        Shared login/unlock/setup routing
+│   │   └── vault/              Full-screen vault manager UI
 │   ├── vault/
 │   │   ├── crypto.ts           PBKDF2, AES-GCM
 │   │   ├── codec.ts            Vault JSON + tombstones
@@ -31,12 +38,15 @@ extension/
 │   ├── api/                    REST client modules
 │   ├── config/
 │   │   └── api-base-url.ts     Runtime backend URL resolver + server switch
-│   ├── domain/                 URL + hostname matching
+│   ├── domain/                 URL matching + vault item summaries
 │   ├── devices/                Device registration
 │   ├── password-generator/
 │   ├── offscreen/              Clipboard document
-│   ├── shared/                 browser shim, constants, brand, author, api-url-validation, api-base-url-read
+│   ├── shared/                 browser shim, constants, brand, open-vault-tab, api-url-validation
 │   └── types/                  API DTOs
+├── popup.html
+├── vault.html                  Full-screen vault manager
+├── picker.html
 ├── tests/
 ├── public/icons/
 ├── dist/chrome/                Chromium build

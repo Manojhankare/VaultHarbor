@@ -1,7 +1,10 @@
 import { VAULT_VERSION, TOMBSTONE_RETENTION_DAYS } from "../shared/constants";
 import type {
+  ListVaultItemsOptions,
   LoginItem,
   NewLoginItem,
+  NewSecureNoteItem,
+  SecureNoteItem,
   VaultDocument,
   VaultItem,
 } from "./vault-types";
@@ -70,6 +73,41 @@ export function updateLoginItem(
   };
 }
 
+export function addSecureNoteItem(
+  vault: VaultDocument,
+  item: NewSecureNoteItem
+): VaultDocument {
+  const now = new Date().toISOString();
+  const note: SecureNoteItem = {
+    id: crypto.randomUUID(),
+    type: "secure_note",
+    name: item.name,
+    content: item.content,
+    notes: item.notes ?? "",
+    custom_fields: {},
+    created_at: now,
+    updated_at: now,
+  };
+  return {
+    ...vault,
+    items: [...vault.items, note],
+  };
+}
+
+export function updateSecureNoteItem(
+  vault: VaultDocument,
+  updated: SecureNoteItem
+): VaultDocument {
+  return {
+    ...vault,
+    items: vault.items.map((item) =>
+      item.id === updated.id
+        ? { ...updated, type: "secure_note", updated_at: new Date().toISOString() }
+        : item
+    ),
+  };
+}
+
 export function deleteLoginItem(
   vault: VaultDocument,
   id: string
@@ -83,6 +121,81 @@ export function deleteLoginItem(
         : item
     ),
   };
+}
+
+export const deleteVaultItem = deleteLoginItem;
+
+export function restoreVaultItem(
+  vault: VaultDocument,
+  id: string
+): VaultDocument {
+  const now = new Date().toISOString();
+  return {
+    ...vault,
+    items: vault.items.map((item) =>
+      item.id === id
+        ? { ...item, deleted_at: null, updated_at: now }
+        : item
+    ),
+  };
+}
+
+function searchHaystack(item: VaultItem): string {
+  const parts = [item.name, item.notes ?? "", item.type];
+  if (item.type === "login") {
+    const login = item as LoginItem;
+    parts.push(login.username ?? "", login.uri ?? "");
+  } else if (item.type === "secure_note") {
+    const note = item as SecureNoteItem;
+    parts.push(note.content ?? "");
+  }
+  return parts.join(" ").toLowerCase();
+}
+
+export function listVaultItems(
+  vault: VaultDocument,
+  opts: ListVaultItemsOptions = {}
+): VaultItem[] {
+  const filter = opts.filter ?? "all";
+  const sort = opts.sort ?? "name";
+  const query = (opts.query ?? "").trim().toLowerCase();
+
+  let items = vault.items.filter((item) => {
+    if (filter === "trash") {
+      return Boolean(item.deleted_at);
+    }
+    if (item.deleted_at) return false;
+    if (filter === "login") return item.type === "login";
+    if (filter === "secure_note") return item.type === "secure_note";
+    if (filter === "other") {
+      return item.type !== "login" && item.type !== "secure_note";
+    }
+    return true;
+  });
+
+  if (query) {
+    items = items.filter((item) => searchHaystack(item).includes(query));
+  }
+
+  const sorted = [...items];
+  sorted.sort((a, b) => {
+    if (sort === "updated") {
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    }
+    return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+  });
+  return sorted;
+}
+
+export function getVaultItemById(
+  vault: VaultDocument,
+  id: string,
+  includeDeleted = false
+): VaultItem | null {
+  const item = vault.items.find((i) => i.id === id);
+  if (!item) return null;
+  if (item.deleted_at && !includeDeleted) return null;
+  return item;
 }
 
 export function searchVault(

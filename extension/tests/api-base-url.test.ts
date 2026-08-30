@@ -72,6 +72,11 @@ describe("isUnencryptedHttpUrl", () => {
   it("flags remote http", () => {
     expect(isUnencryptedHttpUrl("http://vault.example.com")).toBe(true);
   });
+
+  it("returns false for empty or invalid urls", () => {
+    expect(isUnencryptedHttpUrl("")).toBe(false);
+    expect(isUnencryptedHttpUrl("not-a-url")).toBe(false);
+  });
 });
 
 describe("getApiBaseUrl", () => {

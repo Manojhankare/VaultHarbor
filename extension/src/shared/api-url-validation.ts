@@ -25,7 +25,16 @@ export function normalizeApiBaseUrl(input: string): string {
 }
 
 export function isUnencryptedHttpUrl(url: string): boolean {
-  const parsed = new URL(url);
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return false;
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    return false;
+  }
   if (parsed.protocol !== "http:") {
     return false;
   }

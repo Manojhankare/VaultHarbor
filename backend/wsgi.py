@@ -9,13 +9,9 @@ import sys
 import traceback
 
 try:
-    try:
-        from dotenv import load_dotenv
+    from app.config import bootstrap_env
 
-        load_dotenv()
-    except ImportError:
-        # Vercel injects env vars directly; dotenv is optional at runtime.
-        pass
+    bootstrap_env()
 
     from app import create_app
 

@@ -26,7 +26,7 @@ Icons: edit [`branding/vaultharborlogo_icon.png`](../branding/vaultharborlogo_ic
 
 Load **`dist/chrome/`** unpacked in `chrome://extensions` (Developer mode).
 
-The unlocked **vault list** popup uses a compact NordPass-style layout: sticky search header, scrollable rows with favicons and action menus, bottom sync/add toolbar.
+The unlocked **vault list** popup stays compact (search, favicons, sync/add). Open the full-screen vault from the popup (**Open Vault**) to manage logins and secure notes in a tab (`vault.html`). **Forgot password?** on the popup login screen opens that same tab for the reset-code flow.
 
 For **auto-updates** for end users, publish to the [Chrome Web Store](https://chrome.google.com/webstore/devconsole). See [docs/extension/RELEASE.md](../docs/extension/RELEASE.md).
 

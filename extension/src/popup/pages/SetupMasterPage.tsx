@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { BrandHeader } from "../components/BrandHeader";
-import { PasswordRequirements } from "../components/PasswordRequirements";
-import { LoadingButton, TransitionScreen } from "../components/LoadingSpinner";
+import { AuthField } from "../components/auth/AuthField";
+import { AuthFormHeader } from "../components/auth/AuthFormHeader";
+import { AuthPasswordRequirements } from "../components/auth/AuthPasswordRequirements";
+import { AuthSubmitButton } from "../components/auth/AuthSubmitButton";
+import { AuthTips } from "../components/auth/AuthTips";
+import { PasswordMatchHint, PasswordStrengthMeter } from "../components/auth/PasswordStrength";
+import { TransitionScreen } from "../components/LoadingSpinner";
 import { bg } from "../api";
 import { validateNewPassword } from "../../shared/password-validation";
 
@@ -47,41 +52,44 @@ export function SetupMasterPage({ onSuccess, onLogout }: Props) {
   }
 
   return (
-    <div className="app">
+    <div className="app auth-flow">
       <BrandHeader />
-      <p className="muted" style={{ textAlign: "center", marginBottom: 16 }}>
-        Create your master password to encrypt your vault locally.
-      </p>
+      <AuthFormHeader
+        title="Create"
+        accent="master password"
+        subtitle="Encrypt your vault on this device. You'll receive a recovery key — save it offline."
+      />
       <form onSubmit={(e) => void submit(e)}>
-        <div className="field">
-          <label htmlFor="mp">Master password</label>
-          <input
-            id="mp"
-            type="password"
-            value={masterPassword}
-            onChange={(e) => setMasterPassword(e.target.value)}
-            required
-            minLength={12}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="confirm">Confirm master password</label>
-          <input
-            id="confirm"
-            type="password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            required
-            minLength={12}
-          />
-        </div>
-        <PasswordRequirements password={masterPassword} confirm={confirm} />
-        {error && <p className="error">{error}</p>}
-        <LoadingButton loading={loading} loadingLabel="Setting up..." style={{ width: "100%" }}>
+        <AuthField
+          id="mp"
+          label="Master password"
+          type="password"
+          icon="lock"
+          value={masterPassword}
+          onChange={setMasterPassword}
+          required
+          autoComplete="new-password"
+        />
+        <PasswordStrengthMeter password={masterPassword} />
+        <AuthField
+          id="confirm"
+          label="Confirm master password"
+          type="password"
+          icon="lock"
+          value={confirm}
+          onChange={setConfirm}
+          required
+          autoComplete="new-password"
+        />
+        <PasswordMatchHint password={masterPassword} confirm={confirm} />
+        <AuthPasswordRequirements password={masterPassword} confirm={confirm} />
+        {error && <p className="error auth-form-error">{error}</p>}
+        <AuthSubmitButton loading={loading} loadingLabel="Creating vault...">
           Create vault
-        </LoadingButton>
+        </AuthSubmitButton>
       </form>
-      <p style={{ marginTop: 16, textAlign: "center" }}>
+      <AuthTips body="Your master password never leaves this device. Without your recovery key, a forgotten master password means permanent data loss." />
+      <p className="login-links">
         <button
           type="button"
           className="link"
