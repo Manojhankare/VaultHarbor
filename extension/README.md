@@ -9,7 +9,7 @@ Firefox build is produced but **not verified in V1** — see [docs/ARCHITECTURE.
 ## Production API
 
 ```text
-https://vaultsync.manojhankare.in
+https://vaultharbor.manojhankare.in
 ```
 
 ## Quick start
@@ -49,7 +49,7 @@ For **auto-updates** for end users, publish to the [Chrome Web Store](https://ch
 **Developers:** create **`extension/.env`** (project root, not `src/`):
 
 ```env
-VITE_API_BASE_URL=https://vaultsync.manojhankare.in
+VITE_API_BASE_URL=https://vaultharbor.manojhankare.in
 ```
 
 Local backend: `http://localhost:5000`

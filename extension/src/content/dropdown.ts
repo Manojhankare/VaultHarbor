@@ -6,7 +6,7 @@ export type DropdownCredential = {
   username: string;
 };
 
-const DROPDOWN_ID = "vaultsync-cred-dropdown";
+const DROPDOWN_ID = "vaultharbor-cred-dropdown";
 const GAP = 4;
 const MIN_WIDTH = 260;
 
@@ -68,7 +68,7 @@ export function removeCredentialDropdown(): void {
 }
 
 function isFillIconInPath(event: Event): boolean {
-  return event.composedPath().some((node) => (node as HTMLElement).id === "vaultsync-fill-icon");
+  return event.composedPath().some((node) => (node as HTMLElement).id === "vaultharbor-fill-icon");
 }
 
 export function isCredentialDropdownOpen(): boolean {

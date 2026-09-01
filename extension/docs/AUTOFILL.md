@@ -37,7 +37,7 @@ Login capture listens for traditional form submit **and** SPA patterns:
 - Password field removed from the DOM after fill (post-login UI swap)
 - `history.pushState` / `replaceState` (client-side navigation after login)
 
-If the vault is **locked** when the save iframe opens, the UI shows **Unlock to save** first (master password + optional **Keep unlocked**). After unlock it advances to the editable save form. **Keep unlocked** skips the 15-minute auto-lock for the rest of the browser session (cleared on manual Lock / Logout / browser restart).
+If the vault is **locked** when the save iframe opens, the UI shows **Unlock to save** first (master password + optional **Keep unlocked this session**). After unlock it advances to the editable save form. **Keep unlocked** skips auto-lock for the rest of the browser session (cleared on manual Lock / Logout / browser restart). Configure the idle timeout under **Security → Auto-lock** in the full vault app.
 
 ### Save vs update (NordPass-style)
 

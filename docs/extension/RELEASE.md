@@ -46,7 +46,7 @@ npm run release:chrome
 Produces:
 
 ```text
-extension/dist/releases/vaultsync-extension-<version>-chrome.zip
+extension/dist/releases/vaultharbor-extension-<version>-chrome.zip
 ```
 
 Upload this zip to the **Chrome Web Store Developer Dashboard** (same file can be attached to GitHub Releases).
@@ -82,7 +82,7 @@ Workflow: [`.github/workflows/extension-release.yml`](../../.github/workflows/ex
 ## Chrome Web Store — auto-update for users
 
 1. **One-time:** [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole) — $5 registration.
-2. **New extension:** Upload `vaultsync-extension-<version>-chrome.zip`, fill listing (description, screenshots, privacy policy URL).
+2. **New extension:** Upload `vaultharbor-extension-<version>-chrome.zip`, fill listing (description, screenshots, privacy policy URL).
 3. **Privacy:** Declare `storage`, `tabs`, `webNavigation`, host permissions — match [manifest.chrome.json](../../extension/manifest.chrome.json).
 4. **Each update:**
    - Bump version (`bump-version.mjs`) — must be **higher** than the live store version.
@@ -101,6 +101,8 @@ npm run build:firefox
 ```
 
 Submit `dist/firefox/` (zipped) via [Firefox Add-on Developer Hub](https://addons.mozilla.org/developers/). AMO handles auto-update after review.
+
+**Rebrand note:** The Firefox add-on id changed from `vaultsync@extension.local` to `vaultharbor@manojhankare.in`. Existing Firefox users must **remove the old add-on and install fresh** — AMO cannot auto-update across a changed gecko id.
 
 ---
 

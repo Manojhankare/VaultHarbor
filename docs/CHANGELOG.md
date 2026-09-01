@@ -2,6 +2,98 @@
 
 All notable VaultHarbor project changes. Update this file with each significant release or deployment change.
 
+## 2026-08-31 — VaultHarbor rebrand follow-up (domain, repo, internals)
+
+- Production site/API: `https://vaultharbor.manojhankare.in` (was `vaultsync.manojhankare.in`)
+- GitHub repo links: `Manojhankare/VaultHarbor`
+- Extension package: `vaultharbor-extension`; release zip: `vaultharbor-extension-<version>-chrome.zip`
+- Extension internals: IndexedDB `vaultharbor`, alarm names, DOM ids, `MESSAGE_SOURCE` — with one-time migration from legacy `vaultsync` IndexedDB
+- Firefox add-on id: `vaultharbor@manojhankare.in` (requires fresh install for existing Firefox users)
+- Local/docker DB defaults: `vaultharbor` / `vaultharbor_test`; production Supabase `DATABASE_URL` unchanged until DB migrated
+- Manifests include both old and new API hostnames during transition
+
+## 2026-08-31 — Configurable auto-lock
+
+- Security settings: idle auto-lock timeout (5 / 15 / 30 / 60 min; default 15)
+- Session control: disable auto-lock until browser close (Security page or unlock checkbox)
+- Idle-based locking replaces fixed 15-minute timer; autofill and vault use reset the idle clock
+- Full vault and popup detect background auto-lock (15s poll, runtime broadcast, `VAULT_LOCKED` responses)
+- Auto-lock pauses during recovery key, conflict resolve, and import wizard flows
+- Missing activity timestamp initializes idle clock instead of skipping auto-lock indefinitely
+
+## 2026-08-31 — Vault table layout
+
+- Full-screen vault list redesigned as a table: tabs with counts, filter chips, sort
+- Columns: checkbox, name (icon + URL), username/details, category badge, updated, row menu
+- Floating selection bar matches mockup: Share, Move (coming soon), Delete
+
+## 2026-08-31 — Sync conflict resolution fix
+
+- Resolving a conflict now clears stale pending uploads that were re-triggering the warning
+- When vault contents match (0 differences), **Continue** clears the conflict without forcing a choice
+- `keep_local` restores the device copy from the conflict snapshot (not the auto-merged copy)
+- Background sync skips while a conflict is unresolved; failed uploads keep pending for retry
+- Conflict resolve dialog shows a loading overlay while applying your choice
+
+## 2026-08-31 — Vault list multi-select
+
+- Vault list column label corrected: **Updated** (was “Last used”; shows last modified time, not autofill usage)
+- Item detail sidebar redesigned: field cards, metadata, action grid, close (×) button
+- Floating bulk bar: export, delete, restore (trash), clear selection
+- Bulk delete/restore shows progress in the selection bar; single-item delete/restore shows button loading state
+
+## 2026-08-31 — Sync conflict details
+
+- Resolve conflict modal lists item-level differences: only on this device, only on server, updated, deleted
+- Filter chips and revision summary (local vs server) before choosing which copy to keep
+
+## 2026-08-31 — Import items table UI
+
+- Summary step uses a table layout: type tabs, status filters (New / In vault / In file / Invalid), password show/hide
+
+## 2026-08-31 — Import auto-sync with failure details
+
+- After import commit, vault uploads automatically (`syncAfterImport`)
+- Import report shows sync success or a specific failure reason; **Sync now** retries from the report screen
+
+## 2026-08-31 — Review & fix invalid import rows
+
+- After summary, invalid rows open a fix step: edit fields (or change type) and **Save & include**, or **Skip**
+- Fixed rows are re-checked for vault/file duplicates before continuing
+
+## 2026-08-31 — Import compare & invalid details
+
+- File duplicates: side-by-side choose **Keep row A** vs **Keep row B** (only one imported)
+- Reveal passwords (and vault password on demand) while reviewing duplicates
+- Summary lists invalid rows with row number and reason (e.g. missing username/password)
+
+## 2026-08-31 — Import duplicate review UX
+
+- Duplicate review shows source badges: **In your vault** vs **In this file**, with breakdown on summary step
+- Skip / Import as new buttons have clear selected styling; review step shows progress and instructions
+
+## 2026-08-30 — Import/export audit fixes
+
+- Fix import report duplicate-skipped count; show unsupported-row and invalid counts separately
+- Cancel background import session when the wizard closes or unmounts (Escape / ×)
+- Duplicate review panel shows Existing vs Incoming side-by-side for vault duplicates
+- Export: require folder selection when scope is Folder; block empty-scope exports; lighter folder list load
+- VaultHarbor JSON import skips items with `deleted_at`; Bitwarden accepts `secure note` type rows
+- Post-import sync reminder when vault has pending changes
+- Import wizard detects vault auto-lock mid-flow and shows inline unlock (keeps review choices)
+- Bump `papaparse` to ^5.7.0
+
+## 2026-08-30 — Vault import & export
+
+### Added
+
+- Full-screen vault **Security → Import & Export**: import from Chrome/Google, Bitwarden, LastPass, NordPass, 1Password, Firefox, generic CSV, and VaultHarbor JSON/CSV
+- Export to VaultHarbor CSV or JSON (local plaintext download)
+- Background import session (atomic commit) and chunked export for large vaults
+- Duplicate detection with skip / import-as-new / review (no overwrite)
+
+See [docs/extension/IMPORT_EXPORT.md](extension/IMPORT_EXPORT.md).
+
 ## 2026-08-30 — Master password full-screen auth flows
 
 ### Changed

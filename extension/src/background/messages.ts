@@ -28,9 +28,27 @@ import {
   changeMasterPassword,
   generateRecoveryKeyForExistingVault,
   resetVault,
+  listVaultSummariesForImport,
 } from "../vault/vault";
+import {
+  startImportSession,
+  appendImportSession,
+  commitImportSession,
+  cancelImportSession,
+} from "./import-session";
+import {
+  startExportSession,
+  getExportChunk,
+  cancelExportSession,
+} from "./export-session";
 import * as authApi from "../api/auth-api";
-import { syncNow, resolveConflict, getPendingChangeCount } from "../sync/sync";
+import {
+  syncNow,
+  resolveConflict,
+  getPendingChangeCount,
+  syncAfterImport,
+  getConflictDetails,
+} from "../sync/sync";
 import { uploadVault } from "../sync/sync";
 import { getAccessToken } from "../auth/tokens";
 import { getEncryptedVault, getLatestConflict } from "../vault/storage";
@@ -70,10 +88,12 @@ async function getTabUrl(tabId: number): Promise<string | null> {
 
 async function persistVaultUpload(): Promise<void> {
   const accessToken = await getAccessToken();
-  if (accessToken) {
-    const stored = await getEncryptedVault();
-    await uploadVault(accessToken, stored?.revision ?? 0);
+  if (!accessToken) return;
+  if (await getLatestConflict()) {
+    return;
   }
+  const stored = await getEncryptedVault();
+  await uploadVault(accessToken, stored?.revision ?? 0);
 }
 
 async function validateTabOrigin(
@@ -125,7 +145,25 @@ export async function handleBackgroundMessage(
   sender: chrome.runtime.MessageSender
 ): Promise<BackgroundResponse> {
   try {
-    switch (request.type) {
+    const response = await dispatchBackgroundMessage(request, sender);
+    if (response.ok) {
+      const { maybeTouchVaultActivity } = await import("../vault/auto-lock");
+      await maybeTouchVaultActivity(request.type);
+    }
+    return response;
+  } catch (err) {
+    if (err instanceof ExtensionError) {
+      return { ok: false, error: err.message, code: err.code };
+    }
+    return { ok: false, error: userFacingMessage(err) };
+  }
+}
+
+async function dispatchBackgroundMessage(
+  request: BackgroundRequest,
+  sender: chrome.runtime.MessageSender
+): Promise<BackgroundResponse> {
+  switch (request.type) {
       case "PING":
         return { ok: true, data: "pong" };
 
@@ -313,6 +351,11 @@ export async function handleBackgroundMessage(
         };
       }
 
+      case "GET_CONFLICT_DETAILS": {
+        const details = await getConflictDetails();
+        return { ok: true, data: details };
+      }
+
       case "GET_CURRENT_SITE": {
         const tab = await getActiveTab();
         if (!tab?.url || !tab.id) {
@@ -376,6 +419,11 @@ export async function handleBackgroundMessage(
       case "SYNC_NOW":
         await syncNow();
         return { ok: true };
+
+      case "SYNC_AFTER_MUTATION": {
+        const data = await syncAfterImport();
+        return { ok: true, data };
+      }
 
       case "RESOLVE_CONFLICT":
         await resolveConflict(request.choice);
@@ -551,13 +599,94 @@ export async function handleBackgroundMessage(
         return { ok: true, data: result };
       }
 
+      case "IMPORT_SESSION_START": {
+        const data = await startImportSession();
+        return { ok: true, data };
+      }
+
+      case "IMPORT_SESSION_APPEND": {
+        const data = appendImportSession(
+          request.sessionId,
+          request.logins,
+          request.secureNotes
+        );
+        return { ok: true, data };
+      }
+
+      case "IMPORT_SESSION_COMMIT": {
+        const data = await commitImportSession(request.sessionId);
+        const sync = await syncAfterImport();
+        return { ok: true, data: { ...data, sync } };
+      }
+
+      case "IMPORT_SESSION_CANCEL": {
+        cancelImportSession(request.sessionId);
+        return { ok: true };
+      }
+
+      case "EXPORT_ITEMS_START": {
+        const data = await startExportSession(request.scope);
+        return { ok: true, data };
+      }
+
+      case "EXPORT_ITEMS_CHUNK": {
+        const data = getExportChunk(request.sessionId, request.index);
+        return { ok: true, data };
+      }
+
+      case "EXPORT_ITEMS_CANCEL": {
+        cancelExportSession(request.sessionId);
+        return { ok: true };
+      }
+
+      case "LIST_VAULT_ITEM_SUMMARIES_FOR_IMPORT": {
+        const items = await listVaultSummariesForImport();
+        return { ok: true, data: items.map(toVaultItemSummary) };
+      }
+
+      case "GET_AUTO_LOCK_SETTINGS": {
+        const { getAutoLockSettings } = await import("../vault/auto-lock");
+        const settings = await getAutoLockSettings();
+        return { ok: true, data: settings };
+      }
+
+      case "SET_AUTO_LOCK_SETTINGS": {
+        const { setAutoLockMinutes } = await import("../vault/auto-lock");
+        await setAutoLockMinutes(request.minutes);
+        const { getAutoLockSettings } = await import("../vault/auto-lock");
+        const settings = await getAutoLockSettings();
+        return { ok: true, data: settings };
+      }
+
+      case "DISABLE_AUTO_LOCK_SESSION": {
+        const { disableAutoLockForSession } = await import("../vault/auto-lock");
+        await disableAutoLockForSession();
+        const { getAutoLockSettings } = await import("../vault/auto-lock");
+        const settings = await getAutoLockSettings();
+        return { ok: true, data: settings };
+      }
+
+      case "ENABLE_AUTO_LOCK_SESSION": {
+        const { enableAutoLockForSession } = await import("../vault/auto-lock");
+        await enableAutoLockForSession();
+        const { getAutoLockSettings } = await import("../vault/auto-lock");
+        const settings = await getAutoLockSettings();
+        return { ok: true, data: settings };
+      }
+
+      case "PAUSE_AUTO_LOCK": {
+        const { pauseAutoLock } = await import("../vault/auto-lock");
+        await pauseAutoLock();
+        return { ok: true };
+      }
+
+      case "RESUME_AUTO_LOCK": {
+        const { resumeAutoLock } = await import("../vault/auto-lock");
+        await resumeAutoLock();
+        return { ok: true };
+      }
+
       default:
         return { ok: false, error: "Unknown message type" };
     }
-  } catch (err) {
-    if (err instanceof ExtensionError) {
-      return { ok: false, error: err.message, code: err.code };
-    }
-    return { ok: false, error: userFacingMessage(err) };
-  }
 }

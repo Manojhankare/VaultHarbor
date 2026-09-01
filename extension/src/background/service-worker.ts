@@ -8,12 +8,14 @@ import { handleClipboardAlarm } from "./clipboard";
 import { promptSaveIfPending } from "./save-prompt";
 import {
   AUTO_LOCK_ALARM_NAME,
-  AUTO_LOCK_MINUTES,
+  AUTO_LOCK_CHECK_ALARM_NAME,
+  AUTO_LOCK_CHECK_INTERVAL_MINUTES,
+  CLIPBOARD_CLEAR_ALARM_NAME,
+  LEGACY_ALARM_NAMES,
   SYNC_ALARM_NAME,
   SYNC_POLL_MINUTES,
 } from "../shared/constants";
-import { createAlarm } from "../shared/browser";
-import { lockVault } from "../vault/vault";
+import { clearAlarm, createAlarm } from "../shared/browser";
 import { syncNow } from "../sync/sync";
 import { loadDecryptedFromStorage } from "../vault/vault";
 import type { BackgroundRequest } from "../shared/messages";
@@ -30,22 +32,27 @@ chrome.runtime.onStartup.addListener(() => {
 });
 
 async function setupAlarms(): Promise<void> {
+  for (const name of LEGACY_ALARM_NAMES) {
+    await clearAlarm(name);
+  }
   await createAlarm(SYNC_ALARM_NAME, { periodInMinutes: SYNC_POLL_MINUTES });
-  await createAlarm(AUTO_LOCK_ALARM_NAME, {
-    periodInMinutes: AUTO_LOCK_MINUTES,
+  await clearAlarm(AUTO_LOCK_ALARM_NAME);
+  await createAlarm(AUTO_LOCK_CHECK_ALARM_NAME, {
+    periodInMinutes: AUTO_LOCK_CHECK_INTERVAL_MINUTES,
   });
 }
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === SYNC_ALARM_NAME) {
-    void syncNow();
-  } else if (alarm.name === AUTO_LOCK_ALARM_NAME) {
+    void syncNow().catch(() => {
+      /* conflict / auth errors are stored or surfaced via sync status */
+    });
+  } else if (alarm.name === AUTO_LOCK_CHECK_ALARM_NAME) {
     void (async () => {
-      const { isKeepUnlocked } = await import("../vault/keep-unlocked");
-      if (await isKeepUnlocked()) return;
-      await lockVault();
+      const { applyAutoLockIfNeeded } = await import("../vault/auto-lock");
+      await applyAutoLockIfNeeded();
     })();
-  } else if (alarm.name === "vaultsync-clipboard-clear") {
+  } else if (alarm.name === CLIPBOARD_CLEAR_ALARM_NAME) {
     void handleClipboardAlarm();
   }
 });

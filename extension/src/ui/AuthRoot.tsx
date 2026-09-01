@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { bg } from "../popup/api";
+import { onVaultLocked } from "../shared/vault-lock-notify";
 import { BrandHeader } from "../popup/components/BrandHeader";
 import { AuthorFooter } from "../popup/components/AuthorFooter";
 import { LoadingScreen } from "../popup/components/LoadingSpinner";
@@ -138,6 +139,39 @@ export function AuthRoot({ variant, renderUnlocked }: Props) {
       await refresh();
     })();
   }, [refresh]);
+
+  useEffect(() => {
+    if (!state?.unlocked) return;
+
+    async function checkAutoLocked() {
+      const res = await bg<{ unlocked: boolean }>({ type: "GET_VAULT_STATE" });
+      if (res.ok && res.data && !res.data.unlocked) {
+        await refresh();
+      }
+    }
+
+    function onVisible() {
+      if (document.visibilityState === "visible") void checkAutoLocked();
+    }
+
+    function onRuntimeMessage(message: { type?: string }) {
+      if (message.type === "VAULT_AUTO_LOCKED") void refresh();
+    }
+
+    const unsubscribe = onVaultLocked(() => {
+      void refresh();
+    });
+
+    document.addEventListener("visibilitychange", onVisible);
+    chrome.runtime.onMessage.addListener(onRuntimeMessage);
+    const interval = window.setInterval(() => void checkAutoLocked(), 15_000);
+    return () => {
+      unsubscribe();
+      document.removeEventListener("visibilitychange", onVisible);
+      chrome.runtime.onMessage.removeListener(onRuntimeMessage);
+      window.clearInterval(interval);
+    };
+  }, [state?.unlocked, refresh]);
 
   async function confirmRecoveryKey() {
     await storageSessionRemove([PENDING_RECOVERY_KEY]);

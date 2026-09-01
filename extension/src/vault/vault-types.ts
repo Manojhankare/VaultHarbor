@@ -38,12 +38,14 @@ export type NewLoginItem = {
   password: string;
   uri: string;
   notes?: string;
+  custom_fields?: Record<string, string>;
 };
 
 export type NewSecureNoteItem = {
   name: string;
   content: string;
   notes?: string;
+  custom_fields?: Record<string, string>;
 };
 
 export type VaultDocument = {
@@ -84,3 +86,15 @@ export function isSecureNoteItem(item: VaultItem): item is SecureNoteItem {
 export function isActiveItem(item: VaultItem): boolean {
   return !item.deleted_at;
 }
+
+export type ExportScope =
+  | { kind: "all" }
+  | { kind: "selected"; itemIds: string[] }
+  | { kind: "folder"; folderName: string };
+
+export type ImportCommitResult = {
+  imported: number;
+  logins: number;
+  secureNotes: number;
+  baseRevision: number;
+};

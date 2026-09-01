@@ -1,5 +1,5 @@
 [project]
-name = "vaultsync-backend"
+name = "vaultharbor-backend"
 version = "0.1.0"
 description = "Zero-knowledge password manager backend API"
 requires-python = ">=3.12"

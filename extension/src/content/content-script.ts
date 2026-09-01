@@ -352,7 +352,7 @@ function initContentScript(): void {
       id?: string;
       height?: number;
     };
-    if (data?.source !== "vaultsync-extension") return;
+    if (data?.source !== "vaultharbor-extension") return;
     if (data.type === "PICK_CREDENTIAL" && data.id) {
       void fillCredential(data.id);
     }
@@ -361,13 +361,13 @@ function initContentScript(): void {
       closeDropdown();
     }
     if (data.type === "RESIZE_SAVE_PROMPT" && typeof data.height === "number") {
-      const frame = document.getElementById("vaultsync-save-frame") as HTMLIFrameElement | null;
+      const frame = document.getElementById("vaultharbor-save-frame") as HTMLIFrameElement | null;
       if (frame) {
         frame.style.height = `${Math.max(data.height, 200)}px`;
       }
     }
     if (data.type === "RESIZE_PICKER" && typeof data.height === "number") {
-      const frame = document.getElementById("vaultsync-picker-frame") as HTMLIFrameElement | null;
+      const frame = document.getElementById("vaultharbor-picker-frame") as HTMLIFrameElement | null;
       if (frame) {
         frame.style.height = `${Math.max(data.height, 80)}px`;
       }

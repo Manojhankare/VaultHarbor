@@ -2,6 +2,7 @@ import { StrictMode, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { createRoot } from "react-dom/client";
 import { LoadingButton } from "./components/LoadingSpinner";
 import { bg } from "./api";
+import { MESSAGE_SOURCE } from "../shared/messages";
 import "./styles.css";
 import "./save-prompt.css";
 
@@ -17,7 +18,7 @@ type PendingSaveData = {
 type Step = "loading" | "unlock" | "save";
 
 function notifyParent(type: string, extra?: Record<string, unknown>) {
-  window.parent.postMessage({ source: "vaultsync-extension", type, ...extra }, "*");
+  window.parent.postMessage({ source: MESSAGE_SOURCE, type, ...extra }, "*");
 }
 
 function SavePromptHeader({ onClose }: { onClose: () => void }) {
@@ -27,7 +28,7 @@ function SavePromptHeader({ onClose }: { onClose: () => void }) {
         <img src="/icons/icon128.png" alt="" width={26} height={26} />
         <span className="save-prompt__brand">
           <span className="brand-title-vault">Vault</span>
-          <span className="brand-title-sync">Harbor</span>
+          <span className="brand-title-harbor">Harbor</span>
         </span>
       </div>
       <button
@@ -190,7 +191,7 @@ function SavePromptApp() {
               checked={keepUnlocked}
               onChange={(e) => setKeepUnlocked(e.target.checked)}
             />
-            <span>Keep unlocked (until browser closes)</span>
+            <span>Keep unlocked this session (skip auto-lock until browser closes)</span>
           </label>
           {error && <p className="error">{error}</p>}
           <div className="save-prompt__actions">

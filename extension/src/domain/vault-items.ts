@@ -1,5 +1,6 @@
 import type { LoginItem, SecureNoteItem, VaultItem, VaultItemType } from "../vault/vault-types";
 import type { VaultItemSummary } from "../shared/messages";
+import { getFolderFromCustomFields } from "../import/folder-bridge";
 
 const TYPE_LABELS: Record<VaultItemType, string> = {
   login: "Password",
@@ -25,12 +26,14 @@ export function toVaultItemSummary(item: VaultItem): VaultItemSummary {
   } else if (item.type === "secure_note") {
     subtitle = "Secure Note";
   }
+  const folder = getFolderFromCustomFields(item.custom_fields);
   return {
     id: item.id,
     type: item.type,
     name: item.name,
     subtitle,
     uri,
+    ...(folder ? { folder } : {}),
     updated_at: item.updated_at,
     deleted_at: item.deleted_at ?? null,
   };

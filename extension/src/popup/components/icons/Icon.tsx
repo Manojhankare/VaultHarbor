@@ -231,6 +231,51 @@ export function IconFolder({ size = 16 }: { size?: number }) {
   );
 }
 
+export function IconGlobe({ size = 16 }: { size?: number }) {
+  return (
+    <Icon size={size}>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+    </Icon>
+  );
+}
+
+export function IconCalendar({ size = 16 }: { size?: number }) {
+  return (
+    <Icon size={size}>
+      <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" strokeWidth="2" />
+      <path d="M8 3v4M16 3v4M4 10h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </Icon>
+  );
+}
+
+export function IconWand({ size = 16 }: { size?: number }) {
+  return (
+    <Icon size={size}>
+      <path
+        d="M15 4l5 5M4 20l9-9M9 11l2 2"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M3 21l3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </Icon>
+  );
+}
+
+export function IconChevronRight({ size = 16 }: { size?: number }) {
+  return (
+    <Icon size={size}>
+      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </Icon>
+  );
+}
+
 export function IconUser({ size = 16 }: { size?: number }) {
   return (
     <Icon size={size}>

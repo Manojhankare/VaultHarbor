@@ -7,17 +7,17 @@ import {
 
 describe("password-validation", () => {
   it("accepts strong password", () => {
-    expect(isStrongPassword("Vaultsync@1235")).toBe(true);
-    expect(passwordValidationError("Vaultsync@1235")).toBeNull();
+    expect(isStrongPassword("VaultHarbor@1235")).toBe(true);
+    expect(passwordValidationError("VaultHarbor@1235")).toBeNull();
   });
 
   it("rejects weak password missing uppercase", () => {
-    expect(isStrongPassword("vaultsync@1235")).toBe(false);
-    expect(passwordValidationError("vaultsync@1235")).toMatch(/uppercase/i);
+    expect(isStrongPassword("vaultharbor@1235")).toBe(false);
+    expect(passwordValidationError("vaultharbor@1235")).toMatch(/uppercase/i);
   });
 
   it("validateNewPassword checks confirm", () => {
-    expect(validateNewPassword("Vaultsync@1235", "Vaultsync@1235")).toBeNull();
-    expect(validateNewPassword("Vaultsync@1235", "other")).toMatch(/match/i);
+    expect(validateNewPassword("VaultHarbor@1235", "VaultHarbor@1235")).toBeNull();
+    expect(validateNewPassword("VaultHarbor@1235", "other")).toMatch(/match/i);
   });
 });

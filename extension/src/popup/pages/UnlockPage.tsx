@@ -86,7 +86,7 @@ export function UnlockPage({ onSuccess, onForgotMaster, onLogout, isPopup = fals
             onChange={(e) => setKeepUnlocked(e.target.checked)}
             style={{ marginTop: 2 }}
           />
-          <span>Keep unlocked (skip auto-lock until browser closes)</span>
+          <span>Keep unlocked this session (skip auto-lock until browser closes)</span>
         </label>
         {error && <p className="error">{error}</p>}
         <LoadingButton loading={loading} loadingLabel="Unlocking..." style={{ width: "100%" }}>

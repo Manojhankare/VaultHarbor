@@ -24,7 +24,7 @@ A zero-knowledge password manager. The **server never sees plaintext passwords**
 └────────────────────────────┬────────────────────────────────┘
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  PostgreSQL (Supabase) — database: vaultsync                │
+│  PostgreSQL (Supabase) — database: vaultharbor (local); vaultsync (prod until migrated) │
 │  users | devices | vaults | sync_events | refresh_tokens | password_reset_tokens │
 └─────────────────────────────────────────────────────────────┘
 ```

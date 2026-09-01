@@ -63,7 +63,7 @@ flask db upgrade
 pytest
 ```
 
-Tests use an isolated `vaultsync_test` schema on your `DIRECT_DATABASE_URL`.
+Tests use an isolated `vaultharbor_test` schema on your `DIRECT_DATABASE_URL`.
 
 ## API endpoints
 

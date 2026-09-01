@@ -99,9 +99,9 @@ class Config:
     LOG_LEVEL: str = os.environ.get("LOG_LEVEL", "INFO")
 
     DB_POOL_MODE: str = os.environ.get("DB_POOL_MODE", "auto").lower()
-    EXPECTED_DATABASE_NAME: str = os.environ.get("EXPECTED_DATABASE_NAME", "vaultsync")
+    EXPECTED_DATABASE_NAME: str = os.environ.get("EXPECTED_DATABASE_NAME", "vaultharbor")
 
-    TEST_SCHEMA: str = os.environ.get("TEST_SCHEMA", "vaultsync_test")
+    TEST_SCHEMA: str = os.environ.get("TEST_SCHEMA", "vaultharbor_test")
 
     EMAIL_PROVIDER: str = os.environ.get("EMAIL_PROVIDER", "console").lower()
     EMAIL_API_KEY: str = _env("EMAIL_API_KEY", "") or ""

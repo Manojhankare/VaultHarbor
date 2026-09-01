@@ -39,7 +39,7 @@ export function VaultTopBar({
         <img src="/icons/icon128.png" alt="" width={28} height={28} />
         <h1 className="brand-title brand-title--compact" style={{ margin: 0, fontSize: 18 }}>
           <span className="brand-title-vault">Vault</span>
-          <span className="brand-title-sync">Harbor</span>
+          <span className="brand-title-harbor">Harbor</span>
         </h1>
       </div>
       <label className="vh-topbar__search">

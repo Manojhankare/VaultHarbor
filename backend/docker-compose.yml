@@ -2,9 +2,9 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: vaultsync
-      POSTGRES_PASSWORD: vaultsync
-      POSTGRES_DB: vaultsync
+      POSTGRES_USER: vaultharbor
+      POSTGRES_PASSWORD: vaultharbor
+      POSTGRES_DB: vaultharbor
     ports:
       - "5432:5432"
     volumes:
@@ -18,8 +18,8 @@ services:
       FLASK_ENV: development
       SECRET_KEY: docker-dev-secret-key-change-me
       JWT_SECRET_KEY: docker-dev-jwt-secret-change-me
-      DATABASE_URL: postgresql://vaultsync:vaultsync@db:5432/vaultsync
-      DIRECT_DATABASE_URL: postgresql://vaultsync:vaultsync@db:5432/vaultsync
+      DATABASE_URL: postgresql://vaultharbor:vaultharbor@db:5432/vaultharbor
+      DIRECT_DATABASE_URL: postgresql://vaultharbor:vaultharbor@db:5432/vaultharbor
       DB_POOL_MODE: queue
       CORS_ALLOWED_ORIGINS: http://localhost:3000
       ENABLE_API_DOCS: "true"

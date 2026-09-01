@@ -313,7 +313,7 @@ body.auth-popup-active:not(.vault-app-page) .app {
   color: var(--vs-text);
 }
 
-.brand-title-sync {
+.brand-title-harbor {
   background: var(--vs-gradient-text);
   -webkit-background-clip: text;
   background-clip: text;

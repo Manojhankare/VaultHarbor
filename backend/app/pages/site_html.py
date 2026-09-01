@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-SITE_URL = "https://vaultsync.manojhankare.in"
-GITHUB_REPO = "https://github.com/Manojhankare/VaultSync"
-GITHUB_RELEASES = "https://github.com/Manojhankare/VaultSync/releases"
+SITE_URL = "https://vaultharbor.manojhankare.in"
+GITHUB_REPO = "https://github.com/Manojhankare/VaultHarbor"
+GITHUB_RELEASES = "https://github.com/Manojhankare/VaultHarbor/releases"
 # Served by Flask pages blueprint (synced from extension generate-icons.mjs).
 LOGO_ICON = "/pages-static/brand/icon128.png"
 ICON_128 = "/pages-static/brand/icon128.png"
@@ -19,7 +19,7 @@ BROWSER_ICON_CHROME = "/pages-static/browser-icons/chrome.svg"
 BROWSER_ICON_EDGE = "/pages-static/browser-icons/edge.svg"
 BROWSER_ICON_BRAVE = "/pages-static/browser-icons/brave.svg"
 BROWSER_ICON_STORE = "/pages-static/browser-icons/chromewebstore.svg"
-EXTENSION_RELEASE_ZIP = "vaultsync-extension-0.1.0-chrome.zip"
+EXTENSION_RELEASE_ZIP = "vaultharbor-extension-0.1.0-chrome.zip"
 
 BASE_CSS = """
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -63,7 +63,7 @@ BASE_CSS = """
       font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; line-height: 1;
     }
     .nav-brand-vault { color: #f8fafc; }
-    .nav-brand-sync {
+    .nav-brand-harbor {
       background: linear-gradient(135deg, #0ec9fc 0%, #0090f8 45%, #8b5af2 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
@@ -731,7 +731,7 @@ LANDING_EXTRA_CSS = """
       letter-spacing: -0.03em; line-height: 1.1;
     }
     .brand-title-vault { color: #f8fafc; }
-    .brand-title-sync {
+    .brand-title-harbor {
       background: linear-gradient(135deg, #0ec9fc, #8b5af2);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
@@ -1728,7 +1728,7 @@ def about_section_html() -> str:
         <div class="about-visual">
           <img class="about-brand-logo" src="{ICON_512}" alt="" width="208" height="208" loading="lazy" decoding="async" />
           <h2 class="brand-title">
-            <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Harbor</span>
+            <span class="brand-title-vault">Vault</span><span class="brand-title-harbor">Harbor</span>
           </h2>
           <p class="brand-slogan">Secure. Sync. Everywhere.</p>
         </div>
@@ -1771,7 +1771,7 @@ def install_visual_html() -> str:
                   <span class="install-window-dot install-window-dot--yellow"></span>
                   <span class="install-window-dot install-window-dot--green"></span>
                 </div>
-                <div class="install-window-address">vaultsync.manojhankare.in/login</div>
+                <div class="install-window-address">vaultharbor.manojhankare.in/login</div>
                 <div class="install-window-ext-anchor">
                   <div class="install-window-ext">
                     <img src="{LOGO_ICON}" alt="" width="22" height="22" />
@@ -1801,7 +1801,7 @@ def install_visual_html() -> str:
                 <div class="install-page-brand">
                   <img class="install-page-logo" src="{ICON_512}" alt="" width="152" height="152" />
                   <h3 class="install-page-title">
-                    <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Harbor</span>
+                    <span class="brand-title-vault">Vault</span><span class="brand-title-harbor">Harbor</span>
                   </h3>
                 </div>
                 <div class="install-page-skeleton">
@@ -2045,7 +2045,7 @@ def support_section_html() -> str:
         <div class="support-brand">
           <img class="support-brand-logo" src="{ICON_512}" alt="VaultHarbor" width="132" height="132" />
           <h2 class="brand-title">
-            <span class="brand-title-vault">Vault</span><span class="brand-title-sync">Harbor</span>
+            <span class="brand-title-vault">Vault</span><span class="brand-title-harbor">Harbor</span>
           </h2>
           <p class="brand-slogan">Secure · Sync · Everywhere</p>
         </div>
@@ -2115,7 +2115,7 @@ def nav_html(active: str = "") -> str:
       <a class="nav-brand" href="/">
         <img src="{LOGO_ICON}" alt="" width="36" height="36" />
         <span class="nav-brand-title">
-          <span class="nav-brand-vault">Vault</span><span class="nav-brand-sync">Harbor</span>
+          <span class="nav-brand-vault">Vault</span><span class="nav-brand-harbor">Harbor</span>
         </span>
       </a>
       <ul class="nav-links">
@@ -2159,7 +2159,7 @@ def head_html(title: str, description: str, path: str = "/") -> str:
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content="{description}" />
-  <meta name="keywords" content="password manager, zero-knowledge, browser extension, VaultHarbor, VaultSync, privacy" />
+  <meta name="keywords" content="password manager, zero-knowledge, browser extension, VaultHarbor, privacy" />
   <meta name="author" content="Manoj Hankare" />
   <meta name="theme-color" content="#000814" />
   <meta name="robots" content="index, follow" />
@@ -2275,7 +2275,7 @@ def faq_items_html() -> str:
         ),
         (
             "Does VaultHarbor use cookies or tracking?",
-            "The marketing website at vaultsync.manojhankare.in does not use analytics cookies or "
+            "The marketing website at vaultharbor.manojhankare.in does not use analytics cookies or "
             "third-party trackers. The extension uses local storage on your device for session tokens "
             "and vault cache, not advertising cookies.",
         ),

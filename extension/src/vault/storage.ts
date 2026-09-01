@@ -1,4 +1,9 @@
-import { IDB_NAME, IDB_VERSION, STORAGE_KEYS } from "../shared/constants";
+import {
+  IDB_NAME,
+  IDB_VERSION,
+  LEGACY_IDB_NAME,
+  STORAGE_KEYS,
+} from "../shared/constants";
 import { storageLocalRemove } from "../shared/browser";
 import type { EncryptedVaultMeta } from "../vault/vault-types";
 
@@ -21,27 +26,131 @@ export type ConflictSnapshot = {
 
 type StoreNames = "vault" | "meta" | "pending" | "conflicts";
 
-function openDb(): Promise<IDBDatabase> {
+const IDB_STORES: StoreNames[] = ["vault", "meta", "pending", "conflicts"];
+
+function ensureObjectStores(db: IDBDatabase): void {
+  if (!db.objectStoreNames.contains("vault")) {
+    db.createObjectStore("vault", { keyPath: "id" });
+  }
+  if (!db.objectStoreNames.contains("meta")) {
+    db.createObjectStore("meta", { keyPath: "key" });
+  }
+  if (!db.objectStoreNames.contains("pending")) {
+    db.createObjectStore("pending", { keyPath: "id" });
+  }
+  if (!db.objectStoreNames.contains("conflicts")) {
+    db.createObjectStore("conflicts", { keyPath: "id" });
+  }
+}
+
+function openDbRaw(name: string): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(IDB_NAME, IDB_VERSION);
+    const request = indexedDB.open(name, IDB_VERSION);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => resolve(request.result);
     request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains("vault")) {
-        db.createObjectStore("vault", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("meta")) {
-        db.createObjectStore("meta", { keyPath: "key" });
-      }
-      if (!db.objectStoreNames.contains("pending")) {
-        db.createObjectStore("pending", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("conflicts")) {
-        db.createObjectStore("conflicts", { keyPath: "id" });
-      }
+      ensureObjectStores(request.result);
     };
   });
+}
+
+function deleteDb(name: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(name);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+    request.onblocked = () => resolve();
+  });
+}
+
+async function storeHasData(
+  db: IDBDatabase,
+  storeName: StoreNames
+): Promise<boolean> {
+  if (!db.objectStoreNames.contains(storeName)) {
+    return false;
+  }
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readonly");
+    const request = tx.objectStore(storeName).count();
+    request.onsuccess = () => resolve(request.result > 0);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function copyStore(
+  source: IDBDatabase,
+  target: IDBDatabase,
+  storeName: StoreNames
+): Promise<void> {
+  if (!source.objectStoreNames.contains(storeName)) {
+    return;
+  }
+  const records = await new Promise<unknown[]>((resolve, reject) => {
+    const tx = source.transaction(storeName, "readonly");
+    const request = tx.objectStore(storeName).getAll();
+    request.onsuccess = () => resolve(request.result as unknown[]);
+    request.onerror = () => reject(request.error);
+  });
+  if (records.length === 0) return;
+  await new Promise<void>((resolve, reject) => {
+    const tx = target.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+    for (const record of records) {
+      store.put(record);
+    }
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+/** Copy legacy VaultSync IndexedDB into vaultharbor if needed (idempotent). */
+export async function migrateLegacyIdbIfNeeded(): Promise<void> {
+  let legacy: IDBDatabase | null = null;
+  try {
+    legacy = await openDbRaw(LEGACY_IDB_NAME);
+  } catch {
+    return;
+  }
+
+  try {
+    const legacyHasData = await Promise.all(
+      IDB_STORES.map((s) => storeHasData(legacy!, s))
+    ).then((counts) => counts.some(Boolean));
+
+    if (!legacyHasData) {
+      legacy.close();
+      await deleteDb(LEGACY_IDB_NAME);
+      return;
+    }
+
+    const current = await openDbRaw(IDB_NAME);
+    try {
+      const currentHasData = await Promise.all(
+        IDB_STORES.map((s) => storeHasData(current, s))
+      ).then((counts) => counts.some(Boolean));
+
+      if (!currentHasData) {
+        for (const storeName of IDB_STORES) {
+          await copyStore(legacy, current, storeName);
+        }
+      }
+      await deleteDb(LEGACY_IDB_NAME);
+    } finally {
+      current.close();
+    }
+  } finally {
+    legacy.close();
+  }
+}
+
+let migrationPromise: Promise<void> | null = null;
+
+function openDb(): Promise<IDBDatabase> {
+  if (!migrationPromise) {
+    migrationPromise = migrateLegacyIdbIfNeeded();
+  }
+  return migrationPromise.then(() => openDbRaw(IDB_NAME));
 }
 
 async function withStore<T>(

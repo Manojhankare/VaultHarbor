@@ -1,4 +1,4 @@
-import type { LoginItem, NewLoginItem, NewSecureNoteItem, VaultItem, VaultItemType, VaultListFilter, VaultListSort } from "../vault/vault-types";
+import type { LoginItem, NewLoginItem, NewSecureNoteItem, VaultItem, VaultItemType, VaultListFilter, VaultListSort, ExportScope } from "../vault/vault-types";
 
 export type CredentialSummary = {
   id: string;
@@ -13,6 +13,7 @@ export type VaultItemSummary = {
   name: string;
   subtitle: string;
   uri?: string;
+  folder?: string;
   updated_at: string;
   deleted_at?: string | null;
 };
@@ -21,6 +22,8 @@ export type SyncStatus = {
   pendingChanges: number;
   hasConflict: boolean;
 };
+
+export type { ConflictDiffSummary } from "../sync/conflict-diff";
 
 export type BackgroundRequest =
   | { type: "PING" }
@@ -43,11 +46,13 @@ export type BackgroundRequest =
   | { type: "DELETE_VAULT_ITEM"; id: string }
   | { type: "RESTORE_VAULT_ITEM"; id: string }
   | { type: "GET_SYNC_STATUS" }
+  | { type: "GET_CONFLICT_DETAILS" }
   | { type: "GET_CURRENT_SITE" }
   | { type: "GET_MATCHING_CREDENTIALS"; tabId: number }
   | { type: "FILL_CREDENTIAL"; tabId: number; credentialId: string }
   | { type: "SAVE_CREDENTIAL"; credential: NewLoginItem; tabId: number }
   | { type: "SYNC_NOW" }
+  | { type: "SYNC_AFTER_MUTATION" }
   | { type: "RESOLVE_CONFLICT"; choice: "keep_local" | "keep_remote" }
   | { type: "GENERATE_PASSWORD"; options: PasswordGenOptions }
   | { type: "COPY_TO_CLIPBOARD"; text: string }
@@ -67,7 +72,28 @@ export type BackgroundRequest =
   | { type: "GET_API_BASE_URL" }
   | { type: "SET_API_BASE_URL"; url: string }
   | { type: "RESET_API_BASE_URL" }
-  | { type: "TEST_API_CONNECTION"; url: string };
+  | { type: "TEST_API_CONNECTION"; url: string }
+  | { type: "IMPORT_SESSION_START" }
+  | {
+      type: "IMPORT_SESSION_APPEND";
+      sessionId: string;
+      logins: NewLoginItem[];
+      secureNotes: NewSecureNoteItem[];
+    }
+  | { type: "IMPORT_SESSION_COMMIT"; sessionId: string }
+  | { type: "IMPORT_SESSION_CANCEL"; sessionId: string }
+  | { type: "EXPORT_ITEMS_START"; scope: ExportScope }
+  | { type: "EXPORT_ITEMS_CHUNK"; sessionId: string; index: number }
+  | { type: "EXPORT_ITEMS_CANCEL"; sessionId: string }
+  | { type: "LIST_VAULT_ITEM_SUMMARIES_FOR_IMPORT" }
+  | { type: "GET_AUTO_LOCK_SETTINGS" }
+  | { type: "SET_AUTO_LOCK_SETTINGS"; minutes: number }
+  | { type: "DISABLE_AUTO_LOCK_SESSION" }
+  | { type: "ENABLE_AUTO_LOCK_SESSION" }
+  | { type: "PAUSE_AUTO_LOCK" }
+  | { type: "RESUME_AUTO_LOCK" };
+
+export type { ExportScope };
 
 export type PasswordGenOptions = {
   length: number;
@@ -93,4 +119,4 @@ export type BackgroundToContent =
   | { type: "FILL_FIELDS"; username: string; password: string }
   | { type: "SHOW_SAVE_PROMPT"; name: string; username: string; origin: string };
 
-export const MESSAGE_SOURCE = "vaultsync-extension";
+export const MESSAGE_SOURCE = "vaultharbor-extension";

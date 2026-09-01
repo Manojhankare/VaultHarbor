@@ -7,22 +7,32 @@ import { PasswordGenerator } from "../../popup/components/PasswordGenerator";
 import { RecoveryKeyPage } from "../../popup/components/RecoveryKeyPage";
 import { VaultSidebar, type SidebarNav } from "./VaultSidebar";
 import { VaultTopBar } from "./VaultTopBar";
-import { VaultItemRow } from "./VaultItemRow";
+import { VaultItemsTable } from "./VaultItemsTable";
+import { VaultTableTabs, type VaultTabId } from "./VaultTableTabs";
+import { VaultTableToolbar } from "./VaultTableToolbar";
+import { VaultSelectionBar } from "./VaultSelectionBar";
 import { VaultDetailPanel } from "./VaultDetailPanel";
 import { CreateItemModal } from "./CreateItemModal";
 import { EmptyState } from "./EmptyState";
 import { IconPlus, IconX } from "../../popup/components/icons/Icon";
+import { ImportExportPanel } from "./import-export/ImportExportPanel";
+import { AutoLockSettings } from "./AutoLockSettings";
+import { ImportWizardModal } from "./import-export/ImportWizardModal";
+import { ExportDialog } from "./import-export/ExportDialog";
+import { ConflictResolveDialog } from "./ConflictResolveDialog";
 
-type ItemTab = "all" | "login" | "secure_note" | "other";
+type ItemTab = VaultTabId;
+type ListFilter = "all" | "favorites" | "breached" | "shared";
+type TabCounts = Record<ItemTab, number>;
 
 function titleForNav(nav: SidebarNav, tab: ItemTab): { title: string; sub: string } {
   if (nav === "trash") return { title: "Trash", sub: "Deleted items stay here until they expire (90 days)." };
   if (nav === "generator") return { title: "Password generator", sub: "Create a strong password without leaving the vault." };
-  if (nav === "security") return { title: "Security", sub: "Recovery key and vault lock." };
+  if (nav === "security") return { title: "Security", sub: "Recovery key, import/export, and vault lock." };
   if (tab === "login") return { title: "Passwords", sub: "Login items in your vault." };
   if (tab === "secure_note") return { title: "Secure notes", sub: "Private notes stored locally and synced encrypted." };
   if (tab === "other") return { title: "More", sub: "Other item types are preserved even if they cannot be edited yet." };
-  return { title: "Vault", sub: "All items in this vault." };
+  return { title: "Vault", sub: "All your items, in one secure place." };
 }
 
 export function VaultManagerApp({
@@ -35,6 +45,13 @@ export function VaultManagerApp({
 }: AuthUnlockedProps) {
   const [nav, setNav] = useState<SidebarNav>("vault");
   const [tab, setTab] = useState<ItemTab>("all");
+  const [listFilter, setListFilter] = useState<ListFilter>("all");
+  const [tabCounts, setTabCounts] = useState<TabCounts>({
+    all: 0,
+    login: 0,
+    secure_note: 0,
+    other: 0,
+  });
   const [sort, setSort] = useState<VaultListSort>("name");
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<VaultItemSummary[]>([]);
@@ -51,6 +68,12 @@ export function VaultManagerApp({
   const [editOpen, setEditOpen] = useState(false);
   const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
   const [conflictOpen, setConflictOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportItemIds, setExportItemIds] = useState<string[] | null>(null);
+  const [checkedIds, setCheckedIds] = useState<Set<string>>(() => new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkBusyLabel, setBulkBusyLabel] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
   const filter: VaultListFilter = nav === "trash" ? "trash" : tab;
@@ -76,9 +99,33 @@ export function VaultManagerApp({
     }
   }, []);
 
+  const loadTabCounts = useCallback(async () => {
+    const tabs: ItemTab[] = ["all", "login", "secure_note", "other"];
+    const results = await Promise.all(
+      tabs.map((tabId) =>
+        bg<VaultItemSummary[]>({
+          type: "LIST_VAULT_ITEMS",
+          query: "",
+          filter: tabId,
+          sort: "name",
+        })
+      )
+    );
+    const counts: TabCounts = { all: 0, login: 0, secure_note: 0, other: 0 };
+    tabs.forEach((tabId, index) => {
+      const res = results[index];
+      if (res?.ok && res.data) counts[tabId] = res.data.length;
+    });
+    setTabCounts(counts);
+  }, []);
+
   useEffect(() => {
     if (nav === "vault" || nav === "trash") void loadList();
   }, [loadList, nav]);
+
+  useEffect(() => {
+    if (nav === "vault") void loadTabCounts();
+  }, [loadTabCounts, nav, pendingChanges]);
 
   useEffect(() => {
     void loadSync();
@@ -100,6 +147,142 @@ export function VaultManagerApp({
       }
     })();
   }, [selectedId]);
+
+  useEffect(() => {
+    setCheckedIds(new Set());
+  }, [query, filter, sort, nav]);
+
+  const checkedCount = checkedIds.size;
+  const allVisibleChecked =
+    items.length > 0 && items.every((item) => checkedIds.has(item.id));
+  const someVisibleChecked =
+    items.some((item) => checkedIds.has(item.id)) && !allVisibleChecked;
+
+  function toggleChecked(id: string) {
+    setCheckedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAllVisible() {
+    if (allVisibleChecked) {
+      setCheckedIds(new Set());
+      return;
+    }
+    setCheckedIds(new Set(items.map((item) => item.id)));
+  }
+
+  function clearChecked() {
+    setCheckedIds(new Set());
+  }
+
+  async function bulkDelete() {
+    if (checkedCount === 0) return;
+    const message =
+      nav === "trash"
+        ? `Permanently remove ${checkedCount} item${checkedCount === 1 ? "" : "s"} from trash?`
+        : `Move ${checkedCount} item${checkedCount === 1 ? "" : "s"} to trash?`;
+    if (!window.confirm(message)) return;
+
+    const ids = Array.from(checkedIds);
+    setBulkBusy(true);
+    setBulkBusyLabel(
+      nav === "trash"
+        ? `Deleting ${ids.length} item${ids.length === 1 ? "" : "s"}…`
+        : `Moving ${ids.length} item${ids.length === 1 ? "" : "s"} to trash…`
+    );
+    setBannerError(null);
+    try {
+      for (let i = 0; i < ids.length; i++) {
+        setBulkBusyLabel(
+          nav === "trash"
+            ? `Deleting ${i + 1} of ${ids.length}…`
+            : `Moving ${i + 1} of ${ids.length} to trash…`
+        );
+        const res = await bg({ type: "DELETE_VAULT_ITEM", id: ids[i]! });
+        if (!res.ok) {
+          setBannerError(res.error ?? "Delete failed");
+          break;
+        }
+      }
+      clearChecked();
+      if (selectedId && ids.includes(selectedId)) {
+        setSelectedId(null);
+        setDetail(null);
+      }
+      await loadList();
+      await loadSync();
+      await loadTabCounts();
+      onRefresh();
+    } finally {
+      setBulkBusy(false);
+      setBulkBusyLabel(null);
+    }
+  }
+
+  async function bulkRestore() {
+    if (checkedCount === 0) return;
+    const ids = Array.from(checkedIds);
+    setBulkBusy(true);
+    setBulkBusyLabel(`Restoring ${ids.length} item${ids.length === 1 ? "" : "s"}…`);
+    setBannerError(null);
+    try {
+      for (let i = 0; i < ids.length; i++) {
+        setBulkBusyLabel(`Restoring ${i + 1} of ${ids.length}…`);
+        const res = await bg({ type: "RESTORE_VAULT_ITEM", id: ids[i]! });
+        if (!res.ok) {
+          setBannerError(res.error ?? "Restore failed");
+          break;
+        }
+      }
+      clearChecked();
+      await loadList();
+      await loadSync();
+      await loadTabCounts();
+      onRefresh();
+    } finally {
+      setBulkBusy(false);
+      setBulkBusyLabel(null);
+    }
+  }
+
+  function bulkExport() {
+    if (checkedCount === 0) return;
+    setExportItemIds(Array.from(checkedIds));
+    setExportOpen(true);
+  }
+
+  async function deleteItem(id: string) {
+    const message =
+      nav === "trash"
+        ? "Permanently remove this item from trash?"
+        : "Move this item to trash?";
+    if (!window.confirm(message)) return;
+
+    setBannerError(null);
+    const res = await bg({ type: "DELETE_VAULT_ITEM", id });
+    if (!res.ok) {
+      setBannerError(res.error ?? "Delete failed");
+      return;
+    }
+    if (selectedId === id) {
+      setSelectedId(null);
+      setDetail(null);
+    }
+    setCheckedIds((prev) => {
+      if (!prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    await loadList();
+    await loadSync();
+    await loadTabCounts();
+    onRefresh();
+  }
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -127,15 +310,21 @@ export function VaultManagerApp({
         });
       }
       if (e.key === "Escape") {
+        if (checkedCount > 0) {
+          clearChecked();
+          return;
+        }
         setCreateOpen(false);
         setEditOpen(false);
         setSidebarOpen(false);
         setConflictOpen(false);
+        setImportOpen(false);
+        setExportOpen(false);
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [items]);
+  }, [items, checkedCount]);
 
   async function handleLock() {
     setSelectedId(null);
@@ -165,8 +354,12 @@ export function VaultManagerApp({
 
   async function resolveConflict(choice: "keep_local" | "keep_remote") {
     const res = await bg({ type: "RESOLVE_CONFLICT", choice });
+    if (!res.ok) {
+      const message = res.error ?? "Could not resolve conflict";
+      setBannerError(message);
+      throw new Error(message);
+    }
     setConflictOpen(false);
-    if (!res.ok) setBannerError(res.error ?? "Could not resolve conflict");
     await loadList();
     await loadSync();
     onRefresh();
@@ -282,34 +475,15 @@ export function VaultManagerApp({
         )}
 
         {nav === "vault" && (
-          <div className="vh-tabs">
-            {(
-              [
-                ["all", "All Items"],
-                ["login", "Passwords"],
-                ["secure_note", "Secure Notes"],
-                ["other", "More"],
-              ] as const
-            ).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                className={`vh-tab${tab === id ? " is-active" : ""}`}
-                onClick={() => setTab(id)}
-              >
-                {label}
-              </button>
-            ))}
-            <select
-              className="vh-sort"
-              value={sort}
-              onChange={(e) => setSort(e.target.value as VaultListSort)}
-              aria-label="Sort items"
-            >
-              <option value="name">Name</option>
-              <option value="updated">Recently modified</option>
-            </select>
-          </div>
+          <>
+            <VaultTableTabs active={tab} counts={tabCounts} onChange={setTab} />
+            <VaultTableToolbar
+              listFilter={listFilter}
+              sort={sort}
+              onFilterChange={setListFilter}
+              onSortChange={setSort}
+            />
+          </>
         )}
 
         {showList && (
@@ -329,14 +503,30 @@ export function VaultManagerApp({
                 }
               />
             ) : (
-              items.map((item) => (
-                <VaultItemRow
-                  key={item.id}
-                  item={item}
-                  selected={selectedId === item.id}
-                  onSelect={setSelectedId}
-                />
-              ))
+              <VaultItemsTable
+                items={items}
+                inTrash={nav === "trash"}
+                selectedId={selectedId}
+                checkedIds={checkedIds}
+                allChecked={allVisibleChecked}
+                indeterminate={someVisibleChecked}
+                onSelect={setSelectedId}
+                onToggleCheck={toggleChecked}
+                onToggleAll={toggleAllVisible}
+                onEdit={(id) => {
+                  setSelectedId(id);
+                  void (async () => {
+                    const res = await bg<VaultItem>({ type: "GET_VAULT_ITEM", id });
+                    if (res.ok && res.data) {
+                      setDetail(res.data);
+                      setEditOpen(true);
+                    } else {
+                      setBannerError(res.error ?? "Could not load item.");
+                    }
+                  })();
+                }}
+                onDelete={(id) => void deleteItem(id)}
+              />
             )}
           </div>
         )}
@@ -349,7 +539,8 @@ export function VaultManagerApp({
 
         {nav === "security" && (
           <div className="vh-list vs-scrollbar" style={{ padding: 24 }}>
-            <p className="muted">
+            <AutoLockSettings />
+            <p className="muted" style={{ marginTop: 24 }}>
               Your vault is encrypted with your master password. A recovery key lets you set a new master
               password if you forget it.
             </p>
@@ -361,9 +552,30 @@ export function VaultManagerApp({
                 Lock vault
               </button>
             </div>
+            <ImportExportPanel
+              hasConflict={hasConflict}
+              onImport={() => setImportOpen(true)}
+              onExport={() => {
+                setExportItemIds(null);
+                setExportOpen(true);
+              }}
+            />
           </div>
         )}
       </main>
+
+      {showList && (
+        <VaultSelectionBar
+          count={checkedCount}
+          inTrash={nav === "trash"}
+          busy={bulkBusy}
+          busyLabel={bulkBusyLabel}
+          onDelete={() => void bulkDelete()}
+          onRestore={() => void bulkRestore()}
+          onExport={bulkExport}
+          onClear={clearChecked}
+        />
+      )}
 
       <VaultDetailPanel
         item={detail}
@@ -432,26 +644,32 @@ export function VaultManagerApp({
       )}
 
       {conflictOpen && (
-        <div className="vh-modal-backdrop" role="dialog" aria-modal="true">
-          <div className="vh-modal">
-            <h2>Resolve sync conflict</h2>
-            <p className="muted">
-              Local and remote vaults differ. Choose which copy to keep. This uses the existing sync
-              conflict path (revision / ETag).
-            </p>
-            <div className="actions">
-              <button type="button" className="btn btn-secondary" onClick={() => setConflictOpen(false)}>
-                Cancel
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={() => void resolveConflict("keep_remote")}>
-                Keep server
-              </button>
-              <button type="button" className="btn" onClick={() => void resolveConflict("keep_local")}>
-                Keep local
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConflictResolveDialog
+          onClose={() => setConflictOpen(false)}
+          onResolve={resolveConflict}
+        />
+      )}
+
+      {importOpen && (
+        <ImportWizardModal
+          onClose={() => setImportOpen(false)}
+          onDone={() => {
+            void loadList();
+            void loadSync();
+            onRefresh();
+          }}
+        />
+      )}
+
+      {exportOpen && (
+        <ExportDialog
+          selectedId={selectedId}
+          presetSelectedIds={exportItemIds ?? undefined}
+          onClose={() => {
+            setExportOpen(false);
+            setExportItemIds(null);
+          }}
+        />
       )}
     </div>
   );

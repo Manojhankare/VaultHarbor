@@ -1,6 +1,10 @@
 # Backend Deployment (Vercel)
 
-Production API: **https://vaultsync.manojhankare.in** (custom domain on Vercel)
+Production API: **https://vaultharbor.manojhankare.in** (custom domain on Vercel)
+
+**Legacy domain:** `vaultsync.manojhankare.in` should redirect to the new domain so older extension builds keep working until users update.
+
+**Production database:** Vercel `DATABASE_URL` may still point at a Supabase database named `vaultsync` until you migrate the DB. Code defaults for local/docker use `vaultharbor`. Do not change production `DATABASE_URL` unless the database is renamed in Supabase.
 
 ## Vercel project settings
 

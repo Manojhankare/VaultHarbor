@@ -1,12 +1,12 @@
 {
-  "name": "vaultsync-extension",
+  "name": "vaultharbor-extension",
   "version": "0.1.0",
   "author": "Manoj Hankare <manojhankare2@gmail.com> (https://manojhankare.in)",
   "homepage": "https://manojhankare.in",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Manojhankare/VaultSync.git"
+    "url": "https://github.com/Manojhankare/VaultHarbor.git"
   },
   "private": true,
   "type": "module",
@@ -24,12 +24,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "papaparse": "^5.7.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.287",
     "@types/node": "^26.4.0",
+    "@types/papaparse": "^5.3.15",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",

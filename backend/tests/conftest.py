@@ -30,7 +30,7 @@ def _resolve_direct_database_url() -> str:
         try:
             with engine.connect() as conn:
                 name = conn.execute(text("SELECT current_database()")).scalar_one()
-                if name != os.environ.get("EXPECTED_DATABASE_NAME", "vaultsync"):
+                if name != os.environ.get("EXPECTED_DATABASE_NAME", "vaultharbor"):
                     raise RuntimeError(f"Unexpected database {name}")
             return url
         except Exception:
@@ -65,7 +65,7 @@ def direct_database_url() -> str:
 def app(direct_database_url: str) -> Generator[Flask, None, None]:
     os.environ["FLASK_ENV"] = "testing"
     os.environ["DATABASE_URL"] = direct_database_url
-    schema = os.environ.get("TEST_SCHEMA", "vaultsync_test")
+    schema = os.environ.get("TEST_SCHEMA", "vaultharbor_test")
 
     _run_migrations(direct_database_url, schema)
 

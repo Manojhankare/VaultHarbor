@@ -16,6 +16,7 @@ import {
   getVaultItemById,
   searchVault,
   getLoginById,
+  importVaultItems,
 } from "./codec";
 import {
   deriveKek,
@@ -42,6 +43,7 @@ import {
   rehydrateDek,
 } from "../background/session-key";
 import * as vaultApi from "../api/vault-api";
+import { FOLDER_CUSTOM_FIELD_KEY } from "../import/folder-bridge";
 import type {
   ListVaultItemsOptions,
   LoginItem,
@@ -51,6 +53,8 @@ import type {
   VaultDocument,
   VaultItem,
   EncryptedVaultMeta,
+  ExportScope,
+  ImportCommitResult,
 } from "./vault-types";
 
 let decryptedVaultCache: VaultDocument | null = null;
@@ -412,9 +416,59 @@ export async function loadDecryptedFromStorage(): Promise<void> {
     decryptedVaultCache = pruneTombstones(parseVault(json));
     wrappedKeyCache = stored.wrapped_vault_key;
     mergeRecoveryFromStored(stored);
+    const { initVaultActivity } = await import("./auto-lock");
+    await initVaultActivity();
   } catch {
     await lockVault();
   }
+}
+
+export function applyImportBatch(
+  vault: VaultDocument,
+  logins: NewLoginItem[],
+  secureNotes: NewSecureNoteItem[]
+): VaultDocument {
+  return importVaultItems(vault, logins, secureNotes);
+}
+
+export async function commitImportBatch(
+  logins: NewLoginItem[],
+  secureNotes: NewSecureNoteItem[]
+): Promise<ImportCommitResult> {
+  const vault = await requireUnlockedVault();
+  const stored = await getEncryptedVault();
+  const baseRevision = stored?.revision ?? 0;
+  decryptedVaultCache = applyImportBatch(vault, logins, secureNotes);
+  return {
+    imported: logins.length + secureNotes.length,
+    logins: logins.length,
+    secureNotes: secureNotes.length,
+    baseRevision,
+  };
+}
+
+export async function listExportItems(scope: ExportScope): Promise<VaultItem[]> {
+  const vault = await requireUnlockedVault();
+  let items = vault.items.filter((item) => !item.deleted_at);
+  if (scope.kind === "selected") {
+    const ids = new Set(scope.itemIds);
+    items = items.filter((item) => ids.has(item.id));
+  } else if (scope.kind === "folder") {
+    items = items.filter(
+      (item) => item.custom_fields?.[FOLDER_CUSTOM_FIELD_KEY] === scope.folderName
+    );
+  }
+  items = items.filter(
+    (item) => item.type === "login" || item.type === "secure_note"
+  );
+  return items;
+}
+
+export async function listVaultSummariesForImport(): Promise<VaultItem[]> {
+  const vault = await requireUnlockedVault();
+  return vault.items.filter(
+    (item) => item.type === "login" || item.type === "secure_note"
+  );
 }
 
 export { wipeLocalVaultState };

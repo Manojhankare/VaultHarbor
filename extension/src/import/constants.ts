@@ -1,0 +1,4 @@
+export const IMPORT_SESSION_TTL_MS = 15 * 60 * 1000;
+export const IMPORT_APPEND_CHUNK_SIZE = 150;
+export const EXPORT_INLINE_MAX_BYTES = 1_500_000;
+export const EXPORT_CHUNK_SIZE = 100;

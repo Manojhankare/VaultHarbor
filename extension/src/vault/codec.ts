@@ -49,7 +49,7 @@ export function addLoginItem(
     password: item.password,
     uri: item.uri,
     notes: item.notes ?? "",
-    custom_fields: {},
+    custom_fields: item.custom_fields ?? {},
     created_at: now,
     updated_at: now,
   };
@@ -84,7 +84,7 @@ export function addSecureNoteItem(
     name: item.name,
     content: item.content,
     notes: item.notes ?? "",
-    custom_fields: {},
+    custom_fields: item.custom_fields ?? {},
     created_at: now,
     updated_at: now,
   };
@@ -266,4 +266,19 @@ export function mergeVaults(
     merged: { version: VAULT_VERSION, items: Array.from(byId.values()) },
     conflicts,
   };
+}
+
+export function importVaultItems(
+  vault: VaultDocument,
+  logins: NewLoginItem[],
+  secureNotes: NewSecureNoteItem[]
+): VaultDocument {
+  let doc = vault;
+  for (const item of logins) {
+    doc = addLoginItem(doc, item);
+  }
+  for (const item of secureNotes) {
+    doc = addSecureNoteItem(doc, item);
+  }
+  return doc;
 }

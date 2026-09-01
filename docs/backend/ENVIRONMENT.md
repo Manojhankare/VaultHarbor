@@ -42,7 +42,7 @@ No `DIRECT_DATABASE_URL` on Vercel.
 | App (pooled) | 6543 | `postgres.<project-ref>` | `*.pooler.supabase.com` |
 | Migrations (direct) | 5432 | `postgres` | `db.<ref>.supabase.co` |
 
-Both use database name **`vaultsync`**.
+Both use database name **`vaultharbor`** for local/docker defaults. Production Supabase may still use **`vaultsync`** until migrated — match whatever is in your `DATABASE_URL`.
 
 ## Defaults (when env var unset)
 

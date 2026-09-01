@@ -99,7 +99,7 @@ All endpoints under `/api/v1/`. Unversioned: `/health`, `/health/db`.
 
 ```text
 tests/
-├── conftest.py       # App fixture, isolated vaultsync_test schema
+├── conftest.py       # App fixture, isolated vaultharbor_test schema
 ├── factories.py      # Shared payloads
 ├── auth/
 ├── devices/

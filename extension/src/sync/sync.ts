@@ -1,6 +1,6 @@
 import { getAccessToken } from "../auth/tokens";
 import { getDeviceId } from "../devices/device";
-import { ApiError, ExtensionError } from "../shared/errors";
+import { ApiError, ExtensionError, userFacingMessage } from "../shared/errors";
 import { STORAGE_KEYS } from "../shared/constants";
 import { storageLocalSet } from "../shared/browser";
 import * as vaultApi from "../api/vault-api";
@@ -24,11 +24,17 @@ import {
   getPendingChangeCount,
   addPendingChange,
   clearPendingChange,
+  clearPendingChanges,
   wipeLocalVaultState,
+  type ConflictSnapshot,
 } from "../vault/storage";
-import { mergeVaults, parseVault, serializeVault } from "../vault/codec";
+import { mergeVaults, parseVault, pruneTombstones, serializeVault } from "../vault/codec";
 import { rehydrateDek } from "../background/session-key";
 import type { EncryptedVaultMeta } from "../vault/vault-types";
+import {
+  analyzeVaultConflict,
+  type ConflictDiffSummary,
+} from "./conflict-diff";
 
 export async function downloadAndCacheVault(
   accessToken: string
@@ -119,6 +125,7 @@ export async function uploadVault(
     return vault.revision;
   } catch (err) {
     if (err instanceof ApiError && err.code === "VAULT_REVISION_CONFLICT") {
+      await clearPendingChange(pendingId);
       await handleConflict(accessToken, err);
       throw err;
     }
@@ -153,6 +160,8 @@ async function handleConflict(
       "Master password was changed on another device. Unlock with your new master password."
     );
   }
+
+  await clearPendingChanges();
 
   await saveConflict({
     id: crypto.randomUUID(),
@@ -195,6 +204,10 @@ export async function syncNow(): Promise<void> {
   const accessToken = await getAccessToken();
   if (!accessToken) return;
 
+  if (await getLatestConflict()) {
+    return;
+  }
+
   const stored = await getEncryptedVault();
   const syncState = await syncApi.getSyncState(
     accessToken,
@@ -216,6 +229,110 @@ export async function syncNow(): Promise<void> {
   }
 }
 
+export type SyncAttemptResult =
+  | { ok: true }
+  | { ok: false; error: string; code?: string };
+
+function syncFailure(err: unknown): SyncAttemptResult {
+  if (err instanceof ExtensionError) {
+    return { ok: false, error: err.message, code: err.code };
+  }
+  if (err instanceof ApiError) {
+    return { ok: false, error: userFacingMessage(err), code: err.code };
+  }
+  return { ok: false, error: userFacingMessage(err) };
+}
+
+/** Upload vault after a local mutation (e.g. import). Retries queued changes; never throws. */
+export async function syncAfterImport(): Promise<SyncAttemptResult> {
+  const accessToken = await getAccessToken();
+  if (!accessToken) {
+    return {
+      ok: false,
+      error:
+        "Not signed in. Your import is saved on this device — sign in and use Sync to back up to the server.",
+      code: "AUTH_REQUIRED",
+    };
+  }
+
+  try {
+    const stored = await getEncryptedVault();
+    await uploadVault(accessToken, stored?.revision ?? 0);
+
+    let pending = await getPendingChangeCount();
+    if (pending > 0) {
+      await syncNow();
+      pending = await getPendingChangeCount();
+    }
+
+    const conflict = await getLatestConflict();
+    if (conflict) {
+      return {
+        ok: false,
+        error:
+          "The server has a different copy of your vault. Resolve the sync conflict from the vault toolbar, then sync again.",
+        code: "VAULT_CONFLICT",
+      };
+    }
+
+    if (pending > 0) {
+      return {
+        ok: false,
+        error:
+          "Import saved locally but upload did not finish. Check your connection and tap Sync now below.",
+        code: "PENDING_CHANGES",
+      };
+    }
+
+    return { ok: true };
+  } catch (err) {
+    const conflict = await getLatestConflict();
+    if (conflict) {
+      return {
+        ok: false,
+        error:
+          "The server has a different copy of your vault. Resolve the sync conflict from the vault toolbar, then sync again.",
+        code: "VAULT_CONFLICT",
+      };
+    }
+    return syncFailure(err);
+  }
+}
+
+async function diffFromSnapshot(
+  conflict: ConflictSnapshot
+): Promise<ConflictDiffSummary> {
+  const localDoc = parseVault(conflict.localVault);
+  const dek = await rehydrateDek();
+  if (!dek) {
+    throw new ExtensionError(
+      "VAULT_LOCKED",
+      "Unlock your vault to see what changed."
+    );
+  }
+
+  const { decryptVault } = await import("../vault/crypto");
+  const remoteJson = await decryptVault(dek, conflict.remoteVault);
+  const remoteDoc = parseVault(remoteJson);
+
+  return analyzeVaultConflict(localDoc, remoteDoc, {
+    localRevision: conflict.localRevision,
+    remoteRevision: conflict.remoteRevision,
+    createdAt: conflict.createdAt,
+  });
+}
+
+export async function getConflictDetails(): Promise<ConflictDiffSummary | null> {
+  const conflict = await getLatestConflict();
+  if (!conflict) return null;
+  return diffFromSnapshot(conflict);
+}
+
+async function alignWithServer(accessToken: string): Promise<void> {
+  await downloadAndCacheVault(accessToken);
+  await loadDecryptedFromStorage();
+}
+
 export async function resolveConflict(
   choice: "keep_local" | "keep_remote"
 ): Promise<void> {
@@ -223,13 +340,43 @@ export async function resolveConflict(
   if (!conflict) return;
 
   const accessToken = await getAccessToken();
-  if (!accessToken) return;
+  if (!accessToken) {
+    throw new ExtensionError(
+      "AUTH_REQUIRED",
+      "Sign in to resolve the sync conflict."
+    );
+  }
 
-  if (choice === "keep_local") {
-    await uploadVault(accessToken, conflict.remoteRevision);
-  } else {
-    await downloadAndCacheVault(accessToken);
-    await loadDecryptedFromStorage();
+  await clearPendingChanges();
+
+  const diff = await diffFromSnapshot(conflict);
+  const vaultsMatch = diff.totalDifferences === 0;
+
+  if (choice === "keep_remote" || vaultsMatch) {
+    await alignWithServer(accessToken);
+    await clearConflicts();
+    return;
+  }
+
+  const localDoc = pruneTombstones(parseVault(conflict.localVault));
+  setDecryptedVault(localDoc);
+
+  const remoteResult = await vaultApi.getVault(accessToken);
+  const baseRevision =
+    remoteResult.vault?.revision ?? conflict.remoteRevision;
+  try {
+    await uploadVault(accessToken, baseRevision);
+  } catch (err) {
+    if (
+      vaultsMatch &&
+      err instanceof ApiError &&
+      err.code === "VAULT_REVISION_CONFLICT"
+    ) {
+      await alignWithServer(accessToken);
+      await clearConflicts();
+      return;
+    }
+    throw err;
   }
   await clearConflicts();
 }

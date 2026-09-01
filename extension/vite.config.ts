@@ -11,7 +11,7 @@ function apiBaseUrlDefine(env: Record<string, string>, mode: string) {
   const url =
     env.VITE_API_BASE_URL ??
     (mode === "production"
-      ? "https://vaultsync.manojhankare.in"
+      ? "https://vaultharbor.manojhankare.in"
       : "http://localhost:5000");
   return {
     "import.meta.env.VITE_API_BASE_URL": JSON.stringify(url),

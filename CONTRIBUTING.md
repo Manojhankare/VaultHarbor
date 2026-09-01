@@ -2,14 +2,14 @@
 
 Thank you for your interest in VaultHarbor. This project is open source — you are welcome to report issues, suggest improvements, and submit pull requests.
 
-**Repository:** [github.com/Manojhankare/VaultSync](https://github.com/Manojhankare/VaultSync)  
+**Repository:** [github.com/Manojhankare/VaultHarbor](https://github.com/Manojhankare/VaultHarbor)  
 **Author:** [Manoj Hankare](https://manojhankare.in)
 
 ## Ways to contribute
 
 ### Report a bug or request a feature
 
-Open a [GitHub Issue](https://github.com/Manojhankare/VaultSync/issues/new). Include:
+Open a [GitHub Issue](https://github.com/Manojhankare/VaultHarbor/issues/new). Include:
 
 - What you expected vs what happened (bugs)
 - Steps to reproduce, if applicable
@@ -53,7 +53,7 @@ VaultHarbor is released under the [MIT License](LICENSE). You may:
 **Please give credit** when you ship a derivative or public deployment:
 
 - Retain the [LICENSE](LICENSE) copyright notice in source and documentation
-- Mention **VaultHarbor** and link to [https://github.com/Manojhankare/VaultSync](https://github.com/Manojhankare/VaultSync) (e.g. in your README, about page, or app credits)
+- Mention **VaultHarbor** and link to [https://github.com/Manojhankare/VaultHarbor](https://github.com/Manojhankare/VaultHarbor) (e.g. in your README, about page, or app credits)
 - Optional but appreciated: link to [manojhankare.in](https://manojhankare.in)
 
 You do **not** need permission to self-host. The MIT license already grants these rights; credit keeps the community aware of the upstream project.

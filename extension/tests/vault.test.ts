@@ -10,6 +10,7 @@ import {
   parseVault,
   serializeVault,
   getVaultItemById,
+  importVaultItems,
 } from "../src/vault/codec";
 import type { VaultItem } from "../src/vault/vault-types";
 
@@ -97,5 +98,18 @@ describe("vault codec", () => {
     expect(roundtrip.items[0]).toMatchObject({ type: "card", number: "4111" });
     expect(listVaultItems(roundtrip, { filter: "other" })).toHaveLength(1);
     expect(listVaultItems(roundtrip, { filter: "login" })).toHaveLength(0);
+  });
+
+  it("importVaultItems batch adds multiple items", () => {
+    let vault = createEmptyVault();
+    vault = importVaultItems(
+      vault,
+      [
+        { name: "A", uri: "https://a.com", username: "a", password: "1" },
+        { name: "B", uri: "https://b.com", username: "b", password: "2" },
+      ],
+      [{ name: "Note", content: "body" }]
+    );
+    expect(vault.items).toHaveLength(3);
   });
 });

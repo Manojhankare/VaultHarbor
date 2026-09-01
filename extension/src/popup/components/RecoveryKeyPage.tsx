@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { bg } from "../api";
 
 type Props = {
@@ -14,6 +14,13 @@ export function RecoveryKeyPage({
 }: Props) {
   const [confirmed, setConfirmed] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    void bg({ type: "PAUSE_AUTO_LOCK" });
+    return () => {
+      void bg({ type: "RESUME_AUTO_LOCK" });
+    };
+  }, []);
 
   async function copyKey() {
     await bg({ type: "COPY_TO_CLIPBOARD", text: recoveryKey });

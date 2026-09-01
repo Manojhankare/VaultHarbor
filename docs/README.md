@@ -7,7 +7,7 @@ Central documentation for the VaultHarbor password manager monorepo. **Keep this
 ## Repository layout
 
 ```text
-VaultSync/
+VaultHarbor/
 ├── branding/              ← master icons/logos (see branding/README.md)
 ├── docs/                  ← you are here (project-wide docs)
 ├── backend/               ← Flask API (deployed)
@@ -48,10 +48,10 @@ When editing those files, also update the matching section in `docs/backend/` if
 
 | Service | URL |
 |---------|-----|
-| API (production) | `https://vaultsync.manojhankare.in` |
+| API (production) | `https://vaultharbor.manojhankare.in` |
 | Health | `/health` |
 | API docs | `/api/docs` |
-| Database | Supabase PostgreSQL (`vaultsync`) |
+| Database | Supabase PostgreSQL (`vaultsync` in production; `vaultharbor` for local docker) |
 
 Update this table when domains change.
 

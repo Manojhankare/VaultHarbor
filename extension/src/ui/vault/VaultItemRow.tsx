@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import type { VaultItemSummary } from "../../shared/messages";
 import { formatRelativeTime, itemTypeLabel } from "../../domain/vault-items";
 import { faviconFallbackUrl, faviconUrl, isValidHttpUrl } from "../../shared/favicon";
@@ -7,19 +7,47 @@ import { IconKey, IconNote, IconShield } from "../../popup/components/icons/Icon
 type Props = {
   item: VaultItemSummary;
   selected: boolean;
+  checked: boolean;
   onSelect: (id: string) => void;
+  onToggleCheck: (id: string) => void;
 };
 
-export function VaultItemRow({ item, selected, onSelect }: Props) {
+export function VaultItemRow({
+  item,
+  selected,
+  checked,
+  onSelect,
+  onToggleCheck,
+}: Props) {
   const canFavicon = item.type === "login" && item.uri && isValidHttpUrl(item.uri);
   const [iconSrc, setIconSrc] = useState(() => (canFavicon ? faviconUrl(item.uri!) : null));
 
+  function onCheckboxClick(e: MouseEvent) {
+    e.stopPropagation();
+  }
+
   return (
-    <button
-      type="button"
-      className={`vh-item${selected ? " is-selected" : ""}`}
+    <div
+      className={`vh-item${selected ? " is-selected" : ""}${checked ? " is-checked" : ""}`}
       onClick={() => onSelect(item.id)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(item.id);
+        }
+      }}
+      role="button"
+      tabIndex={0}
     >
+      <label className="vh-item__check" onClick={(e) => e.stopPropagation()}>
+        <input
+          type="checkbox"
+          checked={checked}
+          aria-label={`Select ${item.name}`}
+          onChange={() => onToggleCheck(item.id)}
+          onClick={onCheckboxClick}
+        />
+      </label>
       <span className="vh-item__icon">
         {iconSrc ? (
           <img
@@ -45,6 +73,6 @@ export function VaultItemRow({ item, selected, onSelect }: Props) {
         </span>
       </span>
       <span className="vh-item__time">{formatRelativeTime(item.updated_at)}</span>
-    </button>
+    </div>
   );
 }

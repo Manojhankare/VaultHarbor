@@ -7,7 +7,7 @@ Zero-knowledge password manager — encrypted vault on the client, opaque sync o
 
 **Built by** [Manoj Hankare](https://manojhankare.in)
 
-**Open source:** [github.com/Manojhankare/VaultSync](https://github.com/Manojhankare/VaultSync) — issues, pull requests, and self-hosting welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+**Open source:** [github.com/Manojhankare/VaultHarbor](https://github.com/Manojhankare/VaultHarbor) — issues, pull requests, and self-hosting welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Components
 
@@ -43,8 +43,8 @@ Load `extension/dist/chrome/` unpacked in Chrome, Edge, or Brave.
 ## Production API
 
 ```text
-https://vaultsync.manojhankare.in/health
-https://vaultsync.manojhankare.in/api/docs
+https://vaultharbor.manojhankare.in/health
+https://vaultharbor.manojhankare.in/api/docs
 ```
 
 ## Local backend
@@ -66,7 +66,7 @@ VaultHarbor is [MIT licensed](LICENSE). You may use, modify, and self-host the c
 
 ## Contributing
 
-Bug reports, feature ideas, and pull requests are welcome on [GitHub](https://github.com/Manojhankare/VaultSync). Read [CONTRIBUTING.md](CONTRIBUTING.md) for issue/PR guidelines and self-hosting credit expectations.
+Bug reports, feature ideas, and pull requests are welcome on [GitHub](https://github.com/Manojhankare/VaultHarbor). Read [CONTRIBUTING.md](CONTRIBUTING.md) for issue/PR guidelines and self-hosting credit expectations.
 
 ## Support the project
 

@@ -16,6 +16,7 @@ Features include account password reset (email code), master-password recovery k
 - [Autofill](../extension/docs/AUTOFILL.md)
 - [Release & auto-update](RELEASE.md)
 - [Sync](../extension/docs/SYNC.md)
+- [Import & export](IMPORT_EXPORT.md)
 
 ## Build
 
@@ -32,7 +33,7 @@ The toolbar popup stays compact: sticky search, current-site matches, fill, sync
 
 ## Full-screen vault
 
-The full-screen page is the primary place to search, filter, create, edit, and trash items (logins and secure notes). It uses the same service-worker crypto/sync pipeline as the popup — not a second vault. Folders, shared items, and passkeys are shown as coming-soon placeholders when the data model does not support them yet.
+The full-screen page is the primary place to search, filter, create, edit, and trash items (logins and secure notes). **Security** also includes import/export for migrating from other password managers. It uses the same service-worker crypto/sync pipeline as the popup — not a second vault. Folders, shared items, and passkeys are shown as coming-soon placeholders when the data model does not support them yet.
 
 Edit sources in [`branding/`](../branding/README.md) only (`vaultharborlogo_icon.png`). Run `node scripts/generate-icons.mjs` before build — transparent icons for toolbar/manifest; CSS `--vs-bg` provides popup backgrounds. Store promo is `extension/public/store/promo-440x280.png`.
 
@@ -52,7 +53,7 @@ npm run version:bump -- 0.2.0   # sync version in manifests
 Default (Chrome Web Store build):
 
 ```text
-https://vaultsync.manojhankare.in
+https://vaultharbor.manojhankare.in
 ```
 
 **Self-hosted backend:** open the extension login screen → **Advanced** → enter your server URL → **Test connection** → **Save**. Switching servers removes local vault data from this browser.

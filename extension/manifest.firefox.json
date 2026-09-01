@@ -7,7 +7,7 @@
   "homepage_url": "https://manojhankare.in",
   "browser_specific_settings": {
     "gecko": {
-      "id": "vaultsync@extension.local",
+      "id": "vaultharbor@manojhankare.in",
       "strict_min_version": "127.0"
     }
   },
@@ -36,6 +36,7 @@
     "webNavigation"
   ],
   "host_permissions": [
+    "https://vaultharbor.manojhankare.in/*",
     "https://vaultsync.manojhankare.in/*",
     "http://localhost:5000/*",
     "http://*/*",
@@ -45,6 +46,7 @@
     {
       "matches": ["http://*/*", "https://*/*"],
       "exclude_matches": [
+        "https://vaultharbor.manojhankare.in/*",
         "https://vaultsync.manojhankare.in/*",
         "http://localhost:5000/*"
       ],

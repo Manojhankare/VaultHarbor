@@ -1,7 +1,7 @@
 import { detectLoginFields } from "./detector";
 import { BRAND } from "../shared/brand";
 
-const ICON_ID = "vaultsync-fill-icon";
+const ICON_ID = "vaultharbor-fill-icon";
 const LOGO_URL = () => chrome.runtime.getURL("icons/icon128.png");
 
 let iconClickHandler: (() => void) | null = null;
@@ -221,16 +221,16 @@ export function removeFillIcon(): void {
 }
 
 export function removeIframes(): void {
-  document.getElementById("vaultsync-picker-frame")?.remove();
-  document.getElementById("vaultsync-save-frame")?.remove();
+  document.getElementById("vaultharbor-picker-frame")?.remove();
+  document.getElementById("vaultharbor-save-frame")?.remove();
 }
 
 export function showSavePromptIframe(): void {
-  const existing = document.getElementById("vaultsync-save-frame");
+  const existing = document.getElementById("vaultharbor-save-frame");
   existing?.remove();
 
   const iframe = document.createElement("iframe");
-  iframe.id = "vaultsync-save-frame";
+  iframe.id = "vaultharbor-save-frame";
   iframe.src = chrome.runtime.getURL("save-prompt.html");
   iframe.setAttribute("scrolling", "no");
   iframe.style.cssText =
@@ -240,11 +240,11 @@ export function showSavePromptIframe(): void {
 
 /** @deprecated Prefer showCredentialDropdown — kept for rare iframe picker fallbacks. */
 export function showPickerIframe(credentialIds: string[]): void {
-  const existing = document.getElementById("vaultsync-picker-frame");
+  const existing = document.getElementById("vaultharbor-picker-frame");
   existing?.remove();
 
   const iframe = document.createElement("iframe");
-  iframe.id = "vaultsync-picker-frame";
+  iframe.id = "vaultharbor-picker-frame";
   iframe.src = chrome.runtime.getURL(
     `picker.html?ids=${encodeURIComponent(credentialIds.join(","))}`
   );
@@ -255,7 +255,7 @@ export function showPickerIframe(credentialIds: string[]): void {
 }
 
 export function showFillToast(message: string, isError = false): void {
-  const id = "vaultsync-fill-toast";
+  const id = "vaultharbor-fill-toast";
   document.getElementById(id)?.remove();
 
   const toast = document.createElement("div");

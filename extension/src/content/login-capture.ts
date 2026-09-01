@@ -166,11 +166,11 @@ export function bindLoginFormCapture(): void {
   if (!bindTarget || !password) {
     return;
   }
-  if (bindTarget.dataset.vaultsyncBound === "1") {
+  if (bindTarget.dataset.vaultharborBound === "1") {
     syncTrackedValues();
     return;
   }
-  bindTarget.dataset.vaultsyncBound = "1";
+  bindTarget.dataset.vaultharborBound = "1";
 
   tracked = {
     username,

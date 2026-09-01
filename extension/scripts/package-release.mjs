@@ -20,7 +20,7 @@ if (!existsSync(chromeDir)) {
 
 const pkg = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
 const version = pkg.version;
-const zipName = `vaultsync-extension-${version}-chrome.zip`;
+const zipName = `vaultharbor-extension-${version}-chrome.zip`;
 const zipPath = resolve(outDir, zipName);
 
 mkdirSync(outDir, { recursive: true });

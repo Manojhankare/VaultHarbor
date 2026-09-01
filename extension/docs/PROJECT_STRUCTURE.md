@@ -6,6 +6,8 @@ extension/
 │   ├── background/
 │   │   ├── service-worker.ts   MV3 entry, alarms, listeners
 │   │   ├── messages.ts         Typed message router
+│   │   ├── import-session.ts   Atomic batch import buffer
+│   │   ├── export-session.ts   Chunked export reads
 │   │   ├── clipboard.ts        Offscreen copy/clear
 │   │   ├── session-key.ts      DEK session persistence
 │   │   ├── pending-save.ts     Save-login staging
@@ -25,11 +27,14 @@ extension/
 │   │   └── vault-app.css       Full-viewport layout
 │   ├── ui/
 │   │   ├── AuthRoot.tsx        Shared login/unlock/setup routing
-│   │   └── vault/              Full-screen vault manager UI
+│   │   └── vault/              Full-screen vault manager UI + import-export/ + AutoLockSettings
+│   ├── import/                 CSV/JSON parsers, duplicate detection, folder-bridge
+│   ├── export/                 VaultHarbor CSV/JSON exporters
 │   ├── vault/
 │   │   ├── crypto.ts           PBKDF2, AES-GCM
 │   │   ├── codec.ts            Vault JSON + tombstones
 │   │   ├── storage.ts          IndexedDB
+│   │   ├── auto-lock.ts        Idle auto-lock policy + activity whitelist
 │   │   └── vault.ts            Lock/unlock, CRUD
 │   ├── sync/
 │   │   ├── sync.ts             Upload/download/poll

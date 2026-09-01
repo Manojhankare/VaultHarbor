@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Maintain Project Documentation
 
-VaultSync documentation lives in **`docs/`** (repo root). Update it in the **same change** as code — not as a follow-up.
+VaultHarbor documentation lives in **`docs/`** (repo root). Update it in the **same change** as code — not as a follow-up.
 
 ## When to update docs
 
