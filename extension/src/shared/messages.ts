@@ -87,6 +87,7 @@ export type BackgroundRequest =
   | { type: "EXPORT_ITEMS_CANCEL"; sessionId: string }
   | { type: "LIST_VAULT_ITEM_SUMMARIES_FOR_IMPORT" }
   | { type: "GET_AUTO_LOCK_SETTINGS" }
+  | { type: "GET_RECOVERY_KEY_INFO" }
   | { type: "SET_AUTO_LOCK_SETTINGS"; minutes: number }
   | { type: "DISABLE_AUTO_LOCK_SESSION" }
   | { type: "ENABLE_AUTO_LOCK_SESSION" }

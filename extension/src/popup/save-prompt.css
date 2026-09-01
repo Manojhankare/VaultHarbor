@@ -165,3 +165,8 @@ body {
   margin-top: 2px;
   flex-shrink: 0;
 }
+
+.save-prompt__links {
+  margin: 12px 0 0;
+  text-align: center;
+}

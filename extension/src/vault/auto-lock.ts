@@ -89,7 +89,7 @@ export async function setAutoLockMinutes(value: number): Promise<void> {
   if (!isValidAutoLockMinutes(value)) {
     throw new ExtensionError(
       "VALIDATION_ERROR",
-      "Auto-lock timeout must be 5, 15, 30, or 60 minutes."
+      "Auto-lock timeout must be one of the supported idle periods."
     );
   }
 
@@ -189,7 +189,14 @@ export async function resumeAutoLock(): Promise<void> {
   await touchVaultActivity();
 }
 
+/** Human-readable label for auto-lock dropdown (e.g. "15 minutes", "2 hours"). */
 export function formatAutoLockMinutes(minutes: number): string {
-  if (minutes === 1) return "1 minute";
+  if (minutes < 60) {
+    return minutes === 1 ? "1 minute" : `${minutes} minutes`;
+  }
+  if (minutes % 60 === 0) {
+    const hours = minutes / 60;
+    return hours === 1 ? "1 hour" : `${hours} hours`;
+  }
   return `${minutes} minutes`;
 }

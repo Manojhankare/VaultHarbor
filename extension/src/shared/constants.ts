@@ -2,8 +2,8 @@
 export const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 export const VAULT_VERSION = 1;
-export const AUTO_LOCK_MINUTES = 15;
-export const AUTO_LOCK_MINUTES_OPTIONS = [5, 15, 30, 60] as const;
+export const AUTO_LOCK_MINUTES = 120;
+export const AUTO_LOCK_MINUTES_OPTIONS = [5, 15, 30, 60, 120, 240, 480, 720, 1440] as const;
 export type AutoLockMinutesOption = (typeof AUTO_LOCK_MINUTES_OPTIONS)[number];
 export const SYNC_ALARM_NAME = "vaultharbor-sync";
 export const AUTO_LOCK_ALARM_NAME = "vaultharbor-autolock";
@@ -31,7 +31,7 @@ export const STORAGE_KEYS = {
   VAULT_UNLOCKED: "vault_unlocked",
   /** When true, auto-lock alarm is skipped until browser session ends or manual lock. */
   KEEP_UNLOCKED: "keep_unlocked",
-  /** Persistent auto-lock idle timeout in minutes (5, 15, 30, or 60). */
+  /** Persistent auto-lock idle timeout in minutes. */
   AUTO_LOCK_MINUTES: "auto_lock_minutes",
   /** Last vault activity timestamp for idle auto-lock. */
   LAST_VAULT_ACTIVITY_AT: "last_vault_activity_at",

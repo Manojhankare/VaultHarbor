@@ -25,6 +25,7 @@ vi.mock("../../src/vault/vault", () => ({
 import {
   AUTO_LOCK_ACTIVITY_MESSAGES,
   applyAutoLockIfNeeded,
+  formatAutoLockMinutes,
   getAutoLockMinutes,
   initVaultActivity,
   maybeTouchVaultActivity,
@@ -44,8 +45,19 @@ describe("auto-lock", () => {
     clearKeepUnlocked.mockClear();
   });
 
-  it("defaults to 15 minutes when unset", async () => {
-    expect(await getAutoLockMinutes()).toBe(15);
+  it("defaults to configured minutes when unset", async () => {
+    expect(await getAutoLockMinutes()).toBe(120);
+  });
+
+  it("formatAutoLockMinutes uses minutes under 1 hour and hours at or above", () => {
+    expect(formatAutoLockMinutes(5)).toBe("5 minutes");
+    expect(formatAutoLockMinutes(15)).toBe("15 minutes");
+    expect(formatAutoLockMinutes(60)).toBe("1 hour");
+    expect(formatAutoLockMinutes(120)).toBe("2 hours");
+    expect(formatAutoLockMinutes(240)).toBe("4 hours");
+    expect(formatAutoLockMinutes(480)).toBe("8 hours");
+    expect(formatAutoLockMinutes(720)).toBe("12 hours");
+    expect(formatAutoLockMinutes(1440)).toBe("24 hours");
   });
 
   it("persists valid timeout values", async () => {
@@ -54,8 +66,8 @@ describe("auto-lock", () => {
   });
 
   it("rejects invalid timeout values including 0", async () => {
-    await expect(setAutoLockMinutes(0)).rejects.toThrow(/5, 15, 30, or 60/);
-    await expect(setAutoLockMinutes(10)).rejects.toThrow(/5, 15, 30, or 60/);
+    await expect(setAutoLockMinutes(0)).rejects.toThrow(/supported idle periods/);
+    await expect(setAutoLockMinutes(10)).rejects.toThrow(/supported idle periods/);
   });
 
   it("shouldAutoLockNow is false when vault is locked", async () => {

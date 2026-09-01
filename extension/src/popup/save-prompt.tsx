@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import { LoadingButton } from "./components/LoadingSpinner";
 import { bg } from "./api";
 import { MESSAGE_SOURCE } from "../shared/messages";
+import { openVaultAppTab } from "../shared/open-vault-tab";
+import { VAULT_HASH } from "../shared/vault-app-hashes";
 import "./styles.css";
 import "./save-prompt.css";
 
@@ -15,10 +17,24 @@ type PendingSaveData = {
   mode: "save" | "update";
 };
 
-type Step = "loading" | "unlock" | "save";
+type AuthState = {
+  authenticated: boolean;
+  email: string | null;
+  unlocked: boolean;
+  hasVault: boolean;
+};
+
+type Step = "loading" | "login" | "setup" | "unlock" | "save";
 
 function notifyParent(type: string, extra?: Record<string, unknown>) {
   window.parent.postMessage({ source: MESSAGE_SOURCE, type, ...extra }, "*");
+}
+
+function stepFromAuth(auth: AuthState): Step {
+  if (!auth.authenticated) return "login";
+  if (!auth.hasVault) return "setup";
+  if (!auth.unlocked) return "unlock";
+  return "save";
 }
 
 function SavePromptHeader({ onClose }: { onClose: () => void }) {
@@ -53,10 +69,19 @@ function SavePromptApp() {
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"save" | "update">("save");
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [accountPassword, setAccountPassword] = useState("");
   const [masterPassword, setMasterPassword] = useState("");
   const [keepUnlocked, setKeepUnlocked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function resolveStepFromAuth(): Promise<Step | null> {
+    const auth = await bg<AuthState>({ type: "GET_AUTH_STATE" });
+    if (!auth.ok || !auth.data) return null;
+    if (auth.data.email) setEmail(auth.data.email);
+    return stepFromAuth(auth.data);
+  }
 
   useEffect(() => {
     void (async () => {
@@ -71,12 +96,8 @@ function SavePromptApp() {
       setPassword(pending.data.password);
       setMode(pending.data.mode ?? "save");
 
-      const vault = await bg<{ unlocked: boolean }>({ type: "GET_VAULT_STATE" });
-      if (vault.ok && vault.data?.unlocked) {
-        setStep("save");
-      } else {
-        setStep("unlock");
-      }
+      const nextStep = await resolveStepFromAuth();
+      if (nextStep) setStep(nextStep);
     })();
   }, []);
 
@@ -101,6 +122,8 @@ function SavePromptApp() {
     username,
     password,
     showPassword,
+    email,
+    accountPassword,
     masterPassword,
     keepUnlocked,
     mode,
@@ -111,6 +134,25 @@ function SavePromptApp() {
   async function dismiss() {
     await bg({ type: "DISMISS_PENDING_SAVE" });
     notifyParent("CLOSE_SAVE_PROMPT");
+  }
+
+  async function login(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const res = await bg({
+      type: "LOGIN",
+      email,
+      password: accountPassword,
+    });
+    setLoading(false);
+    if (!res.ok) {
+      setError(res.error ?? "Sign in failed.");
+      return;
+    }
+    setAccountPassword("");
+    const nextStep = await resolveStepFromAuth();
+    if (nextStep) setStep(nextStep);
   }
 
   async function unlock(e: React.FormEvent) {
@@ -126,6 +168,9 @@ function SavePromptApp() {
     if (res.ok) {
       setMasterPassword("");
       setStep("save");
+    } else if (res.error?.toLowerCase().includes("not authenticated")) {
+      setStep("login");
+      setError("Sign in to VaultHarbor to save this login.");
     } else {
       setError(res.error ?? "Unlock failed.");
     }
@@ -146,6 +191,9 @@ function SavePromptApp() {
     setLoading(false);
     if (res.ok) {
       notifyParent("CLOSE_SAVE_PROMPT");
+    } else if (res.error?.toLowerCase().includes("not authenticated")) {
+      setError(null);
+      setStep("login");
     } else if (res.error?.toLowerCase().includes("locked")) {
       setError(null);
       setStep("unlock");
@@ -155,6 +203,7 @@ function SavePromptApp() {
   }
 
   const isUpdate = mode === "update";
+  const saveVerb = isUpdate ? "update" : "save";
 
   if (step === "loading") {
     return (
@@ -164,13 +213,94 @@ function SavePromptApp() {
     );
   }
 
+  if (step === "login") {
+    return (
+      <div className="save-prompt" ref={rootRef}>
+        <SavePromptHeader onClose={() => void dismiss()} />
+        <h1 className="save-prompt__title">Sign in to {saveVerb}</h1>
+        <p className="save-prompt__subtitle">
+          Sign in to your VaultHarbor account to {saveVerb} this login to your vault.
+        </p>
+        <form onSubmit={(e) => void login(e)}>
+          <div className="field">
+            <label htmlFor="sp-email">Email</label>
+            <input
+              id="sp-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus
+              autoComplete="email"
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="sp-account-pass">Password</label>
+            <input
+              id="sp-account-pass"
+              type="password"
+              value={accountPassword}
+              onChange={(e) => setAccountPassword(e.target.value)}
+              required
+              minLength={12}
+              autoComplete="current-password"
+            />
+          </div>
+          {error && <p className="error">{error}</p>}
+          <div className="save-prompt__actions">
+            <button type="button" className="btn btn-secondary" onClick={() => void dismiss()}>
+              Not now
+            </button>
+            <LoadingButton loading={loading} loadingLabel="Signing in...">
+              Sign in
+            </LoadingButton>
+          </div>
+        </form>
+        <p className="save-prompt__links">
+          <button
+            type="button"
+            className="link"
+            onClick={() => void openVaultAppTab(VAULT_HASH.REGISTER)}
+          >
+            Create account
+          </button>
+        </p>
+      </div>
+    );
+  }
+
+  if (step === "setup") {
+    return (
+      <div className="save-prompt" ref={rootRef}>
+        <SavePromptHeader onClose={() => void dismiss()} />
+        <h1 className="save-prompt__title">Set up your vault</h1>
+        <p className="save-prompt__subtitle">
+          Create a master password in VaultHarbor before you can {saveVerb} logins.
+        </p>
+        {error && <p className="error">{error}</p>}
+        <div className="save-prompt__actions">
+          <button type="button" className="btn btn-secondary" onClick={() => void dismiss()}>
+            Not now
+          </button>
+          <button
+            type="button"
+            className="btn"
+            onClick={() => void openVaultAppTab(VAULT_HASH.SETUP_MASTER)}
+          >
+            Open VaultHarbor
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (step === "unlock") {
     return (
       <div className="save-prompt" ref={rootRef}>
         <SavePromptHeader onClose={() => void dismiss()} />
-        <h1 className="save-prompt__title">Unlock to {isUpdate ? "update" : "save"}</h1>
+        <h1 className="save-prompt__title">Unlock to {saveVerb}</h1>
         <p className="save-prompt__subtitle">
-          Your vault is locked. Unlock to {isUpdate ? "update this login." : "save this login."}
+          Your vault is locked. Enter your master password to {saveVerb} this login.
         </p>
         <form onSubmit={(e) => void unlock(e)}>
           <div className="field">
@@ -203,6 +333,15 @@ function SavePromptApp() {
             </LoadingButton>
           </div>
         </form>
+        <p className="save-prompt__links">
+          <button
+            type="button"
+            className="link"
+            onClick={() => void openVaultAppTab(VAULT_HASH.RECOVER_MASTER)}
+          >
+            Forgot master password?
+          </button>
+        </p>
       </div>
     );
   }

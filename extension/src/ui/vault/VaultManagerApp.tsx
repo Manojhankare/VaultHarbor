@@ -15,8 +15,7 @@ import { VaultDetailPanel } from "./VaultDetailPanel";
 import { CreateItemModal } from "./CreateItemModal";
 import { EmptyState } from "./EmptyState";
 import { IconPlus, IconX } from "../../popup/components/icons/Icon";
-import { ImportExportPanel } from "./import-export/ImportExportPanel";
-import { AutoLockSettings } from "./AutoLockSettings";
+import { SecuritySettings } from "./SecuritySettings";
 import { ImportWizardModal } from "./import-export/ImportWizardModal";
 import { ExportDialog } from "./import-export/ExportDialog";
 import { ConflictResolveDialog } from "./ConflictResolveDialog";
@@ -28,7 +27,7 @@ type TabCounts = Record<ItemTab, number>;
 function titleForNav(nav: SidebarNav, tab: ItemTab): { title: string; sub: string } {
   if (nav === "trash") return { title: "Trash", sub: "Deleted items stay here until they expire (90 days)." };
   if (nav === "generator") return { title: "Password generator", sub: "Create a strong password without leaving the vault." };
-  if (nav === "security") return { title: "Security", sub: "Recovery key, import/export, and vault lock." };
+  if (nav === "security") return { title: "Security", sub: "Auto-lock, recovery key, import/export, and vault lock." };
   if (tab === "login") return { title: "Passwords", sub: "Login items in your vault." };
   if (tab === "secure_note") return { title: "Secure notes", sub: "Private notes stored locally and synced encrypted." };
   if (tab === "other") return { title: "More", sub: "Other item types are preserved even if they cannot be edited yet." };
@@ -413,7 +412,7 @@ export function VaultManagerApp({
   const noteEdit = detail?.type === "secure_note" ? (detail as SecureNoteItem) : null;
 
   return (
-    <div className="vh-app">
+    <div className={`vh-app${showList ? "" : " vh-app--no-detail"}`}>
       <VaultTopBar
         query={query}
         email={email}
@@ -434,7 +433,10 @@ export function VaultManagerApp({
         onChange={(next) => {
           setNav(next);
           setSidebarOpen(false);
-          if (next !== "vault" && next !== "trash") setSelectedId(null);
+          if (next !== "vault" && next !== "trash") {
+            setSelectedId(null);
+            setDetail(null);
+          }
         }}
       />
       <main className="vh-main">
@@ -538,22 +540,12 @@ export function VaultManagerApp({
         )}
 
         {nav === "security" && (
-          <div className="vh-list vs-scrollbar" style={{ padding: 24 }}>
-            <AutoLockSettings />
-            <p className="muted" style={{ marginTop: 24 }}>
-              Your vault is encrypted with your master password. A recovery key lets you set a new master
-              password if you forget it.
-            </p>
-            <div className="vh-actions">
-              <button type="button" className="btn" onClick={() => void generateRecovery()}>
-                {hasRecoveryKey ? "Rotate recovery key" : "Generate recovery key"}
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={() => void handleLock()}>
-                Lock vault
-              </button>
-            </div>
-            <ImportExportPanel
+          <div className="vh-list vs-scrollbar">
+            <SecuritySettings
+              hasRecoveryKey={hasRecoveryKey}
               hasConflict={hasConflict}
+              onGenerateRecovery={() => void generateRecovery()}
+              onLock={() => void handleLock()}
               onImport={() => setImportOpen(true)}
               onExport={() => {
                 setExportItemIds(null);
@@ -577,31 +569,33 @@ export function VaultManagerApp({
         />
       )}
 
-      <VaultDetailPanel
-        item={detail}
-        loading={detailLoading}
-        onClose={() => {
-          setSelectedId(null);
-          setDetail(null);
-        }}
-        onEdit={() => setEditOpen(true)}
-        onDeleted={() => {
-          setSelectedId(null);
-          setDetail(null);
-          void loadList();
-          void loadSync();
-          onRefresh();
-        }}
-        onRestored={() => {
-          setSelectedId(null);
-          setDetail(null);
-          if (nav === "trash") setNav("vault");
-          void loadList();
-          void loadSync();
-          onRefresh();
-        }}
-        onError={setBannerError}
-      />
+      {showList && (
+        <VaultDetailPanel
+          item={detail}
+          loading={detailLoading}
+          onClose={() => {
+            setSelectedId(null);
+            setDetail(null);
+          }}
+          onEdit={() => setEditOpen(true)}
+          onDeleted={() => {
+            setSelectedId(null);
+            setDetail(null);
+            void loadList();
+            void loadSync();
+            onRefresh();
+          }}
+          onRestored={() => {
+            setSelectedId(null);
+            setDetail(null);
+            if (nav === "trash") setNav("vault");
+            void loadList();
+            void loadSync();
+            onRefresh();
+          }}
+          onError={setBannerError}
+        />
+      )}
 
       {createOpen && (
         <CreateItemModal

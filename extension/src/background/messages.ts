@@ -650,6 +650,18 @@ async function dispatchBackgroundMessage(
         return { ok: true, data: settings };
       }
 
+      case "GET_RECOVERY_KEY_INFO": {
+        const stored = await getEncryptedVault();
+        const hasRecoveryKey = Boolean(stored?.recovery_wrapped_vault_key);
+        return {
+          ok: true,
+          data: {
+            hasRecoveryKey,
+            lastRotatedAt: hasRecoveryKey ? (stored?.updated_at ?? null) : null,
+          },
+        };
+      }
+
       case "SET_AUTO_LOCK_SETTINGS": {
         const { setAutoLockMinutes } = await import("../vault/auto-lock");
         await setAutoLockMinutes(request.minutes);

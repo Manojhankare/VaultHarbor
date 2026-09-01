@@ -1,18 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { bg } from "../../popup/api";
+import {
+  IconLock,
+  IconShield,
+} from "../../popup/components/icons/Icon";
 import type { AutoLockMinutesOption } from "../../shared/constants";
+import { formatAutoLockMinutes } from "../../vault/auto-lock";
 
 type AutoLockSettingsData = {
   minutes: AutoLockMinutesOption;
   options: readonly AutoLockMinutesOption[];
   sessionDisabled: boolean;
-};
-
-const LABELS: Record<AutoLockMinutesOption, string> = {
-  5: "5 minutes",
-  15: "15 minutes",
-  30: "30 minutes",
-  60: "60 minutes",
 };
 
 export function AutoLockSettings() {
@@ -61,108 +59,123 @@ export function AutoLockSettings() {
     }
   }
 
-  async function disableForSession() {
+  async function setSessionDisabled(disabled: boolean) {
+    if (!settings || settings.sessionDisabled === disabled) return;
     setSaving(true);
     setError(null);
-    const res = await bg<AutoLockSettingsData>({ type: "DISABLE_AUTO_LOCK_SESSION" });
+    const res = await bg<AutoLockSettingsData>({
+      type: disabled ? "DISABLE_AUTO_LOCK_SESSION" : "ENABLE_AUTO_LOCK_SESSION",
+    });
     setSaving(false);
     if (res.ok && res.data) {
       setSettings(res.data);
       setSaved(true);
     } else {
-      setError(res.error ?? "Could not disable auto-lock.");
-    }
-  }
-
-  async function enableForSession() {
-    setSaving(true);
-    setError(null);
-    const res = await bg<AutoLockSettingsData>({ type: "ENABLE_AUTO_LOCK_SESSION" });
-    setSaving(false);
-    if (res.ok && res.data) {
-      setSettings(res.data);
-      setSaved(true);
-    } else {
-      setError(res.error ?? "Could not re-enable auto-lock.");
+      setError(res.error ?? "Could not update session auto-lock setting.");
     }
   }
 
   if (loading) {
     return (
-      <section className="vh-settings-section">
-        <h3 className="vh-settings-section__title">Auto-lock</h3>
-        <p className="muted">Loading…</p>
+      <section className="vh-security-card">
+        <p className="muted">Loading auto-lock settings…</p>
       </section>
     );
   }
 
   if (!settings) {
     return (
-      <section className="vh-settings-section">
-        <h3 className="vh-settings-section__title">Auto-lock</h3>
+      <section className="vh-security-card">
         {error && <p className="error">{error}</p>}
       </section>
     );
   }
 
   return (
-    <section className="vh-settings-section">
-      <h3 className="vh-settings-section__title">Auto-lock</h3>
-      <p className="muted vh-settings-section__desc">
-        Lock the vault after this much inactivity while it is unlocked. Checks run about every
-        minute, so lock may occur shortly after the chosen time.
-      </p>
+    <>
+      <section className="vh-security-card">
+        <div className="vh-security-split">
+          <div className="vh-security-split__left">
+            <div className="vh-security-heading">
+              <div className="vh-security-card__icon vh-security-card__icon--round" aria-hidden="true">
+                <IconLock size={20} />
+              </div>
+              <h3 className="vh-security-card__title">Auto-lock</h3>
+            </div>
+            <p className="vh-security-card__desc">
+              Lock the vault after a period of inactivity while it is unlocked. Checks run about
+              every minute, so lock may occur shortly after the chosen time.
+            </p>
+          </div>
+          <div className="vh-security-split__right">
+            <label className="vh-security-field">
+              <span className="vh-security-field__label">Idle timeout</span>
+              <select
+                className="vh-security-field__select"
+                value={settings.minutes}
+                disabled={saving}
+                aria-label="Auto-lock idle timeout"
+                onChange={(e) =>
+                  void changeTimeout(Number(e.target.value) as AutoLockMinutesOption)
+                }
+              >
+                {settings.options.map((minutes) => (
+                  <option key={minutes} value={minutes}>
+                    {formatAutoLockMinutes(minutes)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="vh-security-info">
+              <IconShield size={16} />
+              <span>You can still access your vault using your master password.</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <label className="vh-settings-field">
-        <span className="vh-settings-field__label">Idle timeout</span>
-        <select
-          className="vh-settings-field__select"
-          value={settings.minutes}
-          disabled={saving}
-          aria-label="Auto-lock idle timeout"
-          onChange={(e) => void changeTimeout(Number(e.target.value) as AutoLockMinutesOption)}
-        >
-          {settings.options.map((minutes) => (
-            <option key={minutes} value={minutes}>
-              {LABELS[minutes]}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      {saved && <p className="vh-settings-section__saved">Saved</p>}
-      {error && <p className="error">{error}</p>}
-
-      <div className="vh-settings-section__session">
-        <h4 className="vh-settings-section__subtitle">This browser session</h4>
-        {settings.sessionDisabled ? (
-          <>
-            <p className="vh-settings-section__badge">Auto-lock disabled for this session</p>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              disabled={saving}
-              onClick={() => void enableForSession()}
-            >
-              Re-enable auto-lock
-            </button>
-          </>
-        ) : (
-          <>
-            <p className="muted" style={{ fontSize: 13, marginBottom: 10 }}>
+      <section className="vh-security-card">
+        <div className="vh-security-split">
+          <div className="vh-security-split__left">
+            <div className="vh-security-heading">
+              <div
+                className="vh-security-card__icon vh-security-card__icon--round vh-security-card__icon--success"
+                aria-hidden="true"
+              >
+                <IconShield size={20} />
+              </div>
+              <h3 className="vh-security-card__title">This browser session</h3>
+            </div>
+            <p className="vh-security-card__desc">
               Skip auto-lock until you lock the vault, log out, or close the browser.
             </p>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              disabled={saving}
-              onClick={() => void disableForSession()}
-            >
-              Don&apos;t auto-lock until I close the browser
-            </button>
-          </>
-        )}
-      </div>
-    </section>
+          </div>
+          <div className="vh-security-split__right vh-security-split__right--wide vh-security-split__right--center">
+            <div className="vh-security-control-box">
+              <label className="vh-toggle vh-toggle--boxed">
+                <IconLock size={18} />
+                <span className="vh-toggle__label">
+                  Don&apos;t auto-lock until I close the browser
+                </span>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={settings.sessionDisabled}
+                  disabled={saving}
+                  aria-label="Don't auto-lock until I close the browser"
+                  onChange={(e) => void setSessionDisabled(e.target.checked)}
+                />
+                <span className="vh-toggle__track" aria-hidden="true">
+                  <span className="vh-toggle__thumb" />
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {saved && <p className="vh-security-saved">Saved</p>}
+      {error && <p className="error vh-security-error">{error}</p>}
+    </>
   );
 }
