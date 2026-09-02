@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "VaultHarbor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "VaultHarbor is a secure zero-knowledge password manager by Manoj Hankare (manojhankare.in)",
   "author": "Manoj Hankare",
   "homepage_url": "https://manojhankare.in",
@@ -26,7 +26,9 @@
     "default_title": "VaultHarbor"
   },
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   },
   "permissions": [
     "storage",
@@ -44,21 +46,34 @@
   ],
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
       "exclude_matches": [
         "https://vaultharbor.manojhankare.in/*",
         "https://vaultsync.manojhankare.in/*",
         "http://localhost:5000/*"
       ],
-      "js": ["content-script.js"],
+      "js": [
+        "content-script.js"
+      ],
       "run_at": "document_idle",
       "all_frames": true
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["picker.html", "save-prompt.html", "logo-icon.png", "icons/icon128.png"],
-      "matches": ["http://*/*", "https://*/*"],
+      "resources": [
+        "picker.html",
+        "save-prompt.html",
+        "logo-icon.png",
+        "icons/icon128.png"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
       "use_dynamic_url": true
     }
   ],
