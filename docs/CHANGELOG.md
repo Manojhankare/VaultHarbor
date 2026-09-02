@@ -2,6 +2,12 @@
 
 All notable VaultHarbor project changes. Update this file with each significant release or deployment change.
 
+## 2026-09-02 — Extension autofill search-bar false positive
+
+- Login field detection no longer treats generic page search inputs (e.g. LinkedIn top search) as username fields when no password field is present
+- Multi-step logins (email-only first screen) still work via explicit username/email selectors
+- Added `extension/tests/detector.test.ts` for field-detection regressions
+
 ## 2026-08-31 — VaultHarbor rebrand follow-up (domain, repo, internals)
 
 - Production site/API: `https://vaultharbor.manojhankare.in` (was `vaultsync.manojhankare.in`)

@@ -18,6 +18,8 @@ const PASSWORD_SELECTORS = [
   'input[autocomplete="new-password"]',
 ];
 
+const SEARCH_HINT = /search|query|\bq\b|keyword|find|lookup|filter/i;
+
 export type LoginFormDetection = {
   form: HTMLFormElement | null;
   username: HTMLInputElement | null;
@@ -35,16 +37,49 @@ function isVisible(el: HTMLElement): boolean {
   );
 }
 
-export function findUsernameField(root: ParentNode): HTMLInputElement | null {
+function fieldHint(el: HTMLInputElement): string {
+  return [
+    el.name,
+    el.id,
+    el.placeholder,
+    el.getAttribute("aria-label"),
+    el.getAttribute("autocomplete"),
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function isLikelySearchField(el: HTMLInputElement): boolean {
+  if (el.type === "search") return true;
+  if (el.closest('[role="search"]')) return true;
+  if (el.getAttribute("role") === "searchbox") return true;
+  if (SEARCH_HINT.test(fieldHint(el))) return true;
+  return false;
+}
+
+function isLoginUsernameCandidate(el: HTMLInputElement): boolean {
+  return isVisible(el) && !isLikelySearchField(el);
+}
+
+/** Only fields that clearly look like login identifiers. */
+function findExplicitUsernameField(root: ParentNode): HTMLInputElement | null {
   for (const selector of USERNAME_SELECTORS) {
     const el = root.querySelector<HTMLInputElement>(selector);
-    if (el && isVisible(el)) return el;
+    if (el && isLoginUsernameCandidate(el)) return el;
   }
+  return null;
+}
+
+/** Broader username lookup — use inside a form that already has a password field. */
+export function findUsernameField(root: ParentNode): HTMLInputElement | null {
+  const explicit = findExplicitUsernameField(root);
+  if (explicit) return explicit;
+
   const textInputs = root.querySelectorAll<HTMLInputElement>(
     'input[type="text"], input[type="email"]'
   );
   for (const input of textInputs) {
-    if (isVisible(input)) return input;
+    if (isLoginUsernameCandidate(input)) return input;
   }
   return null;
 }
@@ -75,12 +110,12 @@ function findUsernameNearPassword(password: HTMLInputElement): HTMLInputElement 
       const input = prev.querySelector<HTMLInputElement>(
         'input[type="text"], input[type="email"]'
       );
-      if (input && isVisible(input)) return input;
+      if (input && isLoginUsernameCandidate(input)) return input;
       prev = prev.previousElementSibling;
     }
   }
 
-  return findUsernameField(document);
+  return findExplicitUsernameField(document);
 }
 
 export function findLoginForms(): HTMLFormElement[] {
@@ -91,24 +126,31 @@ export function findLoginForms(): HTMLFormElement[] {
 export function detectLoginFields(): LoginFieldsDetection | null {
   for (const form of findLoginForms()) {
     const password = findPasswordField(form);
+    if (!password) continue;
     const username = findUsernameField(form);
-    if (password || username) {
-      return { form, username, password };
-    }
+    return { form, username, password };
   }
 
   const password = findPasswordField(document);
-  const username = password
-    ? findUsernameNearPassword(password)
-    : findUsernameField(document);
+  if (password) {
+    const username = findUsernameNearPassword(password);
+    return {
+      form: password.closest("form"),
+      username,
+      password,
+    };
+  }
 
-  if (!password && !username) return null;
+  const username = findExplicitUsernameField(document);
+  if (username) {
+    return {
+      form: username.closest("form"),
+      username,
+      password: null,
+    };
+  }
 
-  return {
-    form: password?.closest("form") ?? username?.closest("form") ?? null,
-    username,
-    password,
-  };
+  return null;
 }
 
 export function detectLoginForm(): LoginFormDetection | null {

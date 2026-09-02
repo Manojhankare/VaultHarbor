@@ -2,7 +2,7 @@
 
 ## Flow
 
-1. Content script detects login forms (`input[type=password]`).
+1. Content script detects login fields: a visible password field, or (multi-step step one) an explicit username/email field — not generic page search bars (`type=search`, `role=searchbox`, or name/id/placeholder hints like “search”).
 2. Service worker returns matching credentials for **sender tab URL** (not content-script claims).
 3. Focusing or clicking the **username or password** field opens a **dropdown** under the field with all matches (works for 1 or many). Click a row / **Fill** to autofill. Multi-step logins (email first, password on next screen) fill the email immediately and auto-fill the password when that field appears.
 
