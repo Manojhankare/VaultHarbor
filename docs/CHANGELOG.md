@@ -2,10 +2,17 @@
 
 All notable VaultHarbor project changes. Update this file with each significant release or deployment change.
 
+## 2026-09-07 — Extension autofill ignores branch/filter comboboxes
+
+- Exclude GitHub-style branch/tag filter inputs (`role=combobox`, menu/listbox filters, “Find or create a branch…” placeholders)
+- Tighten username selectors (no broad `id*="user"` / `name*="user"`) so page UI filters are not treated as login fields
+- Username-near-password no longer falls back to an unrelated field elsewhere on the document
+
 ## 2026-09-02 — Extension autofill search-bar false positive
 
 - Login field detection no longer treats generic page search inputs (e.g. LinkedIn top search) as username fields when no password field is present
 - Multi-step logins (email-only first screen) still work via explicit username/email selectors
+- When a page has multiple login forms (registration + sign-in modal), autofill targets the modal, focused field, or sign-in context instead of the first form in DOM order
 - Added `extension/tests/detector.test.ts` for field-detection regressions
 
 ## 2026-08-31 — VaultHarbor rebrand follow-up (domain, repo, internals)

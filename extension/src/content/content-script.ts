@@ -1,4 +1,4 @@
-import { detectLoginFields } from "./detector";
+import { detectLoginFields, findAllLoginFieldGroups } from "./detector";
 import { fillFields, tryFillPendingPassword } from "./autofill";
 import { setupLoginCapture, bindLoginFormCapture } from "./login-capture";
 import {
@@ -114,7 +114,13 @@ function openDropdownFor(anchor: HTMLElement): void {
 }
 
 function pageMayNeedAutofill(): boolean {
-  return detectLoginFields() !== null || pendingCredentials.length > 0;
+  return findAllLoginFieldGroups().length > 0 || pendingCredentials.length > 0;
+}
+
+function getAutofillHint(): HTMLInputElement | null {
+  if (focusedAutofillField) return focusedAutofillField;
+  const active = document.activeElement;
+  return active instanceof HTMLInputElement ? active : null;
 }
 
 function pauseAutofillUi(): void {
@@ -180,33 +186,36 @@ async function refreshMatches(): Promise<void> {
 }
 
 function bindFieldFocusDropdown(): void {
-  const detected = detectLoginFields();
-  if (!detected) return;
+  const seen = new WeakSet<HTMLInputElement>();
 
-  const fields = [detected.username, detected.password].filter(
-    (el): el is HTMLInputElement => el !== null
-  );
+  for (const group of findAllLoginFieldGroups()) {
+    const fields = [group.username, group.password].filter(
+      (el): el is HTMLInputElement => el !== null
+    );
 
-  for (const field of fields) {
-    if (focusBoundEls.has(field)) continue;
-    focusBoundEls.add(field);
+    for (const field of fields) {
+      if (seen.has(field)) continue;
+      seen.add(field);
+      if (focusBoundEls.has(field)) continue;
+      focusBoundEls.add(field);
 
-    field.addEventListener("focus", () => {
-      if (!isAutofillAllowed() || pendingCredentials.length === 0) return;
-      showFillIconForField(field);
-    });
+      field.addEventListener("focus", () => {
+        if (!isAutofillAllowed() || pendingCredentials.length === 0) return;
+        showFillIconForField(field);
+      });
 
-    field.addEventListener("blur", () => {
-      scheduleHideFillIcon();
-    });
+      field.addEventListener("blur", () => {
+        scheduleHideFillIcon();
+      });
 
-    field.addEventListener("click", () => {
-      if (!isAutofillAllowed() || pendingCredentials.length === 0) return;
-      showFillIconForField(field);
-      if (!isCredentialDropdownOpen()) {
-        openDropdownFor(field);
-      }
-    });
+      field.addEventListener("click", () => {
+        if (!isAutofillAllowed() || pendingCredentials.length === 0) return;
+        showFillIconForField(field);
+        if (!isCredentialDropdownOpen()) {
+          openDropdownFor(field);
+        }
+      });
+    }
   }
 }
 
@@ -251,7 +260,7 @@ function handleFillResult(
 
 function tryCompletePendingPasswordFill(): void {
   if (!pendingPasswordFill) return;
-  if (tryFillPendingPassword(pendingPasswordFill)) {
+  if (tryFillPendingPassword(pendingPasswordFill, getAutofillHint())) {
     pendingPasswordFill = null;
     showFillToast("Password filled.");
   }
@@ -337,7 +346,11 @@ function initContentScript(): void {
   listenForExtensionMessages((message) => {
     if (!isAutofillAllowed()) return;
     if (message.type === "FILL_FIELDS" && message.password) {
-      const result = fillFields(message.username ?? "", message.password);
+      const result = fillFields(
+        message.username ?? "",
+        message.password,
+        getAutofillHint()
+      );
       handleFillResult(result, message.password);
     }
     if (message.type === "SHOW_SAVE_PROMPT") {

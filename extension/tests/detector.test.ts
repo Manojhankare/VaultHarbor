@@ -41,6 +41,49 @@ describe("detectLoginFields", () => {
     expect(detectLoginFields()).toBeNull();
   });
 
+  it("ignores GitHub-style branch / tag filter combobox", () => {
+    mountVisibleInput(`
+      <div role="menu">
+        <input
+          type="text"
+          role="combobox"
+          aria-label="Find or create a branch..."
+          aria-controls="branches"
+          autocomplete="off"
+        />
+      </div>
+    `);
+    expect(detectLoginFields()).toBeNull();
+  });
+
+  it("ignores filter inputs even when a password exists elsewhere on the page", () => {
+    mountVisibleInput(`
+      <div role="menu">
+        <input
+          type="text"
+          role="combobox"
+          placeholder="Find or create a branch..."
+          id="context-commitish-filter-field"
+        />
+      </div>
+      <form id="login">
+        <input type="email" name="email" autocomplete="username" />
+        <input type="password" name="password" autocomplete="current-password" />
+      </form>
+    `);
+    const detected = detectLoginFields();
+    expect(detected?.form?.id).toBe("login");
+    expect(detected?.username?.name).toBe("email");
+    expect(detected?.password?.name).toBe("password");
+  });
+
+  it("does not treat loose id*user text fields as usernames without a password", () => {
+    mountVisibleInput(`
+      <input type="text" id="user-content-filter" placeholder="Filter options" />
+    `);
+    expect(detectLoginFields()).toBeNull();
+  });
+
   it("detects username and password in a standard login form", () => {
     mountVisibleInput(`
       <form id="login">
@@ -94,6 +137,43 @@ describe("detectLoginFields", () => {
     const detected = detectLoginFields();
     expect(detected?.form?.id).toBe("signin");
     expect(detected?.username?.name).toBe("username");
+  });
+
+  it("prefers sign-in modal over background registration form", () => {
+    mountVisibleInput(`
+      <form id="register">
+        <h2>Create an account</h2>
+        <input type="email" name="reg-email" />
+        <input type="password" autocomplete="new-password" name="choose-password" />
+      </form>
+      <div role="dialog" style="position: fixed; z-index: 1000">
+        <h2>Sign In</h2>
+        <input type="email" name="login-email" />
+        <input type="password" autocomplete="current-password" name="login-password" />
+      </div>
+    `);
+    const detected = detectLoginFields();
+    expect(detected?.username?.name).toBe("login-email");
+    expect(detected?.password?.name).toBe("login-password");
+  });
+
+  it("uses the focused field group when multiple login forms exist", () => {
+    mountVisibleInput(`
+      <form id="register">
+        <input type="email" name="reg-email" />
+        <input type="password" autocomplete="new-password" name="choose-password" />
+      </form>
+      <form id="signin">
+        <input type="email" name="login-email" />
+        <input type="password" autocomplete="current-password" name="login-password" />
+      </form>
+    `);
+    const loginEmail = document.querySelector<HTMLInputElement>(
+      'input[name="login-email"]'
+    )!;
+    const detected = detectLoginFields(loginEmail);
+    expect(detected?.username?.name).toBe("login-email");
+    expect(detected?.password?.name).toBe("login-password");
   });
 });
 

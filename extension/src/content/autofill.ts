@@ -33,8 +33,12 @@ export function setInputValue(el: HTMLInputElement, value: string): void {
 
 export type FillResult = "full" | "username_only" | "failed";
 
-export function fillFields(username: string, password: string): FillResult {
-  const detected = detectLoginFields();
+export function fillFields(
+  username: string,
+  password: string,
+  hint?: HTMLElement | null
+): FillResult {
+  const detected = detectLoginFields(hint);
   if (!detected) return "failed";
 
   const { username: usernameEl, password: passwordEl } = detected;
@@ -56,9 +60,11 @@ export function fillFields(username: string, password: string): FillResult {
 
 /** Fill password when it appears (multi-step login, e.g. Hostinger email → password). */
 export function tryFillPendingPassword(
-  pendingPassword: string
+  pendingPassword: string,
+  hint?: HTMLElement | null
 ): boolean {
-  const passwordEl = findPasswordField(document);
+  const passwordEl =
+    detectLoginFields(hint)?.password ?? findPasswordField(document);
   if (!passwordEl || !pendingPassword) return false;
   setInputValue(passwordEl, pendingPassword);
   return true;
