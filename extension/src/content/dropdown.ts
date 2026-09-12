@@ -1,4 +1,8 @@
+import { MESSAGE_SOURCE } from "../shared/messages";
 import { findLoginOverlayRoot } from "./detector";
+import { applyOverlayFixed, alignDropdownToField, dropdownAnchorBox, layoutViewport } from "./overlay-position";
+import { detectOverlayTheme } from "./overlay-theme";
+import { detectPageFaviconUrl } from "../shared/favicon";
 
 export type DropdownCredential = {
   id: string;
@@ -9,7 +13,14 @@ export type DropdownCredential = {
 const DROPDOWN_ID = "vaultharbor-cred-dropdown";
 const GAP = 4;
 const MIN_WIDTH = 260;
-const DEFAULT_HEIGHT = 148;
+const VIEWPORT_GUTTER = 16;
+const DEFAULT_HEIGHT = 88;
+
+/** Match the login field; never thinner than MIN_WIDTH or wider than the viewport. */
+export function credentialPickerWidth(fieldWidth: number, viewportWidth: number): number {
+  const max = Math.max(MIN_WIDTH, viewportWidth - VIEWPORT_GUTTER);
+  return Math.min(max, Math.max(fieldWidth, MIN_WIDTH));
+}
 
 let anchorEl: HTMLElement | null = null;
 let overlayParent: HTMLElement | null = null;
@@ -25,42 +36,28 @@ function isFillIconInPath(event: Event): boolean {
 }
 
 function positionDropdown(frame: HTMLIFrameElement, anchor: HTMLElement): void {
-  const rect = anchor.getBoundingClientRect();
-  const parent = overlayParent ?? document.body;
-  const width = Math.max(rect.width, MIN_WIDTH);
+  if (!anchor.isConnected) {
+    removeCredentialDropdown();
+    return;
+  }
+  const rect = dropdownAnchorBox(anchor);
+  const viewport = layoutViewport();
+  if (rect.bottom < viewport.top || rect.top > viewport.top + viewport.height) {
+    removeCredentialDropdown();
+    return;
+  }
+  const width = credentialPickerWidth(rect.width, viewport.width);
   const height = Math.max(
     Number.parseFloat(frame.style.height) || DEFAULT_HEIGHT,
     80
   );
-
-  let top = rect.bottom + GAP;
-  if (top + height > window.innerHeight - 8 && rect.top > height + GAP) {
-    top = rect.top - height - GAP;
-  }
-  let left = rect.left;
-  if (left + width > window.innerWidth - 8) {
-    left = Math.max(8, window.innerWidth - width - 8);
-  }
-  if (left < 8) left = 8;
-
-  const parentStyle = window.getComputedStyle(parent);
-  const transformed =
-    parent !== document.body &&
-    (parentStyle.transform !== "none" ||
-      parentStyle.filter !== "none" ||
-      parentStyle.perspective !== "none");
-
-  if (transformed) {
-    const parentRect = parent.getBoundingClientRect();
-    frame.style.position = "absolute";
-    frame.style.top = `${top - parentRect.top}px`;
-    frame.style.left = `${left - parentRect.left}px`;
-  } else {
-    frame.style.position = "fixed";
-    frame.style.top = `${top}px`;
-    frame.style.left = `${left}px`;
-  }
-  frame.style.width = `${width}px`;
+  const { left, top } = alignDropdownToField(
+    rect,
+    { width, height },
+    viewport,
+    GAP
+  );
+  applyOverlayFixed(frame, left, top, { width });
 }
 
 export function resizeCredentialDropdown(height: number): void {
@@ -83,6 +80,8 @@ export function removeCredentialDropdown(): void {
   if (scrollHandler) {
     window.removeEventListener("scroll", scrollHandler, true);
     window.removeEventListener("resize", scrollHandler);
+    window.visualViewport?.removeEventListener("scroll", scrollHandler);
+    window.visualViewport?.removeEventListener("resize", scrollHandler);
     scrollHandler = null;
   }
   anchorEl = null;
@@ -97,8 +96,8 @@ export function isCredentialDropdownOpen(): boolean {
 }
 
 /**
- * Credential list in a chrome-extension iframe (same approach as Bitwarden /
- * NordPass). Clicks inside that document never reach the host page, so modal
+ * Compact suggestion menu in a chrome-extension iframe (Bitwarden / NordPass
+ * pattern). Clicks inside that document never reach the host page, so modal
  * click-outside handlers do not dismiss Sign In. The iframe is also parented
  * under the login dialog/form so focus-traps still see it as inside the modal.
  */
@@ -116,6 +115,9 @@ export function showCredentialDropdown(
   onClose = options?.onClose ?? null;
 
   const ids = credentials.map((c) => c.id).join(",");
+  const theme = detectOverlayTheme(anchor);
+  const pageIcon = detectPageFaviconUrl();
+  const iconQuery = pageIcon ? `&pageIcon=${encodeURIComponent(pageIcon)}` : "";
   const frame = document.createElement("iframe");
   frame.id = DROPDOWN_ID;
   frame.title = "VaultHarbor autofill";
@@ -126,14 +128,16 @@ export function showCredentialDropdown(
     "z-index:2147483647",
     "border:none",
     "background:transparent",
+    "box-sizing:border-box",
     "overflow:hidden",
+    "border-radius:16px",
     "color-scheme:normal",
     "pointer-events:auto",
     "box-shadow:none",
   ].join(";");
   frame.style.height = `${DEFAULT_HEIGHT}px`;
   frame.src = chrome.runtime.getURL(
-    `picker.html?ids=${encodeURIComponent(ids)}`
+    `picker.html?ids=${encodeURIComponent(ids)}&theme=${theme}${iconQuery}`
   );
 
   overlayParent.appendChild(frame);
@@ -153,7 +157,24 @@ export function showCredentialDropdown(
   }, 0);
 
   keyHandler = (e: KeyboardEvent) => {
-    if (e.key === "Escape") removeCredentialDropdown();
+    if (e.key === "Escape") {
+      removeCredentialDropdown();
+      return;
+    }
+    const win = frame.contentWindow;
+    if (!win) return;
+    let direction: "next" | "prev" | "confirm" | null = null;
+    if (e.key === "ArrowDown") direction = "next";
+    else if (e.key === "ArrowUp") direction = "prev";
+    else if (e.key === "Enter") direction = "confirm";
+    if (!direction) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    win.postMessage(
+      { source: MESSAGE_SOURCE, type: "PICKER_NAV", direction },
+      "*"
+    );
   };
   document.addEventListener("keydown", keyHandler, true);
 
@@ -164,4 +185,6 @@ export function showCredentialDropdown(
   };
   window.addEventListener("scroll", scrollHandler, true);
   window.addEventListener("resize", scrollHandler);
+  window.visualViewport?.addEventListener("scroll", scrollHandler);
+  window.visualViewport?.addEventListener("resize", scrollHandler);
 }

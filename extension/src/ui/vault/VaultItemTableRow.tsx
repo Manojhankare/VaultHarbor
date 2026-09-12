@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import type { VaultItemSummary } from "../../shared/messages";
 import { formatRelativeTime } from "../../domain/vault-items";
-import { faviconFallbackUrl, faviconUrl, isValidHttpUrl } from "../../shared/favicon";
+import { faviconFallbackUrl, faviconUrl, isValidHttpUrl, onFaviconResolved } from "../../shared/favicon";
 import {
   IconEdit,
   IconKey,
@@ -91,7 +91,14 @@ export function VaultItemTableRow({
       <div className="vh-table-row__cell vh-table-row__cell--name" role="cell">
         <span className="vh-table-row__icon">
           {iconSrc ? (
-            <img src={iconSrc} alt="" onError={() => setIconSrc(faviconFallbackUrl())} />
+            <img
+              src={iconSrc}
+              alt=""
+              onError={() => setIconSrc(faviconFallbackUrl())}
+              onLoad={(e) =>
+                onFaviconResolved(e.currentTarget, () => setIconSrc(faviconFallbackUrl()))
+              }
+            />
           ) : item.type === "secure_note" ? (
             <IconNote size={16} />
           ) : item.type === "login" ? (

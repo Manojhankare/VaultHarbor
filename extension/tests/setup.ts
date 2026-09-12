@@ -46,7 +46,10 @@ const storage: Record<string, Record<string, unknown>> = {
       },
     },
   },
-  runtime: { lastError: undefined },
+  runtime: {
+    lastError: undefined,
+    getURL: (path: string) => `chrome-extension://test/${path}`,
+  },
 } as unknown as typeof chrome;
 
 export function resetChromeStorage(): void {

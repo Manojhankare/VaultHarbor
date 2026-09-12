@@ -7,7 +7,7 @@ extension/
 ├── src/
 │   ├── background/     service worker, messages, clipboard, session key
 │   ├── content/        form detection, autofill, overlay isolation, save-login UI
-│   ├── popup/          React UI
+│   ├── popup/          React UI (toolbar popup, picker, save-prompt)
 │   ├── vault/          crypto, codec, storage, auto-lock idle policy
 │   ├── sync/           upload/download, conflicts
 │   ├── auth/           tokens, login flow

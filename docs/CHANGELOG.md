@@ -2,6 +2,17 @@
 
 All notable VaultHarbor project changes. Update this file with each significant release or deployment change.
 
+## 2026-09-12 — Autofill picker as a suggestion menu
+
+- Credential picker is a compact autocomplete-style list (no “Choose login” title, no Fill button — the row fills on click)
+- Username is the primary line, with favicon (page icon, then Google; Google’s default globe is replaced by the VaultHarbor lock). Site hostnames are omitted (custom names like “Work” still show). Highlighted row shows a chevron. Menu is as wide as the visible login field (pill / underline wrapper, not a narrower inner input) and sits flush under it
+- Picker and fill icon stay aligned to the field on transformed/filtered dialogs (Instagram, OpenAI, Workday); they no longer drift left, right, or to the page center
+- Fill icon sits just left of the site’s show-password control, using the visible field wrapper (not a narrower inner input)
+- Picker footer has a compact **Manage vault** control (next to close) that opens the full vault tab
+- Overlay attachment: prefer the sign-in **dialog** over a clipping `overflow:hidden` form; walk shadow hosts; ignore `will-change` on `body`/`html`; keep the menu glued to the input on scroll/visualViewport; do not drop the fill icon for shadow-tree fields (`isConnected`)
+- Picker width and bottom edge use the **visible field** (pill / underline wrapper), not a narrower inner input — sits flush under ChatGPT/Instagram pills and Infosys-style underlines without overlapping or leaving a hole. A field-width menu is not shifted sideways to fit a tight visual viewport
+- Light or dark theme follows the host page; ↑/↓ + Enter to fill without stealing focus from the field
+
 ## 2026-09-07 — Autofill Fill on modal logins (Workday)
 
 - Credential picker is now a `chrome-extension://` iframe inside the login dialog/form (Bitwarden/NordPass approach), so Fill does not dismiss Workday Sign In

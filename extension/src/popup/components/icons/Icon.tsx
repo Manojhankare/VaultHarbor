@@ -335,6 +335,20 @@ export function IconVault({ size = 16 }: { size?: number }) {
   );
 }
 
+export function IconSettings({ size = 16 }: { size?: number }) {
+  return (
+    <Icon size={size}>
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4L18 18M6 18l1.6-1.6M16.4 7.6L18 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </Icon>
+  );
+}
+
 export function IconShare({ size = 16 }: { size?: number }) {
   return (
     <Icon size={size}>

@@ -29,7 +29,7 @@ Load `extension/dist/chrome/` unpacked.
 
 ## Vault popup (unlocked)
 
-The toolbar popup stays compact: sticky search, current-site matches, fill, sync, and add. Use **Open Vault** (external-link icon) to open the full-screen vault manager in a tab (`vault.html`). **Forgot password?** on the popup login screen also opens that tab (`#forgot`) for the account reset flow. Fill from the popup still requires an origin-matching active tab.
+The toolbar popup stays compact: sticky search, current-site matches, fill, sync, **Open vault**, and add. **Open vault** (external-link icon in the header and next to Sync) opens the full-screen vault manager in a tab (`vault.html`). **Forgot password?** on the popup login screen also opens that tab (`#forgot`) for the account reset flow. Fill from the popup still requires an origin-matching active tab.
 
 ## Full-screen vault
 

@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { bg } from "../../popup/api";
-import { isValidHttpUrl } from "../../shared/favicon";
-import { faviconFallbackUrl, faviconUrl } from "../../shared/favicon";
+import { faviconFallbackUrl, faviconUrl, isValidHttpUrl, onFaviconResolved } from "../../shared/favicon";
 import { itemTypeLabel } from "../../domain/vault-items";
 import { getFolderFromCustomFields } from "../../import/folder-bridge";
 import type { LoginItem, SecureNoteItem, VaultItem } from "../../vault/vault-types";
@@ -93,7 +92,14 @@ function DetailHeaderIcon({ item }: { item: VaultItem }) {
   return (
     <div className="vh-detail-header__icon">
       {iconSrc ? (
-        <img src={iconSrc} alt="" onError={() => setIconSrc(faviconFallbackUrl())} />
+        <img
+          src={iconSrc}
+          alt=""
+          onError={() => setIconSrc(faviconFallbackUrl())}
+          onLoad={(e) =>
+            onFaviconResolved(e.currentTarget, () => setIconSrc(faviconFallbackUrl()))
+          }
+        />
       ) : item.type === "secure_note" ? (
         <IconNote size={22} />
       ) : item.type === "login" ? (

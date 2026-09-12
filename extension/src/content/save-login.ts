@@ -1,4 +1,5 @@
 import { detectLoginFields, findLoginOverlayRoot } from "./detector";
+import { applyOverlayFixed, fillIconViewportBox } from "./overlay-position";
 import { BRAND } from "../shared/brand";
 import { shieldOverlayHost } from "./overlay-events";
 
@@ -13,46 +14,16 @@ let iconActionTaken = false;
 
 const PILL_WIDTH = 52;
 const PILL_HEIGHT = 32;
-const INSIDE_INSET = 6;
-const PASSWORD_EYE_RESERVE = 38;
-
-function getInsideReserve(anchor: HTMLInputElement): number {
-  return anchor.type === "password" ? PASSWORD_EYE_RESERVE : INSIDE_INSET;
-}
 
 function positionIcon(host: HTMLElement, anchor: HTMLInputElement): void {
   const rect = anchor.getBoundingClientRect();
   if (rect.width === 0 && rect.height === 0) return;
 
-  const reserve = getInsideReserve(anchor);
-  let left = rect.right - PILL_WIDTH - reserve;
-  if (left < rect.left + INSIDE_INSET) {
-    left = rect.right - PILL_WIDTH - INSIDE_INSET;
-  }
-  const top = rect.top + (rect.height - PILL_HEIGHT) / 2;
-
-  const parent = host.parentElement;
-  const parentStyle = parent ? window.getComputedStyle(parent) : null;
-  const transformed =
-    parent &&
-    parent !== document.body &&
-    parentStyle &&
-    (parentStyle.transform !== "none" ||
-      parentStyle.filter !== "none" ||
-      parentStyle.perspective !== "none");
-
-  if (transformed && parent) {
-    const parentRect = parent.getBoundingClientRect();
-    host.style.position = "absolute";
-    host.style.top = `${top - parentRect.top}px`;
-    host.style.left = `${left - parentRect.left}px`;
-  } else {
-    host.style.position = "fixed";
-    host.style.top = `${top}px`;
-    host.style.left = `${left}px`;
-  }
-  host.style.width = `${PILL_WIDTH}px`;
-  host.style.height = `${PILL_HEIGHT}px`;
+  const { left, top } = fillIconViewportBox(anchor, {
+    width: PILL_WIDTH,
+    height: PILL_HEIGHT,
+  });
+  applyOverlayFixed(host, left, top, { width: PILL_WIDTH, height: PILL_HEIGHT });
 }
 
 function buildPillButton(): HTMLButtonElement {
@@ -209,6 +180,8 @@ export function mountFillIcon(onClick: () => void): void {
 
     window.addEventListener("scroll", repositionFillIcon, true);
     window.addEventListener("resize", repositionFillIcon);
+    window.visualViewport?.addEventListener("scroll", repositionFillIcon);
+    window.visualViewport?.addEventListener("resize", repositionFillIcon);
   } else if (host.parentElement !== overlayRoot) {
     overlayRoot.appendChild(host);
   }
@@ -240,7 +213,7 @@ export function isFillIconEvent(event: Event): boolean {
 export function repositionFillIcon(): void {
   const host = document.getElementById(ICON_ID);
   if (!host || !iconAnchorEl) return;
-  if (!document.contains(iconAnchorEl)) {
+  if (!iconAnchorEl.isConnected) {
     removeFillIcon();
     return;
   }
@@ -257,6 +230,8 @@ export function removeFillIcon(): void {
   document.getElementById(ICON_ID)?.remove();
   window.removeEventListener("scroll", repositionFillIcon, true);
   window.removeEventListener("resize", repositionFillIcon);
+  window.visualViewport?.removeEventListener("scroll", repositionFillIcon);
+  window.visualViewport?.removeEventListener("resize", repositionFillIcon);
 }
 
 export function removeIframes(): void {

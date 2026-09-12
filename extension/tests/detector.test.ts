@@ -202,6 +202,45 @@ describe("detectLoginFields", () => {
     expect(findLoginOverlayRoot(password).id).toBe("signin");
   });
 
+  it("prefers the dialog over an inner form so overflow:hidden forms do not clip the picker", () => {
+    mountVisibleInput(`
+      <div role="dialog" id="signin">
+        <form id="login" style="overflow:hidden">
+          <input type="password" name="password" />
+        </form>
+      </div>
+    `);
+    const password = document.querySelector<HTMLInputElement>(
+      'input[name="password"]'
+    )!;
+    expect(findLoginOverlayRoot(password).id).toBe("signin");
+  });
+
+  it("lifts out of a clipping form when there is no dialog", () => {
+    mountVisibleInput(`
+      <form id="login" style="overflow:hidden">
+        <input type="password" name="password" />
+      </form>
+    `);
+    const password = document.querySelector<HTMLInputElement>(
+      'input[name="password"]'
+    )!;
+    expect(findLoginOverlayRoot(password)).toBe(document.body);
+  });
+
+  it("finds a form outside a shadow-root field", () => {
+    const form = document.createElement("form");
+    form.id = "login";
+    const host = document.createElement("wd-input");
+    form.appendChild(host);
+    document.body.appendChild(form);
+    const shadow = host.attachShadow({ mode: "open" });
+    const input = document.createElement("input");
+    input.type = "password";
+    shadow.appendChild(input);
+    expect(findLoginOverlayRoot(input).id).toBe("login");
+  });
+
   it("finds a password input inside an open shadow root", () => {
     const host = document.createElement("wd-input");
     document.body.appendChild(host);

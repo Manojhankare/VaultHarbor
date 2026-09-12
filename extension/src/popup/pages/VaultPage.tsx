@@ -340,6 +340,7 @@ export function VaultPage({
           syncing={syncing}
           pendingChanges={pendingChanges}
           onSync={() => void handleSync()}
+          onOpenVault={() => void openVaultAppTab()}
           onAdd={() => setView("add")}
         />
       }

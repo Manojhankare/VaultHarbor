@@ -77,23 +77,59 @@ function firstVisibleInput(
 /**
  * Attach overlays inside the login surface so page click-outside / focus-trap
  * logic (Workday Sign In) still treats them as part of the dialog.
+ *
+ * Prefer the dialog over an inner <form> — forms often use overflow:hidden and
+ * clip the picker. Skip overflow:hidden/clip ancestors when a better root
+ * exists. Walk through shadow hosts (Workday custom elements).
  */
+export function elementClipsAbsolutely(el: HTMLElement): boolean {
+  const s = window.getComputedStyle(el);
+  const clip = (v: string) => v === "hidden" || v === "clip";
+  return clip(s.overflow) || clip(s.overflowX) || clip(s.overflowY);
+}
+
+export function composedParent(el: HTMLElement): HTMLElement | null {
+  if (el.parentElement) return el.parentElement;
+  const root = el.getRootNode();
+  if (root instanceof ShadowRoot && root.host instanceof HTMLElement) {
+    return root.host;
+  }
+  return null;
+}
+
+export function closestComposed(el: HTMLElement, selector: string): HTMLElement | null {
+  let node: HTMLElement | null = el;
+  while (node) {
+    const hit = node.closest(selector);
+    if (hit instanceof HTMLElement) return hit;
+    const root = node.getRootNode();
+    if (root instanceof ShadowRoot && root.host instanceof HTMLElement) {
+      node = root.host;
+      continue;
+    }
+    break;
+  }
+  return null;
+}
+
 export function findLoginOverlayRoot(anchor: HTMLElement): HTMLElement {
-  const form = anchor.closest("form");
-  if (form instanceof HTMLElement) return form;
+  const modal = closestComposed(anchor, MODAL_SELECTORS);
+  const form = closestComposed(anchor, "form");
 
-  const modal = anchor.closest(MODAL_SELECTORS);
-  if (modal instanceof HTMLElement) return modal;
+  for (const el of [modal, form]) {
+    if (el && !elementClipsAbsolutely(el)) return el;
+  }
+  if (modal) return modal;
 
-  let node: HTMLElement | null = anchor.parentElement;
+  let node = composedParent(anchor);
   let best: HTMLElement | null = null;
   while (node && node !== document.body) {
     const style = window.getComputedStyle(node);
     const z = Number.parseInt(style.zIndex, 10);
     if (style.position === "fixed" || (!Number.isNaN(z) && z >= 10)) {
-      best = node;
+      if (!elementClipsAbsolutely(node) || !best) best = node;
     }
-    node = node.parentElement;
+    node = composedParent(node);
   }
   return best ?? document.body;
 }

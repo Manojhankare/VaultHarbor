@@ -1,15 +1,16 @@
 import { AUTHOR } from "../../shared/author";
 import { IconButton } from "./IconButton";
-import { IconPlus, IconSync } from "./icons/Icon";
+import { IconExternalLink, IconPlus, IconSync } from "./icons/Icon";
 
 type Props = {
   syncing: boolean;
   pendingChanges: number;
   onSync: () => void;
+  onOpenVault: () => void;
   onAdd: () => void;
 };
 
-export function VaultToolbar({ syncing, pendingChanges, onSync, onAdd }: Props) {
+export function VaultToolbar({ syncing, pendingChanges, onSync, onOpenVault, onAdd }: Props) {
   return (
     <div className="vault-toolbar-wrap">
       <div className="vault-toolbar">
@@ -24,6 +25,13 @@ export function VaultToolbar({ syncing, pendingChanges, onSync, onAdd }: Props) 
           <IconSync size={17} />
         </IconButton>
         <span className="vault-toolbar__divider" aria-hidden="true" />
+        <IconButton
+          label="Open vault"
+          className="icon-btn--toolbar"
+          onClick={onOpenVault}
+        >
+          <IconExternalLink size={17} />
+        </IconButton>
         <IconButton label="Add password" className="icon-btn--toolbar icon-btn--accent" onClick={onAdd}>
           <IconPlus size={17} />
         </IconButton>

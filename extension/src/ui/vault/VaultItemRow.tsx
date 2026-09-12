@@ -1,7 +1,7 @@
 import { useState, type MouseEvent } from "react";
 import type { VaultItemSummary } from "../../shared/messages";
 import { formatRelativeTime, itemTypeLabel } from "../../domain/vault-items";
-import { faviconFallbackUrl, faviconUrl, isValidHttpUrl } from "../../shared/favicon";
+import { faviconFallbackUrl, faviconUrl, isValidHttpUrl, onFaviconResolved } from "../../shared/favicon";
 import { IconKey, IconNote, IconShield } from "../../popup/components/icons/Icon";
 
 type Props = {
@@ -54,6 +54,9 @@ export function VaultItemRow({
             src={iconSrc}
             alt=""
             onError={() => setIconSrc(faviconFallbackUrl())}
+            onLoad={(e) =>
+              onFaviconResolved(e.currentTarget, () => setIconSrc(faviconFallbackUrl()))
+            }
           />
         ) : item.type === "secure_note" ? (
           <IconNote size={18} />

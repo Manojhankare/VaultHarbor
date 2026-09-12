@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { CredentialSummary } from "../../shared/messages";
-import { faviconFallbackUrl, faviconUrl, isValidHttpUrl } from "../../shared/favicon";
+import { faviconFallbackUrl, faviconUrl, isValidHttpUrl, onFaviconResolved } from "../../shared/favicon";
 import { IconButton } from "./IconButton";
 import { IconExternalLink, IconMoreHorizontal } from "./icons/Icon";
 import { CredentialRowMenu, type MenuAction } from "./CredentialRowMenu";
@@ -42,6 +42,9 @@ export function CredentialRow({
           width={28}
           height={28}
           onError={() => setIconSrc(faviconFallbackUrl())}
+          onLoad={(e) =>
+            onFaviconResolved(e.currentTarget, () => setIconSrc(faviconFallbackUrl()))
+          }
         />
         <span className="cred-row__text">
           <span className="cred-row__name">{item.name}</span>

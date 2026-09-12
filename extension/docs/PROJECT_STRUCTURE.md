@@ -17,6 +17,8 @@ extension/
 │   │   ├── detector.ts         Login form detection
 │   │   ├── autofill.ts         Field filling
 │   │   ├── overlay-events.ts   Isolate icon clicks from page dialogs
+│   │   ├── overlay-theme.ts    Light/dark picker theme from page background
+│   │   ├── overlay-position.ts Viewport→overlay coords (transform containing blocks)
 │   │   ├── dropdown.ts         Extension-iframe credential picker
 │   │   └── save-login.ts       Icon + iframe UI
 │   ├── popup/
