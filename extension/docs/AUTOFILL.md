@@ -4,7 +4,8 @@
 
 1. Content script detects login fields: a visible password field, or (multi-step step one) an explicit username/email field — not UI filters (`type=search`, `role=combobox` / `searchbox`, branch/tag pickers, or name/id/placeholder/label hints like “search”, “find”, “filter”, “branch”). When several login forms exist (e.g. registration on the page + a sign-in modal), the **topmost / focused / sign-in** context wins — not the first form in DOM order.
 2. Service worker returns matching credentials for **sender tab URL** (not content-script claims).
-3. Focusing or clicking the **username or password** field opens a **dropdown** under the field with all matches (works for 1 or many). Click a row / **Fill** to autofill. Multi-step logins (email first, password on next screen) fill the email immediately and auto-fill the password when that field appears.
+3. Focusing or clicking the **username or password** field opens a credential picker. The picker is a **`chrome-extension://` iframe** (same pattern as Bitwarden / NordPass), parented **inside the login dialog or form** — not `document.body`. Clicks inside that iframe never reach the host page, so Workday-style Sign In modals stay open. Fill then uses click/focus/keyboard simulation plus a native value setter and `composed: true` `input`/`change` events. Multi-step logins (email first, password on next screen) fill the email immediately and auto-fill the password when that field appears.
+4. Detection walks open/closed shadow roots (`chrome.dom.openOrClosedShadowRoot`) so custom-element fields (Workday) are found. Autofill remembers the focused field if a full-page scan misses the modal.
 
 ## Domain matching
 
@@ -25,7 +26,7 @@ Background worker validates origin before releasing passwords. Content scripts r
 | UI | Implementation |
 |----|----------------|
 | In-field icon | Closed shadow root; fixed position **outside** the password field (right side, or left if no room) so it doesn’t cover show-password controls |
-| Credential dropdown | Shadow-DOM menu anchored under the focused username/password field; lists all site matches |
+| Credential dropdown | `chrome-extension://` iframe (`picker.html`) anchored under the field and parented in the login dialog/form |
 | Save prompt | `save-prompt.html` iframe — shown on the **post-login page** after redirect (pending save stored in session; background re-injects via `tabs.onUpdated` and `webNavigation.onHistoryStateUpdated` for SPAs like LinkedIn) |
 
 ## Save prompt capture

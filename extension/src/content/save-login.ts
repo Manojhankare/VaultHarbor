@@ -1,5 +1,6 @@
-import { detectLoginFields } from "./detector";
+import { detectLoginFields, findLoginOverlayRoot } from "./detector";
 import { BRAND } from "../shared/brand";
+import { shieldOverlayHost } from "./overlay-events";
 
 const ICON_ID = "vaultharbor-fill-icon";
 const LOGO_URL = () => chrome.runtime.getURL("icons/icon128.png");
@@ -7,6 +8,8 @@ const LOGO_URL = () => chrome.runtime.getURL("icons/icon128.png");
 let iconClickHandler: (() => void) | null = null;
 let iconAnchorEl: HTMLInputElement | null = null;
 let pillBtn: HTMLButtonElement | null = null;
+let unshieldIcon: (() => void) | null = null;
+let iconActionTaken = false;
 
 const PILL_WIDTH = 52;
 const PILL_HEIGHT = 32;
@@ -26,9 +29,28 @@ function positionIcon(host: HTMLElement, anchor: HTMLInputElement): void {
   if (left < rect.left + INSIDE_INSET) {
     left = rect.right - PILL_WIDTH - INSIDE_INSET;
   }
+  const top = rect.top + (rect.height - PILL_HEIGHT) / 2;
 
-  host.style.top = `${rect.top + (rect.height - PILL_HEIGHT) / 2}px`;
-  host.style.left = `${left}px`;
+  const parent = host.parentElement;
+  const parentStyle = parent ? window.getComputedStyle(parent) : null;
+  const transformed =
+    parent &&
+    parent !== document.body &&
+    parentStyle &&
+    (parentStyle.transform !== "none" ||
+      parentStyle.filter !== "none" ||
+      parentStyle.perspective !== "none");
+
+  if (transformed && parent) {
+    const parentRect = parent.getBoundingClientRect();
+    host.style.position = "absolute";
+    host.style.top = `${top - parentRect.top}px`;
+    host.style.left = `${left - parentRect.left}px`;
+  } else {
+    host.style.position = "fixed";
+    host.style.top = `${top}px`;
+    host.style.left = `${left}px`;
+  }
   host.style.width = `${PILL_WIDTH}px`;
   host.style.height = `${PILL_HEIGHT}px`;
 }
@@ -139,6 +161,16 @@ function injectPillStyles(shadow: ShadowRoot): void {
   shadow.appendChild(style);
 }
 
+function handleIconOverlayEvent(event: Event): void {
+  if (event.type !== "pointerdown" && event.type !== "click") return;
+  if (iconActionTaken) return;
+  iconActionTaken = true;
+  iconClickHandler?.();
+  window.setTimeout(() => {
+    iconActionTaken = false;
+  }, 400);
+}
+
 export function mountFillIcon(onClick: () => void): void {
   const detected = detectLoginFields();
   const anchor = detected?.password ?? detected?.username;
@@ -149,13 +181,14 @@ export function mountFillIcon(onClick: () => void): void {
 
   iconClickHandler = onClick;
   iconAnchorEl = anchor;
+  const overlayRoot = findLoginOverlayRoot(anchor);
 
   let host = document.getElementById(ICON_ID);
   if (!host) {
     host = document.createElement("div");
     host.id = ICON_ID;
     host.dataset.visible = "false";
-    host.style.cssText = "position:fixed;z-index:2147483646;";
+    host.style.cssText = "z-index:2147483646;";
 
     const shadow = host.attachShadow({ mode: "closed" });
     injectPillStyles(shadow);
@@ -168,13 +201,16 @@ export function mountFillIcon(onClick: () => void): void {
     pillBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      iconClickHandler?.();
+      handleIconOverlayEvent(e);
     });
     shadow.appendChild(pillBtn);
-    document.body.appendChild(host);
+    overlayRoot.appendChild(host);
+    unshieldIcon = shieldOverlayHost(host, handleIconOverlayEvent);
 
     window.addEventListener("scroll", repositionFillIcon, true);
     window.addEventListener("resize", repositionFillIcon);
+  } else if (host.parentElement !== overlayRoot) {
+    overlayRoot.appendChild(host);
   }
 
   positionIcon(host, anchor);
@@ -212,9 +248,12 @@ export function repositionFillIcon(): void {
 }
 
 export function removeFillIcon(): void {
+  unshieldIcon?.();
+  unshieldIcon = null;
   iconClickHandler = null;
   iconAnchorEl = null;
   pillBtn = null;
+  iconActionTaken = false;
   document.getElementById(ICON_ID)?.remove();
   window.removeEventListener("scroll", repositionFillIcon, true);
   window.removeEventListener("resize", repositionFillIcon);

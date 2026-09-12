@@ -6,7 +6,7 @@ See [extension/docs/PROJECT_STRUCTURE.md](../../extension/docs/PROJECT_STRUCTURE
 extension/
 ├── src/
 │   ├── background/     service worker, messages, clipboard, session key
-│   ├── content/        form detection, autofill, save-login UI
+│   ├── content/        form detection, autofill, overlay isolation, save-login UI
 │   ├── popup/          React UI
 │   ├── vault/          crypto, codec, storage, auto-lock idle policy
 │   ├── sync/           upload/download, conflicts

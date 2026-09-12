@@ -2,6 +2,14 @@
 
 All notable VaultHarbor project changes. Update this file with each significant release or deployment change.
 
+## 2026-09-07 — Autofill Fill on modal logins (Workday)
+
+- Credential picker is now a `chrome-extension://` iframe inside the login dialog/form (Bitwarden/NordPass approach), so Fill does not dismiss Workday Sign In
+- Fill simulates click, focus, and keyboard events, then sets value with `composed: true` input/change (React / Shadow DOM)
+- Detect fields inside custom-element shadow roots; overlay icon is parented in the same dialog as the field
+- Autofill remembers the focused field if a full-page scan misses the modal
+- Detect Workday `data-automation-id` email/password fields; treat sized inputs as visible even when `offsetParent` is null
+
 ## 2026-09-07 — Extension autofill ignores branch/filter comboboxes
 
 - Exclude GitHub-style branch/tag filter inputs (`role=combobox`, menu/listbox filters, “Find or create a branch…” placeholders)

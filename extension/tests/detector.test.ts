@@ -2,7 +2,9 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   detectLoginFields,
   detectLoginForm,
+  findLoginOverlayRoot,
   findUsernameField,
+  loginFieldsFromHint,
 } from "../src/content/detector";
 
 function mountVisibleInput(html: string): void {
@@ -155,6 +157,64 @@ describe("detectLoginFields", () => {
     const detected = detectLoginFields();
     expect(detected?.username?.name).toBe("login-email");
     expect(detected?.password?.name).toBe("login-password");
+  });
+
+  it("detects Workday automation-id email and password in a dialog", () => {
+    mountVisibleInput(`
+      <div role="dialog" data-automation-widget="wd-popup">
+        <input data-automation-id="email" type="text" />
+        <input data-automation-id="password" type="password" />
+      </div>
+    `);
+    const detected = detectLoginFields();
+    expect(detected?.username?.getAttribute("data-automation-id")).toBe("email");
+    expect(detected?.password?.getAttribute("data-automation-id")).toBe(
+      "password"
+    );
+  });
+
+  it("resolves username from a password hint in a deep modal tree", () => {
+    mountVisibleInput(`
+      <div role="dialog">
+        <div><div><div><div>
+          <input type="text" name="email" />
+          <input type="password" name="password" />
+        </div></div></div></div>
+      </div>
+    `);
+    const password = document.querySelector<HTMLInputElement>(
+      'input[name="password"]'
+    )!;
+    const group = loginFieldsFromHint(password);
+    expect(group?.username?.name).toBe("email");
+    expect(group?.password?.name).toBe("password");
+  });
+
+  it("uses a sign-in dialog as the overlay parent", () => {
+    mountVisibleInput(`
+      <div role="dialog" id="signin">
+        <input type="password" name="password" />
+      </div>
+    `);
+    const password = document.querySelector<HTMLInputElement>(
+      'input[name="password"]'
+    )!;
+    expect(findLoginOverlayRoot(password).id).toBe("signin");
+  });
+
+  it("finds a password input inside an open shadow root", () => {
+    const host = document.createElement("wd-input");
+    document.body.appendChild(host);
+    const shadow = host.attachShadow({ mode: "open" });
+    const input = document.createElement("input");
+    input.type = "password";
+    input.name = "shadow-pass";
+    Object.defineProperty(input, "offsetParent", {
+      configurable: true,
+      value: document.body,
+    });
+    shadow.appendChild(input);
+    expect(detectLoginFields()?.password?.name).toBe("shadow-pass");
   });
 
   it("uses the focused field group when multiple login forms exist", () => {

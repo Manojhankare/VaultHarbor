@@ -11,6 +11,7 @@ import {
   showCredentialDropdown,
   removeCredentialDropdown,
   isCredentialDropdownOpen,
+  resizeCredentialDropdown,
 } from "./dropdown";
 import {
   mountFillIcon,
@@ -35,6 +36,7 @@ let focusBoundEls = new WeakSet<HTMLElement>();
 let domObserver: MutationObserver | null = null;
 let hideIconTimer: number | null = null;
 let focusedAutofillField: HTMLInputElement | null = null;
+let lastFillHint: HTMLInputElement | null = null;
 let contentScriptInitialized = false;
 let autofillPausedForBackend = false;
 
@@ -222,6 +224,8 @@ function bindFieldFocusDropdown(): void {
 async function fillCredential(credentialId: string): Promise<void> {
   if (!isAutofillAllowed()) return;
 
+  lastFillHint = getAutofillHint();
+
   const response = await sendToBackground<{
     ok: boolean;
     error?: string;
@@ -346,11 +350,14 @@ function initContentScript(): void {
   listenForExtensionMessages((message) => {
     if (!isAutofillAllowed()) return;
     if (message.type === "FILL_FIELDS" && message.password) {
+      const hint = lastFillHint ?? getAutofillHint();
+      lastFillHint = null;
       const result = fillFields(
         message.username ?? "",
         message.password,
-        getAutofillHint()
+        hint
       );
+      if (result === "failed" && !isTopFrame) return;
       handleFillResult(result, message.password);
     }
     if (message.type === "SHOW_SAVE_PROMPT") {
@@ -380,9 +387,12 @@ function initContentScript(): void {
       }
     }
     if (data.type === "RESIZE_PICKER" && typeof data.height === "number") {
-      const frame = document.getElementById("vaultharbor-picker-frame") as HTMLIFrameElement | null;
-      if (frame) {
-        frame.style.height = `${Math.max(data.height, 80)}px`;
+      resizeCredentialDropdown(data.height);
+      const legacy = document.getElementById(
+        "vaultharbor-picker-frame"
+      ) as HTMLIFrameElement | null;
+      if (legacy) {
+        legacy.style.height = `${Math.max(data.height, 80)}px`;
       }
     }
   });

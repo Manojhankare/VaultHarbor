@@ -14,6 +14,8 @@ const USERNAME_SELECTORS = [
   'input[type="text"][autocomplete="email"]',
   'input[autocomplete="username"]',
   'input[autocomplete="email"]',
+  'input[data-automation-id="email"]',
+  'input[data-automation-id="username"]',
 ];
 
 const PASSWORD_SELECTORS = [
@@ -21,6 +23,7 @@ const PASSWORD_SELECTORS = [
   'input[name="session_password"]',
   'input[autocomplete="current-password"]',
   'input[autocomplete="new-password"]',
+  'input[data-automation-id="password"]',
 ];
 
 /** UI filter / search fields — never treat as login usernames. */
@@ -31,7 +34,7 @@ const REGISTER_HINT =
   /sign[\s-]*up|register|create[\s-]*(an[\s-]*)?account|choose[\s-]*password|new[\s-]*password|confirm[\s-]*password/i;
 
 const MODAL_SELECTORS =
-  '[role="dialog"], [aria-modal="true"], dialog, .modal, .overlay, .popup';
+  '[role="dialog"], [aria-modal="true"], dialog, .modal, .overlay, .popup, [data-automation-widget="wd-popup"], [data-uxi-widget-type="popup"]';
 
 export type LoginFormDetection = {
   form: HTMLFormElement | null;
@@ -41,13 +44,73 @@ export type LoginFormDetection = {
 
 export type LoginFieldsDetection = LoginFormDetection;
 
+function chromeShadowRoot(el: Element): ShadowRoot | null {
+  if (el.shadowRoot) return el.shadowRoot;
+  try {
+    return chrome.dom?.openOrClosedShadowRoot?.(el as HTMLElement) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Light DOM first, then custom-element / shadow trees (Workday, etc.). */
+function queryDeep<T extends Element>(root: ParentNode, selector: string): T[] {
+  const matches = Array.from(root.querySelectorAll<T>(selector));
+  for (const host of root.querySelectorAll<Element>("*")) {
+    if (!host.tagName.includes("-") && !host.shadowRoot) continue;
+    const shadow = chromeShadowRoot(host);
+    if (shadow) matches.push(...queryDeep<T>(shadow, selector));
+  }
+  return matches;
+}
+
+function firstVisibleInput(
+  root: ParentNode,
+  selector: string
+): HTMLInputElement | null {
+  for (const el of queryDeep<HTMLInputElement>(root, selector)) {
+    if (isVisible(el)) return el;
+  }
+  return null;
+}
+
+/**
+ * Attach overlays inside the login surface so page click-outside / focus-trap
+ * logic (Workday Sign In) still treats them as part of the dialog.
+ */
+export function findLoginOverlayRoot(anchor: HTMLElement): HTMLElement {
+  const form = anchor.closest("form");
+  if (form instanceof HTMLElement) return form;
+
+  const modal = anchor.closest(MODAL_SELECTORS);
+  if (modal instanceof HTMLElement) return modal;
+
+  let node: HTMLElement | null = anchor.parentElement;
+  let best: HTMLElement | null = null;
+  while (node && node !== document.body) {
+    const style = window.getComputedStyle(node);
+    const z = Number.parseInt(style.zIndex, 10);
+    if (style.position === "fixed" || (!Number.isNaN(z) && z >= 10)) {
+      best = node;
+    }
+    node = node.parentElement;
+  }
+  return best ?? document.body;
+}
+
 function isVisible(el: HTMLElement): boolean {
   const style = window.getComputedStyle(el);
-  return (
-    style.display !== "none" &&
-    style.visibility !== "hidden" &&
-    el.offsetParent !== null
-  );
+  if (
+    style.display === "none" ||
+    style.visibility === "hidden" ||
+    style.opacity === "0"
+  ) {
+    return false;
+  }
+  const rect = el.getBoundingClientRect();
+  if (rect.width > 0 && rect.height > 0) return true;
+  // jsdom (and some fixed-position fields) report an empty box.
+  return el.offsetParent !== null;
 }
 
 function associatedLabelText(el: HTMLInputElement): string {
@@ -232,8 +295,9 @@ function pickBestLoginFieldGroup(
 /** Only fields that clearly look like login identifiers. */
 function findExplicitUsernameField(root: ParentNode): HTMLInputElement | null {
   for (const selector of USERNAME_SELECTORS) {
-    const el = root.querySelector<HTMLInputElement>(selector);
-    if (el && isLoginUsernameCandidate(el)) return el;
+    for (const el of queryDeep<HTMLInputElement>(root, selector)) {
+      if (isLoginUsernameCandidate(el)) return el;
+    }
   }
   return null;
 }
@@ -243,7 +307,8 @@ export function findUsernameField(root: ParentNode): HTMLInputElement | null {
   const explicit = findExplicitUsernameField(root);
   if (explicit) return explicit;
 
-  const textInputs = root.querySelectorAll<HTMLInputElement>(
+  const textInputs = queryDeep<HTMLInputElement>(
+    root,
     'input[type="text"], input[type="email"]'
   );
   for (const input of textInputs) {
@@ -254,8 +319,8 @@ export function findUsernameField(root: ParentNode): HTMLInputElement | null {
 
 export function findPasswordField(root: ParentNode): HTMLInputElement | null {
   for (const selector of PASSWORD_SELECTORS) {
-    const el = root.querySelector<HTMLInputElement>(selector);
-    if (el && isVisible(el)) return el;
+    const el = firstVisibleInput(root, selector);
+    if (el) return el;
   }
   return null;
 }
@@ -264,7 +329,7 @@ function findUsernameNearPassword(
   password: HTMLInputElement
 ): HTMLInputElement | null {
   let node: Element | null = password.parentElement;
-  for (let depth = 0; depth < 6 && node; depth += 1) {
+  for (let depth = 0; depth < 12 && node; depth += 1) {
     const username = findUsernameField(node);
     if (username && username !== password) return username;
     node = node.parentElement;
@@ -276,8 +341,9 @@ function findUsernameNearPassword(
     if (username && username !== password) return username;
   }
 
-  const allPasswords = Array.from(
-    document.querySelectorAll<HTMLInputElement>('input[type="password"]')
+  const allPasswords = queryDeep<HTMLInputElement>(
+    document,
+    'input[type="password"]'
   ).filter(isVisible);
   const index = allPasswords.indexOf(password);
   if (index > 0) {
@@ -334,8 +400,9 @@ export function findAllLoginFieldGroups(): LoginFieldsDetection[] {
     });
   }
 
-  const allPasswords = Array.from(
-    document.querySelectorAll<HTMLInputElement>('input[type="password"]')
+  const allPasswords = queryDeep<HTMLInputElement>(
+    document,
+    'input[type="password"]'
   ).filter(isVisible);
 
   for (const password of allPasswords) {
@@ -366,6 +433,44 @@ export function detectLoginFields(
   hint?: HTMLElement | null
 ): LoginFieldsDetection | null {
   return pickBestLoginFieldGroup(findAllLoginFieldGroups(), hint);
+}
+
+/**
+ * When the user opened the dropdown from a specific field, fill that group
+ * even if a later full-page scan misses the (modal) form.
+ */
+export function loginFieldsFromHint(
+  hint: HTMLElement | null | undefined
+): LoginFieldsDetection | null {
+  if (!(hint instanceof HTMLInputElement) || !hint.isConnected) return null;
+  if (!isVisible(hint)) return null;
+
+  const isPassword =
+    hint.type === "password" ||
+    hint.getAttribute("autocomplete") === "current-password" ||
+    hint.getAttribute("autocomplete") === "new-password" ||
+    hint.getAttribute("data-automation-id") === "password";
+
+  if (isPassword) {
+    return {
+      form: hint.closest("form"),
+      username: findUsernameNearPassword(hint),
+      password: hint,
+    };
+  }
+
+  if (!isLoginUsernameCandidate(hint)) return null;
+
+  const scope =
+    hint.closest("form") ??
+    hint.closest(MODAL_SELECTORS) ??
+    hint.parentElement ??
+    document;
+  return {
+    form: hint.closest("form"),
+    username: hint,
+    password: findPasswordField(scope),
+  };
 }
 
 export function detectLoginForm(): LoginFormDetection | null {

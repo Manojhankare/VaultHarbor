@@ -1,4 +1,4 @@
-import { BRAND } from "../shared/brand";
+import { findLoginOverlayRoot } from "./detector";
 
 export type DropdownCredential = {
   id: string;
@@ -9,40 +9,65 @@ export type DropdownCredential = {
 const DROPDOWN_ID = "vaultharbor-cred-dropdown";
 const GAP = 4;
 const MIN_WIDTH = 260;
+const DEFAULT_HEIGHT = 148;
 
 let anchorEl: HTMLElement | null = null;
-let onPick: ((id: string) => void) | null = null;
+let overlayParent: HTMLElement | null = null;
 let onClose: (() => void) | null = null;
 let outsideHandler: ((e: MouseEvent) => void) | null = null;
 let keyHandler: ((e: KeyboardEvent) => void) | null = null;
 let scrollHandler: (() => void) | null = null;
 
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+function isFillIconInPath(event: Event): boolean {
+  return event.composedPath().some(
+    (node) => (node as HTMLElement).id === "vaultharbor-fill-icon"
+  );
 }
 
-function positionDropdown(host: HTMLElement, anchor: HTMLElement): void {
+function positionDropdown(frame: HTMLIFrameElement, anchor: HTMLElement): void {
   const rect = anchor.getBoundingClientRect();
+  const parent = overlayParent ?? document.body;
   const width = Math.max(rect.width, MIN_WIDTH);
+  const height = Math.max(
+    Number.parseFloat(frame.style.height) || DEFAULT_HEIGHT,
+    80
+  );
+
+  let top = rect.bottom + GAP;
+  if (top + height > window.innerHeight - 8 && rect.top > height + GAP) {
+    top = rect.top - height - GAP;
+  }
   let left = rect.left;
   if (left + width > window.innerWidth - 8) {
     left = Math.max(8, window.innerWidth - width - 8);
   }
   if (left < 8) left = 8;
 
-  const estimatedHeight = host.offsetHeight || 120;
-  let top = rect.bottom + GAP;
-  if (top + estimatedHeight > window.innerHeight - 8 && rect.top > estimatedHeight + GAP) {
-    top = rect.top - estimatedHeight - GAP;
-  }
+  const parentStyle = window.getComputedStyle(parent);
+  const transformed =
+    parent !== document.body &&
+    (parentStyle.transform !== "none" ||
+      parentStyle.filter !== "none" ||
+      parentStyle.perspective !== "none");
 
-  host.style.top = `${top}px`;
-  host.style.left = `${left}px`;
-  host.style.width = `${width}px`;
+  if (transformed) {
+    const parentRect = parent.getBoundingClientRect();
+    frame.style.position = "absolute";
+    frame.style.top = `${top - parentRect.top}px`;
+    frame.style.left = `${left - parentRect.left}px`;
+  } else {
+    frame.style.position = "fixed";
+    frame.style.top = `${top}px`;
+    frame.style.left = `${left}px`;
+  }
+  frame.style.width = `${width}px`;
+}
+
+export function resizeCredentialDropdown(height: number): void {
+  const frame = document.getElementById(DROPDOWN_ID) as HTMLIFrameElement | null;
+  if (!frame) return;
+  frame.style.height = `${Math.max(height, 80)}px`;
+  if (anchorEl) positionDropdown(frame, anchorEl);
 }
 
 export function removeCredentialDropdown(): void {
@@ -61,208 +86,66 @@ export function removeCredentialDropdown(): void {
     scrollHandler = null;
   }
   anchorEl = null;
-  onPick = null;
+  overlayParent = null;
   const closeCb = onClose;
   onClose = null;
   closeCb?.();
-}
-
-function isFillIconInPath(event: Event): boolean {
-  return event.composedPath().some((node) => (node as HTMLElement).id === "vaultharbor-fill-icon");
 }
 
 export function isCredentialDropdownOpen(): boolean {
   return document.getElementById(DROPDOWN_ID) !== null;
 }
 
+/**
+ * Credential list in a chrome-extension iframe (same approach as Bitwarden /
+ * NordPass). Clicks inside that document never reach the host page, so modal
+ * click-outside handlers do not dismiss Sign In. The iframe is also parented
+ * under the login dialog/form so focus-traps still see it as inside the modal.
+ */
 export function showCredentialDropdown(
   anchor: HTMLElement,
   credentials: DropdownCredential[],
-  pick: (id: string) => void,
+  _pick: (id: string) => void,
   options?: { onClose?: () => void }
 ): void {
   if (credentials.length === 0) return;
 
   removeCredentialDropdown();
   anchorEl = anchor;
-  onPick = pick;
+  overlayParent = findLoginOverlayRoot(anchor);
   onClose = options?.onClose ?? null;
 
-  const host = document.createElement("div");
-  host.id = DROPDOWN_ID;
-  host.style.cssText =
-    "position:fixed;z-index:2147483647;pointer-events:auto;";
+  const ids = credentials.map((c) => c.id).join(",");
+  const frame = document.createElement("iframe");
+  frame.id = DROPDOWN_ID;
+  frame.title = "VaultHarbor autofill";
+  frame.tabIndex = -1;
+  frame.setAttribute("scrolling", "no");
+  frame.setAttribute("allowtransparency", "true");
+  frame.style.cssText = [
+    "z-index:2147483647",
+    "border:none",
+    "background:transparent",
+    "overflow:hidden",
+    "color-scheme:normal",
+    "pointer-events:auto",
+    "box-shadow:none",
+  ].join(";");
+  frame.style.height = `${DEFAULT_HEIGHT}px`;
+  frame.src = chrome.runtime.getURL(
+    `picker.html?ids=${encodeURIComponent(ids)}`
+  );
 
-  const shadow = host.attachShadow({ mode: "closed" });
-  const style = document.createElement("style");
-  style.textContent = `
-    :host { all: initial; }
-    .dd {
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: ${BRAND.bg};
-      border: 1px solid rgba(14, 201, 252, 0.45);
-      border-radius: 10px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-      overflow: hidden;
-      color: #f8fafc;
-    }
-    .dd__head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 10px;
-      border-bottom: 1px solid rgba(14, 201, 252, 0.15);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      color: #94a3b8;
-      text-transform: uppercase;
-    }
-    .dd__brand {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      text-transform: none;
-      letter-spacing: -0.02em;
-      font-size: 12px;
-      color: #f8fafc;
-    }
-    .dd__brand-vault { color: ${BRAND.accent}; }
-    .dd__brand-sync { color: ${BRAND.accentPurple}; }
-    .dd__close {
-      border: none;
-      background: transparent;
-      color: #94a3b8;
-      font-size: 18px;
-      line-height: 1;
-      cursor: pointer;
-      width: 24px;
-      height: 24px;
-      border-radius: 4px;
-      padding: 0;
-    }
-    .dd__close:hover { background: rgba(14, 201, 252, 0.1); color: #fff; }
-    .dd__list {
-      list-style: none;
-      margin: 0;
-      padding: 4px;
-      max-height: 220px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(14, 201, 252, 0.35) transparent;
-    }
-    .dd__item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      text-align: left;
-      border: none;
-      background: transparent;
-      color: inherit;
-      padding: 9px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font: inherit;
-    }
-    .dd__item:hover, .dd__item:focus-visible {
-      background: rgba(14, 201, 252, 0.1);
-      outline: none;
-    }
-    .dd__meta { flex: 1; min-width: 0; }
-    .dd__user {
-      font-size: 13px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .dd__name {
-      font-size: 11px;
-      color: #94a3b8;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-top: 1px;
-    }
-    .dd__fill {
-      flex-shrink: 0;
-      font-size: 11px;
-      font-weight: 600;
-      color: ${BRAND.bg};
-      background: ${BRAND.gradientBtn};
-      border: none;
-      border-radius: 6px;
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-  `;
-
-  const wrap = document.createElement("div");
-  wrap.className = "dd";
-  wrap.innerHTML = `
-    <div class="dd__head">
-      <span class="dd__brand">
-        <span class="dd__brand-vault">Vault</span><span class="dd__brand-sync">Harbor</span>
-      </span>
-      <button type="button" class="dd__close" aria-label="Close" title="Close">×</button>
-    </div>
-    <ul class="dd__list">
-      ${credentials
-        .map(
-          (c) => `
-        <li>
-          <button type="button" class="dd__item" data-id="${escapeHtml(c.id)}">
-            <span class="dd__meta">
-              <span class="dd__user">${escapeHtml(c.username || "(no username)")}</span>
-              <span class="dd__name">${escapeHtml(c.name)}</span>
-            </span>
-            <span class="dd__fill">Fill</span>
-          </button>
-        </li>`
-        )
-        .join("")}
-    </ul>
-  `;
-
-  shadow.appendChild(style);
-  shadow.appendChild(wrap);
-
-  wrap.querySelector(".dd__close")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    removeCredentialDropdown();
-  });
-
-  for (const btn of wrap.querySelectorAll<HTMLButtonElement>(".dd__item")) {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const id = btn.dataset.id;
-      if (id && onPick) onPick(id);
-      removeCredentialDropdown();
-    });
-  }
-
-  document.body.appendChild(host);
-  positionDropdown(host, anchor);
-
-  // Reposition after layout (list height known).
-  requestAnimationFrame(() => {
-    if (anchorEl && document.getElementById(DROPDOWN_ID)) {
-      positionDropdown(host, anchorEl);
-    }
-  });
+  overlayParent.appendChild(frame);
+  positionDropdown(frame, anchor);
 
   outsideHandler = (e: MouseEvent) => {
     const t = e.target as Node | null;
-    if (host.contains(t as Node)) return;
+    if (t === frame || frame.contains(t as Node)) return;
     if (anchorEl && (anchorEl === t || anchorEl.contains(t as Node))) return;
     if (isFillIconInPath(e)) return;
     removeCredentialDropdown();
   };
-  // Delay so the focus click that opened us doesn't immediately close.
   window.setTimeout(() => {
     if (outsideHandler) {
       document.addEventListener("mousedown", outsideHandler, true);
@@ -276,7 +159,7 @@ export function showCredentialDropdown(
 
   scrollHandler = () => {
     if (!anchorEl) return;
-    const el = document.getElementById(DROPDOWN_ID);
+    const el = document.getElementById(DROPDOWN_ID) as HTMLIFrameElement | null;
     if (el) positionDropdown(el, anchorEl);
   };
   window.addEventListener("scroll", scrollHandler, true);

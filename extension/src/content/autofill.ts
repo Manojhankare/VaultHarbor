@@ -1,34 +1,58 @@
 import {
   detectLoginFields,
   findPasswordField,
+  loginFieldsFromHint,
 } from "./detector";
 
-/** Set input value in a way that works with React/Vue controlled fields. */
-export function setInputValue(el: HTMLInputElement, value: string): void {
-  el.focus();
-
+function nativeValueSetter(el: HTMLInputElement): ((v: string) => void) | null {
   const prototype =
     el instanceof HTMLTextAreaElement
       ? HTMLTextAreaElement.prototype
       : HTMLInputElement.prototype;
   const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
-  const setter = descriptor?.set;
+  return descriptor?.set
+    ? (value: string) => descriptor.set!.call(el, value)
+    : null;
+}
 
-  if (setter) {
-    setter.call(el, value);
-  } else {
-    el.value = value;
-  }
+function fireKey(el: HTMLInputElement, type: "keydown" | "keyup"): void {
+  el.dispatchEvent(
+    new KeyboardEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      key: "Unidentified",
+    })
+  );
+}
+
+/**
+ * Bitwarden-style insert: click/focus/keys, native setter (React), then
+ * composed input+change so Shadow DOM hosts and Workday widgets see the fill.
+ */
+export function setInputValue(el: HTMLInputElement, value: string): void {
+  if (typeof el.click === "function") el.click();
+  el.focus();
+  fireKey(el, "keydown");
+  fireKey(el, "keyup");
+
+  const setter = nativeValueSetter(el);
+  if (setter) setter(value);
+  else el.value = value;
+
+  fireKey(el, "keydown");
+  fireKey(el, "keyup");
 
   el.dispatchEvent(
     new InputEvent("input", {
       bubbles: true,
       cancelable: true,
+      composed: true,
       inputType: "insertReplacementText",
       data: value,
     })
   );
-  el.dispatchEvent(new Event("change", { bubbles: true }));
+  el.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
 }
 
 export type FillResult = "full" | "username_only" | "failed";
@@ -38,7 +62,7 @@ export function fillFields(
   password: string,
   hint?: HTMLElement | null
 ): FillResult {
-  const detected = detectLoginFields(hint);
+  const detected = detectLoginFields(hint) ?? loginFieldsFromHint(hint);
   if (!detected) return "failed";
 
   const { username: usernameEl, password: passwordEl } = detected;
@@ -64,7 +88,9 @@ export function tryFillPendingPassword(
   hint?: HTMLElement | null
 ): boolean {
   const passwordEl =
-    detectLoginFields(hint)?.password ?? findPasswordField(document);
+    detectLoginFields(hint)?.password ??
+    loginFieldsFromHint(hint)?.password ??
+    findPasswordField(document);
   if (!passwordEl || !pendingPassword) return false;
   setInputValue(passwordEl, pendingPassword);
   return true;

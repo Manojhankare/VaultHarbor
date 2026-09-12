@@ -16,6 +16,8 @@ extension/
 │   │   ├── content-script.ts   Page injection entry
 │   │   ├── detector.ts         Login form detection
 │   │   ├── autofill.ts         Field filling
+│   │   ├── overlay-events.ts   Isolate icon clicks from page dialogs
+│   │   ├── dropdown.ts         Extension-iframe credential picker
 │   │   └── save-login.ts       Icon + iframe UI
 │   ├── popup/
 │   │   ├── App.tsx             AuthRoot wrapper + compact vault
