@@ -22,6 +22,10 @@ vi.mock("../../src/vault/vault", () => ({
   lockVault: () => lockVault(),
 }));
 
+vi.mock("../../src/background/vault-ui-sync", () => ({
+  notifyVaultLockedFromBackground: vi.fn(async () => {}),
+}));
+
 import {
   AUTO_LOCK_ACTIVITY_MESSAGES,
   applyAutoLockIfNeeded,

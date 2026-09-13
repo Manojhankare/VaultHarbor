@@ -49,6 +49,21 @@ const storage: Record<string, Record<string, unknown>> = {
   runtime: {
     lastError: undefined,
     getURL: (path: string) => `chrome-extension://test/${path}`,
+    getManifest: () => ({ version: "0.1.1" }),
+    sendMessage: async () => undefined,
+    onMessage: { addListener: () => {}, removeListener: () => {} },
+  },
+  action: {
+    setTitle: async () => undefined,
+    openPopup: async () => undefined,
+  },
+  windows: {
+    create: async () => ({}),
+  },
+  tabs: {
+    query: async () => [],
+    sendMessage: async () => undefined,
+    create: async () => ({}),
   },
 } as unknown as typeof chrome;
 

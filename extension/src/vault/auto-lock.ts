@@ -152,11 +152,10 @@ export async function applyAutoLockIfNeeded(): Promise<boolean> {
   if (!(await shouldAutoLockNow())) return false;
   const { lockVault } = await import("./vault");
   await lockVault();
-  try {
-    await chrome.runtime.sendMessage({ type: "VAULT_AUTO_LOCKED" });
-  } catch {
-    /* no UI listening */
-  }
+  const { notifyVaultLockedFromBackground } = await import(
+    "../background/vault-ui-sync"
+  );
+  await notifyVaultLockedFromBackground(true);
   return true;
 }
 

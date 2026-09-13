@@ -141,6 +141,20 @@ export function AuthRoot({ variant, renderUnlocked }: Props) {
   }, [refresh]);
 
   useEffect(() => {
+    function onRuntimeMessage(message: { type?: string }) {
+      if (
+        message.type === "VAULT_AUTO_LOCKED" ||
+        message.type === "VAULT_LOCKED" ||
+        message.type === "VAULT_UNLOCKED"
+      ) {
+        void refresh();
+      }
+    }
+    chrome.runtime.onMessage.addListener(onRuntimeMessage);
+    return () => chrome.runtime.onMessage.removeListener(onRuntimeMessage);
+  }, [refresh]);
+
+  useEffect(() => {
     if (!state?.unlocked) return;
 
     async function checkAutoLocked() {
@@ -154,21 +168,15 @@ export function AuthRoot({ variant, renderUnlocked }: Props) {
       if (document.visibilityState === "visible") void checkAutoLocked();
     }
 
-    function onRuntimeMessage(message: { type?: string }) {
-      if (message.type === "VAULT_AUTO_LOCKED") void refresh();
-    }
-
     const unsubscribe = onVaultLocked(() => {
       void refresh();
     });
 
     document.addEventListener("visibilitychange", onVisible);
-    chrome.runtime.onMessage.addListener(onRuntimeMessage);
     const interval = window.setInterval(() => void checkAutoLocked(), 15_000);
     return () => {
       unsubscribe();
       document.removeEventListener("visibilitychange", onVisible);
-      chrome.runtime.onMessage.removeListener(onRuntimeMessage);
       window.clearInterval(interval);
     };
   }, [state?.unlocked, refresh]);
@@ -301,7 +309,12 @@ export function AuthRoot({ variant, renderUnlocked }: Props) {
     }
     return wrap(
       <UnlockPage
-        onSuccess={() => void refresh()}
+        onSuccess={async () => {
+          if (new URLSearchParams(window.location.search).get("unlock") === "1") {
+            window.close();
+          }
+          await refresh();
+        }}
         onForgotMaster={goToRecoverMaster}
         onLogout={() => void handleLogout()}
         isPopup={variant === "popup"}

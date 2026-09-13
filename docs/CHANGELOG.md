@@ -2,6 +2,16 @@
 
 All notable VaultHarbor project changes. Update this file with each significant release or deployment change.
 
+## 2026-09-13 — Locked vault overlay on login pages
+
+- If the vault is locked, focusing a login field shows the fill icon and a Bitwarden-style picker: **VaultHarbor is locked** / **Unlock to autofill this site**
+- Unlock opens the extension popup (or a small unlock window), not a master-password form on the website
+- After unlock, the page overlay refreshes to matching logins; the toolbar tooltip reads **VaultHarbor — vault locked** while locked
+- Unlocked sites with no saved login are unchanged (no icon)
+- **Keep unlocked this session** is checked by default on unlock (popup and save prompt); uncheck it to keep idle auto-lock
+- Signed out / no vault yet: the same login-field overlay says **You're not signed in** (**Sign in**) or **Finish vault setup** instead of staying silent
+- Footer and Security show the installed extension version (`v0.1.1` from the manifest)
+
 ## 2026-09-12 — Autofill picker as a suggestion menu
 
 - Credential picker is a compact autocomplete-style list (no “Choose login” title, no Fill button — the row fills on click)

@@ -6,6 +6,7 @@ extension/
 │   ├── background/
 │   │   ├── service-worker.ts   MV3 entry, alarms, listeners
 │   │   ├── messages.ts         Typed message router
+│   │   ├── vault-ui-sync.ts    Toolbar locked hint + tab unlock/lock broadcast
 │   │   ├── import-session.ts   Atomic batch import buffer
 │   │   ├── export-session.ts   Chunked export reads
 │   │   ├── clipboard.ts        Offscreen copy/clear
@@ -51,7 +52,7 @@ extension/
 │   ├── devices/                Device registration
 │   ├── password-generator/
 │   ├── offscreen/              Clipboard document
-│   ├── shared/                 browser shim, constants, brand, open-vault-tab, api-url-validation
+│   ├── shared/                 browser shim, constants, brand, extension-version, open-vault-tab, matching-credentials, api-url-validation
 │   └── types/                  API DTOs
 ├── popup.html
 ├── vault.html                  Full-screen vault manager

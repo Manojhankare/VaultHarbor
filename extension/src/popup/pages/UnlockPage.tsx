@@ -14,7 +14,7 @@ type Props = {
 
 export function UnlockPage({ onSuccess, onForgotMaster, onLogout, isPopup = false }: Props) {
   const [masterPassword, setMasterPassword] = useState("");
-  const [keepUnlocked, setKeepUnlocked] = useState(false);
+  const [keepUnlocked, setKeepUnlocked] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [transitionMessage, setTransitionMessage] = useState<string | null>(null);

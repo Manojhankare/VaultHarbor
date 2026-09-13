@@ -49,6 +49,7 @@ export type BackgroundRequest =
   | { type: "GET_CONFLICT_DETAILS" }
   | { type: "GET_CURRENT_SITE" }
   | { type: "GET_MATCHING_CREDENTIALS"; tabId: number }
+  | { type: "OPEN_UNLOCK_UI" }
   | { type: "FILL_CREDENTIAL"; tabId: number; credentialId: string }
   | { type: "SAVE_CREDENTIAL"; credential: NewLoginItem; tabId: number }
   | { type: "SYNC_NOW" }

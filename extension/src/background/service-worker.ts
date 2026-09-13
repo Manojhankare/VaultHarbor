@@ -24,12 +24,20 @@ initAuthClient();
 
 chrome.runtime.onInstalled.addListener(() => {
   void setupAlarms();
+  void refreshLockHint();
 });
 
 chrome.runtime.onStartup.addListener(() => {
   void setupAlarms();
   void loadDecryptedFromStorage();
+  void refreshLockHint();
 });
+
+function refreshLockHint(): void {
+  void import("./vault-ui-sync").then(({ refreshToolbarLockHint }) =>
+    refreshToolbarLockHint()
+  );
+}
 
 async function setupAlarms(): Promise<void> {
   for (const name of LEGACY_ALARM_NAMES) {

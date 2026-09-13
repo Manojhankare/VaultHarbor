@@ -72,7 +72,7 @@ function SavePromptApp() {
   const [email, setEmail] = useState("");
   const [accountPassword, setAccountPassword] = useState("");
   const [masterPassword, setMasterPassword] = useState("");
-  const [keepUnlocked, setKeepUnlocked] = useState(false);
+  const [keepUnlocked, setKeepUnlocked] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

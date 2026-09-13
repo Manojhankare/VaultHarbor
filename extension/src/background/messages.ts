@@ -149,6 +149,8 @@ export async function handleBackgroundMessage(
     if (response.ok) {
       const { maybeTouchVaultActivity } = await import("../vault/auto-lock");
       await maybeTouchVaultActivity(request.type);
+      const { syncVaultUiAfterMessage } = await import("./vault-ui-sync");
+      await syncVaultUiAfterMessage(request.type);
     }
     return response;
   } catch (err) {
@@ -374,14 +376,37 @@ async function dispatchBackgroundMessage(
       }
 
       case "GET_MATCHING_CREDENTIALS": {
+        const { matchingCredentialsPayload } = await import(
+          "../shared/matching-credentials"
+        );
+        const auth = await getAuthState();
+        const vault = await getVaultState();
+        if (!auth.authenticated) {
+          return { ok: true, data: matchingCredentialsPayload([], "signed_out") };
+        }
+        if (!vault.hasVault) {
+          return { ok: true, data: matchingCredentialsPayload([], "needs_setup") };
+        }
+        if (!vault.unlocked) {
+          return { ok: true, data: matchingCredentialsPayload([], "locked") };
+        }
         const tabId = sender.tab?.id ?? request.tabId;
         const url = tabId ? await getTabUrl(tabId) : sender.tab?.url ?? null;
         if (!url) {
-          return { ok: true, data: [] };
+          return { ok: true, data: matchingCredentialsPayload() };
         }
         const items = await listCredentials();
         const matches = findMatchesForPage(items, url);
-        return { ok: true, data: matches.map(toCredentialSummary) };
+        return {
+          ok: true,
+          data: matchingCredentialsPayload(matches.map(toCredentialSummary)),
+        };
+      }
+
+      case "OPEN_UNLOCK_UI": {
+        const { openUnlockUi } = await import("./vault-ui-sync");
+        await openUnlockUi();
+        return { ok: true };
       }
 
       case "FILL_CREDENTIAL": {

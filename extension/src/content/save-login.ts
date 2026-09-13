@@ -2,6 +2,7 @@ import { detectLoginFields, findLoginOverlayRoot } from "./detector";
 import { applyOverlayFixed, fillIconViewportBox } from "./overlay-position";
 import { BRAND } from "../shared/brand";
 import { shieldOverlayHost } from "./overlay-events";
+import { autofillIconLabel, type AutofillPrompt } from "../shared/matching-credentials";
 
 const ICON_ID = "vaultharbor-fill-icon";
 const LOGO_URL = () => chrome.runtime.getURL("icons/icon128.png");
@@ -199,6 +200,13 @@ export function setFillIconExpanded(expanded: boolean): void {
   if (pillBtn) {
     pillBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
   }
+}
+
+export function setFillIconPrompt(prompt: AutofillPrompt): void {
+  if (!pillBtn) return;
+  const label = autofillIconLabel(prompt);
+  pillBtn.title = label;
+  pillBtn.setAttribute("aria-label", label);
 }
 
 export function getFillIconAnchor(): HTMLElement | null {

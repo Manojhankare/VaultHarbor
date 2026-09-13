@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   isHostnameLikeName,
+  pickerPromptCopy,
+  pickerPromptFromSearch,
   pickerPrimaryLabel,
   pickerSecondaryLabel,
 } from "../src/popup/picker-display";
@@ -63,5 +65,27 @@ describe("isHostnameLikeName", () => {
     expect(isHostnameLikeName("www.instagram.com")).toBe(true);
     expect(isHostnameLikeName("Work")).toBe(false);
     expect(isHostnameLikeName("Personal IG")).toBe(false);
+  });
+});
+
+describe("pickerPromptFromSearch", () => {
+  it("reads overlay prompt flags", () => {
+    expect(pickerPromptFromSearch("?prompt=locked&theme=dark")).toBe("locked");
+    expect(pickerPromptFromSearch("locked=1")).toBe("locked");
+    expect(pickerPromptFromSearch("?prompt=signed_out")).toBe("signed_out");
+    expect(pickerPromptFromSearch("?prompt=needs_setup")).toBe("needs_setup");
+    expect(pickerPromptFromSearch("?ids=a&theme=light")).toBe("none");
+  });
+});
+
+describe("pickerPromptCopy", () => {
+  it("tells signed-out users to sign in", () => {
+    const copy = pickerPromptCopy("signed_out");
+    expect(copy?.title).toMatch(/not signed in/i);
+    expect(copy?.button).toBe("Sign in");
+  });
+
+  it("tells locked users to unlock", () => {
+    expect(pickerPromptCopy("locked")?.button).toBe("Unlock");
   });
 });

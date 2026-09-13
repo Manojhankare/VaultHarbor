@@ -5,9 +5,11 @@ import "./styles.css";
 import "./picker.css";
 import { MESSAGE_SOURCE } from "../shared/messages";
 import { faviconChain, isGenericGoogleFavicon } from "../shared/favicon";
-import { IconChevronRight, IconSettings } from "./components/icons/Icon";
+import { IconChevronRight, IconLock, IconLogOut, IconPlus, IconSettings } from "./components/icons/Icon";
 import { openVaultAppTab } from "../shared/open-vault-tab";
 import {
+  pickerPromptCopy,
+  pickerPromptFromSearch,
   pickerPrimaryLabel,
   pickerSecondaryLabel,
   type PickerItem,
@@ -16,6 +18,9 @@ import {
 const params = new URLSearchParams(window.location.search);
 const pickerTheme = params.get("theme") === "light" ? "light" : "dark";
 const pageIcon = params.get("pageIcon");
+const pickerPrompt = pickerPromptFromSearch(window.location.search);
+const pickerBlocking = pickerPrompt !== "none";
+const pickerCopy = pickerPromptCopy(pickerPrompt);
 document.documentElement.dataset.pickerTheme = pickerTheme;
 document.documentElement.style.colorScheme = pickerTheme;
 
@@ -51,10 +56,12 @@ function PickerApp() {
   const rootRef = useRef<HTMLDivElement>(null);
   const idsParam = params.get("ids") ?? "";
   const [items, setItems] = useState<PickerItem[]>([]);
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(pickerBlocking);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [unlocking, setUnlocking] = useState(false);
 
   useEffect(() => {
+    if (pickerBlocking) return;
     const ids = idsParam.split(",").filter(Boolean);
     void (async () => {
       const res = await bg<PickerItem[]>({
@@ -85,7 +92,7 @@ function PickerApp() {
     const observer = new ResizeObserver(postHeight);
     observer.observe(rootRef.current);
     return () => observer.disconnect();
-  }, [ready, items]);
+  }, [ready, items, pickerBlocking]);
 
   useEffect(() => {
     function onMsg(event: MessageEvent) {
@@ -95,6 +102,10 @@ function PickerApp() {
         direction?: string;
       };
       if (data?.source !== MESSAGE_SOURCE || data.type !== "PICKER_NAV") return;
+      if (pickerBlocking) {
+        if (data.direction === "confirm") void openAccountUi();
+        return;
+      }
       if (items.length === 0) return;
       if (data.direction === "next") {
         setActiveIndex((i) => (i + 1) % items.length);
@@ -107,7 +118,7 @@ function PickerApp() {
     }
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
-  }, [items, activeIndex]);
+  }, [items, activeIndex, pickerBlocking, unlocking]);
 
   useEffect(() => {
     document
@@ -128,6 +139,17 @@ function PickerApp() {
     close();
   }
 
+  async function openAccountUi() {
+    if (unlocking) return;
+    setUnlocking(true);
+    try {
+      const res = await bg({ type: "OPEN_UNLOCK_UI" });
+      if (res.ok) close();
+    } finally {
+      setUnlocking(false);
+    }
+  }
+
   if (!ready) {
     return (
       <div className="picker" ref={rootRef}>
@@ -138,7 +160,29 @@ function PickerApp() {
 
   return (
     <div className="picker" ref={rootRef}>
-      {items.length === 0 ? (
+      {pickerCopy ? (
+        <div className="picker__locked">
+          <span className="picker__locked-icon" aria-hidden="true">
+            {pickerPrompt === "signed_out" ? (
+              <IconLogOut size={18} />
+            ) : pickerPrompt === "needs_setup" ? (
+              <IconPlus size={18} />
+            ) : (
+              <IconLock size={18} />
+            )}
+          </span>
+          <p className="picker__locked-title">{pickerCopy.title}</p>
+          <p className="picker__locked-copy">{pickerCopy.copy}</p>
+          <button
+            type="button"
+            className="picker__unlock-btn"
+            onClick={() => void openAccountUi()}
+            disabled={unlocking}
+          >
+            {unlocking ? "Opening…" : pickerCopy.button}
+          </button>
+        </div>
+      ) : items.length === 0 ? (
         <p className="picker__empty">No matching logins.</p>
       ) : (
         <ul className="picker__list" role="listbox" aria-label="VaultHarbor logins">

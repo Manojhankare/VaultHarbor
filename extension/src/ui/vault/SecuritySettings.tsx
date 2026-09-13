@@ -9,6 +9,7 @@ import {
 } from "../../popup/components/icons/Icon";
 import { AutoLockSettings } from "./AutoLockSettings";
 import { ImportExportPanel } from "./import-export/ImportExportPanel";
+import { extensionVersionLabel } from "../../shared/extension-version";
 
 type Props = {
   hasRecoveryKey: boolean;
@@ -53,6 +54,8 @@ export function SecuritySettings({
       }
     });
   }, [hasRecoveryKey]);
+
+  const version = extensionVersionLabel();
 
   return (
     <div className="vh-security-page">
@@ -134,6 +137,8 @@ export function SecuritySettings({
           </div>
         </div>
       </section>
+
+      {version ? <p className="vh-security-about">VaultHarbor {version}</p> : null}
     </div>
   );
 }

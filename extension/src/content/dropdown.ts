@@ -3,6 +3,11 @@ import { findLoginOverlayRoot } from "./detector";
 import { applyOverlayFixed, alignDropdownToField, dropdownAnchorBox, layoutViewport } from "./overlay-position";
 import { detectOverlayTheme } from "./overlay-theme";
 import { detectPageFaviconUrl } from "../shared/favicon";
+import {
+  autofillFrameTitle,
+  isBlockingAutofillPrompt,
+  type AutofillPrompt,
+} from "../shared/matching-credentials";
 
 export type DropdownCredential = {
   id: string;
@@ -20,6 +25,22 @@ const DEFAULT_HEIGHT = 88;
 export function credentialPickerWidth(fieldWidth: number, viewportWidth: number): number {
   const max = Math.max(MIN_WIDTH, viewportWidth - VIEWPORT_GUTTER);
   return Math.min(max, Math.max(fieldWidth, MIN_WIDTH));
+}
+
+export function credentialPickerQuery(options: {
+  ids: string[];
+  theme: string;
+  pageIcon?: string | null;
+  prompt?: AutofillPrompt;
+}): string {
+  const params = new URLSearchParams();
+  if (options.prompt && options.prompt !== "none") {
+    params.set("prompt", options.prompt);
+  }
+  if (options.ids.length > 0) params.set("ids", options.ids.join(","));
+  params.set("theme", options.theme);
+  if (options.pageIcon) params.set("pageIcon", options.pageIcon);
+  return params.toString();
 }
 
 let anchorEl: HTMLElement | null = null;
@@ -105,22 +126,23 @@ export function showCredentialDropdown(
   anchor: HTMLElement,
   credentials: DropdownCredential[],
   _pick: (id: string) => void,
-  options?: { onClose?: () => void }
+  options?: { onClose?: () => void; prompt?: AutofillPrompt }
 ): void {
-  if (credentials.length === 0) return;
+  const prompt = options?.prompt ?? "none";
+  const blocking = isBlockingAutofillPrompt(prompt);
+  if (!blocking && credentials.length === 0) return;
 
   removeCredentialDropdown();
   anchorEl = anchor;
   overlayParent = findLoginOverlayRoot(anchor);
   onClose = options?.onClose ?? null;
 
-  const ids = credentials.map((c) => c.id).join(",");
   const theme = detectOverlayTheme(anchor);
   const pageIcon = detectPageFaviconUrl();
-  const iconQuery = pageIcon ? `&pageIcon=${encodeURIComponent(pageIcon)}` : "";
+  const copyTitle = autofillFrameTitle(prompt);
   const frame = document.createElement("iframe");
   frame.id = DROPDOWN_ID;
-  frame.title = "VaultHarbor autofill";
+  frame.title = copyTitle;
   frame.tabIndex = -1;
   frame.setAttribute("scrolling", "no");
   frame.setAttribute("allowtransparency", "true");
@@ -135,9 +157,14 @@ export function showCredentialDropdown(
     "pointer-events:auto",
     "box-shadow:none",
   ].join(";");
-  frame.style.height = `${DEFAULT_HEIGHT}px`;
+  frame.style.height = `${blocking ? 168 : DEFAULT_HEIGHT}px`;
   frame.src = chrome.runtime.getURL(
-    `picker.html?ids=${encodeURIComponent(ids)}&theme=${theme}${iconQuery}`
+    `picker.html?${credentialPickerQuery({
+      ids: credentials.map((c) => c.id),
+      theme,
+      pageIcon,
+      prompt,
+    })}`
   );
 
   overlayParent.appendChild(frame);
@@ -161,6 +188,7 @@ export function showCredentialDropdown(
       removeCredentialDropdown();
       return;
     }
+    if (blocking) return;
     const win = frame.contentWindow;
     if (!win) return;
     let direction: "next" | "prev" | "confirm" | null = null;

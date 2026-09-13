@@ -18,6 +18,7 @@ import {
   removeFillIcon,
   setFillIconVisible,
   setFillIconExpanded,
+  setFillIconPrompt,
   showSavePromptIframe,
   removeIframes,
   showFillToast,
@@ -25,12 +26,19 @@ import {
 } from "./save-login";
 import { readApiBaseOriginFromStorage } from "../shared/api-base-url-read";
 import { STORAGE_KEYS } from "../shared/constants";
+import {
+  isBlockingAutofillPrompt,
+  parseMatchingCredentials,
+  type AutofillPrompt,
+} from "../shared/matching-credentials";
 
 type CredentialSummary = { id: string; name: string; username: string };
 
 const isTopFrame = window === window.top;
 
 let pendingCredentials: CredentialSummary[] = [];
+let autofillPrompt: AutofillPrompt = "none";
+let blockingPromptShown = false;
 let pendingPasswordFill: string | null = null;
 let focusBoundEls = new WeakSet<HTMLElement>();
 let domObserver: MutationObserver | null = null;
@@ -57,8 +65,12 @@ function syncFillIconExpanded(): void {
   setFillIconExpanded(isCredentialDropdownOpen());
 }
 
+function canShowAutofillUi(): boolean {
+  return isBlockingAutofillPrompt(autofillPrompt) || pendingCredentials.length > 0;
+}
+
 function toggleDropdownFor(anchor: HTMLElement): void {
-  if (pendingCredentials.length === 0) return;
+  if (!canShowAutofillUi()) return;
   if (isCredentialDropdownOpen()) {
     closeDropdown();
     return;
@@ -67,7 +79,7 @@ function toggleDropdownFor(anchor: HTMLElement): void {
 }
 
 function showFillIconForField(field: HTMLInputElement): void {
-  if (pendingCredentials.length === 0) return;
+  if (!canShowAutofillUi()) return;
   focusedAutofillField = field;
   if (hideIconTimer !== null) {
     window.clearTimeout(hideIconTimer);
@@ -76,6 +88,7 @@ function showFillIconForField(field: HTMLInputElement): void {
   mountFillIcon(() => {
     toggleDropdownFor(field);
   });
+  setFillIconPrompt(autofillPrompt);
   repositionFillIcon();
   setFillIconVisible(true);
 }
@@ -97,7 +110,7 @@ function closeDropdown(): void {
 }
 
 function openDropdownFor(anchor: HTMLElement): void {
-  if (pendingCredentials.length === 0) return;
+  if (!canShowAutofillUi()) return;
   showCredentialDropdown(
     anchor,
     pendingCredentials,
@@ -105,6 +118,7 @@ function openDropdownFor(anchor: HTMLElement): void {
       void fillCredential(id);
     },
     {
+      prompt: autofillPrompt,
       onClose: () => {
         syncFillIconExpanded();
         scheduleHideFillIcon();
@@ -127,6 +141,8 @@ function getAutofillHint(): HTMLInputElement | null {
 
 function pauseAutofillUi(): void {
   pendingCredentials = [];
+  autofillPrompt = "none";
+  blockingPromptShown = false;
   shutdownContentScript();
 }
 
@@ -138,10 +154,12 @@ function shutdownContentScript(): void {
   removeIframes();
 }
 
-async function refreshMatches(): Promise<void> {
+async function refreshMatches(options?: { reopen?: boolean }): Promise<void> {
   if (!isAutofillAllowed() || !isTopFrame) return;
   if (!pageMayNeedAutofill()) {
     pendingCredentials = [];
+    autofillPrompt = "none";
+    blockingPromptShown = false;
     removeFillIcon();
     removeCredentialDropdown();
     return;
@@ -149,8 +167,9 @@ async function refreshMatches(): Promise<void> {
 
   const response = await sendToBackground<{
     ok: boolean;
-    data?: CredentialSummary[];
+    data?: unknown;
     error?: string;
+    code?: string;
   }>({
     type: "GET_MATCHING_CREDENTIALS",
     tabId: 0,
@@ -166,22 +185,43 @@ async function refreshMatches(): Promise<void> {
   }
   if (!response) return;
 
-  if (response.ok && response.data && response.data.length > 0) {
-    pendingCredentials = response.data;
+  const parsed = parseMatchingCredentials(response);
+  const previousPrompt = autofillPrompt;
+  autofillPrompt = parsed.prompt;
+  pendingCredentials = parsed.items;
+  if (!isBlockingAutofillPrompt(autofillPrompt)) blockingPromptShown = false;
+
+  const shouldRecreatePicker =
+    isCredentialDropdownOpen() &&
+    (options?.reopen || previousPrompt !== autofillPrompt);
+  if (shouldRecreatePicker) {
+    closeDropdown();
+  }
+
+  if (canShowAutofillUi()) {
     bindFieldFocusDropdown();
     const active = focusedAutofillField ?? document.activeElement;
     if (active instanceof HTMLInputElement && focusBoundEls.has(active)) {
       showFillIconForField(active);
+      const openBlockingOnce =
+        isBlockingAutofillPrompt(autofillPrompt) && !blockingPromptShown;
+      if (!isCredentialDropdownOpen() && (options?.reopen || openBlockingOnce)) {
+        openDropdownFor(active);
+        if (isBlockingAutofillPrompt(autofillPrompt)) blockingPromptShown = true;
+      }
     } else {
       mountFillIcon(() => {
         const detected = detectLoginFields();
         const anchor = detected?.password ?? detected?.username;
         if (anchor) toggleDropdownFor(anchor);
       });
+      setFillIconPrompt(autofillPrompt);
       setFillIconVisible(false);
     }
   } else {
     pendingCredentials = [];
+    autofillPrompt = "none";
+    blockingPromptShown = false;
     removeFillIcon();
     removeCredentialDropdown();
   }
@@ -202,8 +242,15 @@ function bindFieldFocusDropdown(): void {
       focusBoundEls.add(field);
 
       field.addEventListener("focus", () => {
-        if (!isAutofillAllowed() || pendingCredentials.length === 0) return;
+        if (!isAutofillAllowed() || !canShowAutofillUi()) return;
         showFillIconForField(field);
+        if (
+          isBlockingAutofillPrompt(autofillPrompt) &&
+          !isCredentialDropdownOpen()
+        ) {
+          openDropdownFor(field);
+          blockingPromptShown = true;
+        }
       });
 
       field.addEventListener("blur", () => {
@@ -211,7 +258,7 @@ function bindFieldFocusDropdown(): void {
       });
 
       field.addEventListener("click", () => {
-        if (!isAutofillAllowed() || pendingCredentials.length === 0) return;
+        if (!isAutofillAllowed() || !canShowAutofillUi()) return;
         showFillIconForField(field);
         if (!isCredentialDropdownOpen()) {
           openDropdownFor(field);
@@ -362,6 +409,12 @@ function initContentScript(): void {
     }
     if (message.type === "SHOW_SAVE_PROMPT") {
       void checkPendingSavePrompt();
+    }
+    if (message.type === "VAULT_UNLOCKED") {
+      void refreshMatches({ reopen: true });
+    }
+    if (message.type === "VAULT_LOCKED" || message.type === "VAULT_AUTO_LOCKED") {
+      void refreshMatches({ reopen: true });
     }
   });
 
