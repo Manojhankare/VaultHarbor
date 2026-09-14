@@ -101,6 +101,7 @@ export function parseVaultHarborJson(content: string): ParseResult {
         baseSecureNoteRecord(rowIndex, "VaultHarbor JSON", {
           title: String(item.name ?? "Untitled"),
           secureNoteContent: String(item.content ?? ""),
+          notes: String(item.notes ?? ""),
           folder: cf?.folder,
         })
       );

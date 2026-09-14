@@ -34,7 +34,7 @@ extension/
 │   │   ├── AuthRoot.tsx        Shared login/unlock/setup routing
 │   │   └── vault/              Full-screen vault manager UI + import-export/ + AutoLockSettings
 │   ├── import/                 CSV/JSON parsers, duplicate detection, folder-bridge
-│   ├── export/                 VaultHarbor CSV/JSON exporters
+│   ├── export/                 VaultHarbor CSV/JSON exporters + encrypted .vhbak backup
 │   ├── vault/
 │   │   ├── crypto.ts           PBKDF2, AES-GCM
 │   │   ├── codec.ts            Vault JSON + tombstones

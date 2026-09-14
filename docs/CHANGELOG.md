@@ -2,6 +2,25 @@
 
 All notable VaultHarbor project changes. Update this file with each significant release or deployment change.
 
+## 2026-09-13 — Encrypted VaultHarbor backup (file)
+
+- Security replaces the “coming soon” card with **Create backup** / **Restore backup**
+- Create backup dialog matches the two-column layout: steps, password fields, and download action
+- Restore backup picker matches the empty and selected `.vhbak` file states
+- Import and plaintext Export use the same dialog style: file card or format choices, info note, and Cancel plus the main action
+- Export dialog is compact enough that format, items, and the action buttons stay on one screen
+- Vault list headers line up with the name, username, category, and updated values
+- Vault list checkboxes are dark when empty and blue with a white check when selected
+- Vault list column header stays pinned under the filters while the item list scrolls, with slightly bolder labels
+- Vault top bar is shorter, and the synced status is a compact green-dot pill
+- Downloads a password-protected `.vhbak` (AES-GCM, local only). Restore adds items; it does not replace the vault
+- Other managers still use plaintext CSV/JSON. `.vhbak` is VaultHarbor-only
+
+## 2026-09-13 — Vault search in the list toolbar
+
+- Full-screen vault search moved from the top bar into the filter/sort row (chips left, search in the middle, sort right)
+- Trash keeps the same search field; `/` still focuses it on Vault and Trash (not on Generator/Security)
+
 ## 2026-09-13 — Locked vault overlay on login pages
 
 - If the vault is locked, focusing a login field shows the fill icon and a Bitwarden-style picker: **VaultHarbor is locked** / **Unlock to autofill this site**
@@ -10,7 +29,7 @@ All notable VaultHarbor project changes. Update this file with each significant 
 - Unlocked sites with no saved login are unchanged (no icon)
 - **Keep unlocked this session** is checked by default on unlock (popup and save prompt); uncheck it to keep idle auto-lock
 - Signed out / no vault yet: the same login-field overlay says **You're not signed in** (**Sign in**) or **Finish vault setup** instead of staying silent
-- Footer and Security show the installed extension version (`v0.1.1` from the manifest)
+- Footer, Security, and the full-vault top bar show the installed extension version (`v0.1.1` from the manifest)
 
 ## 2026-09-12 — Autofill picker as a suggestion menu
 

@@ -13,6 +13,8 @@ export type NormalizedImportRecord = {
   loginNotes?: string;
   /** Secure-note-only → SecureNoteItem.content */
   secureNoteContent?: string;
+  /** Secure-note-only → SecureNoteItem.notes */
+  secureNoteNotes?: string;
   /** Opaque folder path; applied only via folder-bridge */
   folder?: string;
   sourceMetadata?: { adapter: string; rawType?: string };

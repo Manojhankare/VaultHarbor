@@ -1,16 +1,13 @@
-import type { RefObject } from "react";
 import { IconButton } from "../../popup/components/IconButton";
-import { IconLock, IconLogOut, IconMenu, IconSearch, IconUser, IconX } from "../../popup/components/icons/Icon";
+import { IconLock, IconLogOut, IconMenu, IconUser } from "../../popup/components/icons/Icon";
+import { extensionVersionLabel } from "../../shared/extension-version";
 import { SyncStatusBadge } from "./SyncStatusBadge";
 
 type Props = {
-  query: string;
   email: string | null;
   syncing: boolean;
   pendingChanges: number;
   hasConflict: boolean;
-  searchRef: RefObject<HTMLInputElement | null>;
-  onQueryChange: (value: string) => void;
   onToggleSidebar: () => void;
   onSync: () => void;
   onLock: () => void;
@@ -18,46 +15,34 @@ type Props = {
 };
 
 export function VaultTopBar({
-  query,
   email,
   syncing,
   pendingChanges,
   hasConflict,
-  searchRef,
-  onQueryChange,
   onToggleSidebar,
   onSync,
   onLock,
   onLogout,
 }: Props) {
+  const version = extensionVersionLabel();
+
   return (
     <header className="vh-topbar">
       <IconButton label="Menu" className="vh-menu-btn" onClick={onToggleSidebar}>
         <IconMenu size={18} />
       </IconButton>
       <div className="vh-topbar__brand">
-        <img src="/icons/icon128.png" alt="" width={28} height={28} />
-        <h1 className="brand-title brand-title--compact" style={{ margin: 0, fontSize: 18 }}>
+        <img src="/icons/icon128.png" alt="" width={22} height={22} />
+        <h1 className="brand-title brand-title--compact" style={{ margin: 0, fontSize: 16 }}>
           <span className="brand-title-vault">Vault</span>
           <span className="brand-title-harbor">Harbor</span>
         </h1>
+        {version ? (
+          <small className="vh-topbar__version" title="Extension version">
+            {version}
+          </small>
+        ) : null}
       </div>
-      <label className="vh-topbar__search">
-        <IconSearch size={15} />
-        <input
-          ref={searchRef}
-          type="search"
-          placeholder="Search all items"
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-          aria-label="Search vault"
-        />
-        {query && (
-          <IconButton label="Clear search" onClick={() => onQueryChange("")}>
-            <IconX size={14} />
-          </IconButton>
-        )}
-      </label>
       <div className="vh-topbar__actions">
         <SyncStatusBadge
           syncing={syncing}

@@ -18,6 +18,7 @@ import { IconPlus, IconX } from "../../popup/components/icons/Icon";
 import { SecuritySettings } from "./SecuritySettings";
 import { ImportWizardModal } from "./import-export/ImportWizardModal";
 import { ExportDialog } from "./import-export/ExportDialog";
+import { EncryptedBackupDialog } from "./import-export/EncryptedBackupDialog";
 import { ConflictResolveDialog } from "./ConflictResolveDialog";
 
 type ItemTab = VaultTabId;
@@ -27,7 +28,12 @@ type TabCounts = Record<ItemTab, number>;
 function titleForNav(nav: SidebarNav, tab: ItemTab): { title: string; sub: string } {
   if (nav === "trash") return { title: "Trash", sub: "Deleted items stay here until they expire (90 days)." };
   if (nav === "generator") return { title: "Password generator", sub: "Create a strong password without leaving the vault." };
-  if (nav === "security") return { title: "Security", sub: "Auto-lock, recovery key, import/export, and vault lock." };
+  if (nav === "security") {
+    return {
+      title: "Security",
+      sub: "Auto-lock, recovery key, import/export, encrypted backup, and vault lock.",
+    };
+  }
   if (tab === "login") return { title: "Passwords", sub: "Login items in your vault." };
   if (tab === "secure_note") return { title: "Secure notes", sub: "Private notes stored locally and synced encrypted." };
   if (tab === "other") return { title: "More", sub: "Other item types are preserved even if they cannot be edited yet." };
@@ -68,6 +74,8 @@ export function VaultManagerApp({
   const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
   const [conflictOpen, setConflictOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [importIntent, setImportIntent] = useState<"import" | "backup">("import");
+  const [backupOpen, setBackupOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [exportItemIds, setExportItemIds] = useState<string[] | null>(null);
   const [checkedIds, setCheckedIds] = useState<Set<string>>(() => new Set());
@@ -289,9 +297,9 @@ export function VaultManagerApp({
       const typing =
         target &&
         (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
-      if (e.key === "/" && !typing) {
+      if (e.key === "/" && !typing && searchRef.current) {
         e.preventDefault();
-        searchRef.current?.focus();
+        searchRef.current.focus();
       }
       if (e.key === "ArrowDown" && !typing) {
         e.preventDefault();
@@ -318,6 +326,7 @@ export function VaultManagerApp({
         setSidebarOpen(false);
         setConflictOpen(false);
         setImportOpen(false);
+        setBackupOpen(false);
         setExportOpen(false);
       }
     }
@@ -414,13 +423,10 @@ export function VaultManagerApp({
   return (
     <div className={`vh-app${showList ? "" : " vh-app--no-detail"}`}>
       <VaultTopBar
-        query={query}
         email={email}
         syncing={syncing}
         pendingChanges={pending}
         hasConflict={hasConflict}
-        searchRef={searchRef}
-        onQueryChange={setQuery}
         onToggleSidebar={() => setSidebarOpen((v) => !v)}
         onSync={() => void handleSync()}
         onLock={() => void handleLock()}
@@ -480,12 +486,29 @@ export function VaultManagerApp({
           <>
             <VaultTableTabs active={tab} counts={tabCounts} onChange={setTab} />
             <VaultTableToolbar
+              query={query}
+              searchRef={searchRef}
               listFilter={listFilter}
               sort={sort}
+              onQueryChange={setQuery}
               onFilterChange={setListFilter}
               onSortChange={setSort}
             />
           </>
+        )}
+
+        {nav === "trash" && (
+          <VaultTableToolbar
+            query={query}
+            searchRef={searchRef}
+            listFilter={listFilter}
+            sort={sort}
+            showFilters={false}
+            searchPlaceholder="Search trash"
+            onQueryChange={setQuery}
+            onFilterChange={setListFilter}
+            onSortChange={setSort}
+          />
         )}
 
         {showList && (
@@ -546,10 +569,18 @@ export function VaultManagerApp({
               hasConflict={hasConflict}
               onGenerateRecovery={() => void generateRecovery()}
               onLock={() => void handleLock()}
-              onImport={() => setImportOpen(true)}
+              onImport={() => {
+                setImportIntent("import");
+                setImportOpen(true);
+              }}
               onExport={() => {
                 setExportItemIds(null);
                 setExportOpen(true);
+              }}
+              onCreateBackup={() => setBackupOpen(true)}
+              onRestoreBackup={() => {
+                setImportIntent("backup");
+                setImportOpen(true);
               }}
             />
           </div>
@@ -646,6 +677,7 @@ export function VaultManagerApp({
 
       {importOpen && (
         <ImportWizardModal
+          intent={importIntent}
           onClose={() => setImportOpen(false)}
           onDone={() => {
             void loadList();
@@ -654,6 +686,8 @@ export function VaultManagerApp({
           }}
         />
       )}
+
+      {backupOpen && <EncryptedBackupDialog onClose={() => setBackupOpen(false)} />}
 
       {exportOpen && (
         <ExportDialog

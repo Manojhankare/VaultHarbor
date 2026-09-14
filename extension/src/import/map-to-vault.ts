@@ -34,7 +34,7 @@ export function mapRecordToSecureNote(
   return {
     name: deriveTitle(record),
     content: record.secureNoteContent?.trim() ?? "",
-    notes: "",
+    notes: record.secureNoteNotes?.trim() ?? "",
     ...(custom ? { custom_fields: custom } : {}),
   };
 }

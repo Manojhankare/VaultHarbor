@@ -87,6 +87,7 @@ export function baseSecureNoteRecord(
     title: string;
     secureNoteContent: string;
     folder?: string;
+    notes?: string;
   }
 ): NormalizedImportRecord {
   return {
@@ -94,6 +95,7 @@ export function baseSecureNoteRecord(
     type: "secure_note",
     title: fields.title,
     secureNoteContent: fields.secureNoteContent,
+    secureNoteNotes: fields.notes,
     folder: fields.folder,
     sourceMetadata: { adapter },
   };

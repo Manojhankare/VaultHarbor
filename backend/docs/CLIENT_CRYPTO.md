@@ -115,6 +115,23 @@ At vault setup the client generates a **25-character Crockford Base32 recovery k
 
 **Vault wipe:** `DELETE /api/v1/vault` (account password + `confirm: "DELETE"`) removes the vault row and sync history. The user must run setup again (new master password and new recovery key). There is no server-side recovery of wiped data.
 
+## Encrypted file backup (`.vhbak`)
+
+Client-only. Not synced and not stored on the server.
+
+```json
+{
+  "format": "vaultharbor-backup",
+  "version": 1,
+  "created_at": "ISO-8601",
+  "kdf": { "algorithm": "pbkdf2-sha256", "iterations": 600000, "salt": "<base64 string>" },
+  "wrapped_dek": "<base64>",
+  "encrypted_payload": "<base64>"
+}
+```
+
+The salt value is the **base64 string** passed into PBKDF2 as UTF-8 (same as `deriveKek`). Do not decode it to raw bytes before derivation. The payload is VaultHarbor JSON (logins and secure notes), encrypted with a fresh DEK wrapped under a backup-password KEK. Framing matches vault AES-256-GCM (`[12-byte nonce][ciphertext + tag]`). Other managers cannot import this file.
+
 ## Account password reset (not master password)
 
 `POST /api/v1/auth/forgot-password` and `POST /api/v1/auth/reset-password` change the **account** password only. They **must not** modify `users.kdf_*` — those fields are for master-password derivation. Resetting the account password does not unlock the vault without the master password or recovery key.

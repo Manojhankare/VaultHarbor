@@ -23,6 +23,13 @@ import {
 } from "../../../import/adapters/generic-csv";
 
 import { parseVaultHarborJson, isVaultHarborJson } from "../../../import/adapters/vaultharbor-csv";
+import {
+  classifyBackupFile,
+  decryptVaultHarborBackup,
+  INVALID_BACKUP_MESSAGE,
+  WRONG_BACKUP_PASSWORD_MESSAGE,
+} from "../../../export/vaultharbor-backup";
+import { IconInfo, IconX } from "../../../popup/components/icons/Icon";
 
 import { classifyImportRecords, getDuplicateRows } from "../../../import/duplicate-detection";
 
@@ -41,6 +48,8 @@ import {
 import { cancelImportSession, retrySyncAfterImport, runImportSession } from "./import-export-api";
 import { duplicateSummaryLine } from "./duplicate-ui";
 import { fetchVaultUnlocked, ImportVaultUnlockPanel } from "./ImportVaultUnlockPanel";
+import { RestoreEncryptedBackupDialog } from "./RestoreEncryptedBackupDialog";
+import { ImportPasswordsDialog } from "./ImportPasswordsDialog";
 import { InvalidReviewList } from "./InvalidReviewList";
 import { ImportItemsTable } from "./ImportItemsTable";
 import {
@@ -52,6 +61,7 @@ import type { NormalizedImportRecord } from "../../../import/types";
 
 type WizardStep =
   | "pick"
+  | "backup-password"
   | "generic-map"
   | "processing"
   | "summary"
@@ -65,11 +75,9 @@ type WizardStep =
 
 
 type Props = {
-
+  intent?: "import" | "backup";
   onClose: () => void;
-
   onDone: () => void;
-
 };
 
 
@@ -78,7 +86,7 @@ const EMPTY_MAP: GenericColumnMapping = {};
 
 
 
-export function ImportWizardModal({ onClose, onDone }: Props) {
+export function ImportWizardModal({ intent = "import", onClose, onDone }: Props) {
 
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -121,10 +129,23 @@ export function ImportWizardModal({ onClose, onDone }: Props) {
 
   const [processingLabel, setProcessingLabel] = useState("");
   const [vaultLocked, setVaultLocked] = useState(false);
+  const [backupEnvelope, setBackupEnvelope] = useState<string | null>(null);
+  const [backupPassword, setBackupPassword] = useState("");
+  const [decrypting, setDecrypting] = useState(false);
+  const decryptingRef = useRef(false);
+  const [pickedBackup, setPickedBackup] = useState<{ name: string; size: number } | null>(null);
+  const [pickedImport, setPickedImport] = useState<File | null>(null);
+  const [readingImport, setReadingImport] = useState(false);
+  const readingImportRef = useRef(false);
 
   useEffect(() => {
-    void bg({ type: "PAUSE_AUTO_LOCK" });
+    let cancelled = false;
+    void (async () => {
+      await bg({ type: "PAUSE_AUTO_LOCK" });
+      if (cancelled) await bg({ type: "RESUME_AUTO_LOCK" });
+    })();
     return () => {
+      cancelled = true;
       void bg({ type: "RESUME_AUTO_LOCK" });
     };
   }, []);
@@ -191,13 +212,75 @@ export function ImportWizardModal({ onClose, onDone }: Props) {
 
   const processFile = useCallback(
 
-    async (file: { size: number; text(): Promise<string> }) => {
+    async (file: { name?: string; size: number; text(): Promise<string> }) => {
 
       setError(null);
 
       if (file.size > MAX_IMPORT_FILE_BYTES) {
 
         setError("File is too large (max 10 MB).");
+
+        if (intent === "backup") setPickedBackup(null);
+
+        return;
+
+      }
+
+      const text = await file.text();
+
+      const classified = classifyBackupFile(text);
+
+      if (classified.kind === "invalid-backup") {
+
+        setError(INVALID_BACKUP_MESSAGE);
+
+        if (intent === "backup") setPickedBackup(null);
+
+        setStep("pick");
+
+        return;
+
+      }
+
+      if (classified.kind === "backup") {
+
+        setBackupEnvelope(text);
+
+        setBackupPassword("");
+
+        setError(null);
+
+        if (intent === "backup") {
+
+          setPickedBackup({
+            name: file.name?.trim() || "vaultharbor-backup.vhbak",
+            size: file.size,
+          });
+
+          setStep("pick");
+
+          return;
+
+        }
+
+        setPickedBackup({
+          name: file.name?.trim() || "vaultharbor-backup.vhbak",
+          size: file.size,
+        });
+
+        setStep("backup-password");
+
+        return;
+
+      }
+
+      if (intent === "backup") {
+
+        setPickedBackup(null);
+
+        setError("This isn't an encrypted VaultHarbor backup. Use Import for CSV/JSON.");
+
+        setStep("pick");
 
         return;
 
@@ -208,10 +291,6 @@ export function ImportWizardModal({ onClose, onDone }: Props) {
       setStep("processing");
 
       setProcessingLabel("Reading file…");
-
-      const text = await file.text();
-
-
 
       await new Promise((r) => setTimeout(r, 0));
 
@@ -295,7 +374,7 @@ export function ImportWizardModal({ onClose, onDone }: Props) {
 
     },
 
-    [finishClassification]
+    [finishClassification, intent]
 
   );
 
@@ -495,7 +574,131 @@ export function ImportWizardModal({ onClose, onDone }: Props) {
 
     }
 
+    setBackupEnvelope(null);
+
+    setBackupPassword("");
+
+    setPickedBackup(null);
+
     onClose();
+
+  }
+
+  function backToPick() {
+
+    setBackupPassword("");
+
+    setError(null);
+
+    setStep("pick");
+
+    if (intent !== "backup") {
+
+      setBackupEnvelope(null);
+
+      setPickedBackup(null);
+
+    }
+
+  }
+
+  function startRestore() {
+
+    if (!backupEnvelope || !pickedBackup) {
+
+      setError("Choose an encrypted VaultHarbor backup (.vhbak).");
+
+      return;
+
+    }
+
+    setError(null);
+
+    setStep("backup-password");
+
+  }
+
+  async function handleDecryptBackup() {
+
+    if (!backupEnvelope) {
+
+      setError(INVALID_BACKUP_MESSAGE);
+
+      setStep("pick");
+
+      return;
+
+    }
+
+    if (!backupPassword) {
+
+      setError("Enter the backup password.");
+
+      return;
+
+    }
+
+    if (decryptingRef.current) return;
+
+    decryptingRef.current = true;
+
+    setDecrypting(true);
+
+    setError(null);
+
+    await new Promise((r) => setTimeout(r, 0));
+
+    try {
+
+      const plaintext = await decryptVaultHarborBackup(backupEnvelope, backupPassword);
+
+      setStep("processing");
+
+      setProcessingLabel("Reading backup…");
+
+      const parsed = parseVaultHarborJson(plaintext);
+
+      if (parsed.records.length > MAX_IMPORT_ROWS) {
+
+        setError(`Too many rows (max ${MAX_IMPORT_ROWS}).`);
+
+        setBackupEnvelope(null);
+
+        setBackupPassword("");
+
+        setStep("pick");
+
+        return;
+
+      }
+
+      await finishClassification(
+
+        parsed.records,
+
+        "Encrypted VaultHarbor backup",
+
+        parsed.skippedUnsupported.length
+
+      );
+
+      setBackupEnvelope(null);
+
+      setBackupPassword("");
+
+    } catch (err) {
+
+      setError(err instanceof Error ? err.message : WRONG_BACKUP_PASSWORD_MESSAGE);
+
+      setStep("backup-password");
+
+    } finally {
+
+      decryptingRef.current = false;
+
+      setDecrypting(false);
+
+    }
 
   }
 
@@ -515,7 +718,114 @@ export function ImportWizardModal({ onClose, onDone }: Props) {
 
     : 0;
 
+  if (intent === "backup" && (step === "pick" || step === "backup-password")) {
+    return (
+      <>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".vhbak"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void processFile(f);
+            e.target.value = "";
+          }}
+        />
+        <RestoreEncryptedBackupDialog
+          picked={pickedBackup}
+          passwordStep={step === "backup-password"}
+          password={backupPassword}
+          error={error}
+          busy={decrypting}
+          onPasswordChange={setBackupPassword}
+          onChooseFile={() => fileRef.current?.click()}
+          onRestore={() => {
+            if (step === "backup-password") void handleDecryptBackup();
+            else startRestore();
+          }}
+          onCancel={step === "backup-password" ? backToPick : closeWizard}
+          onClose={closeWizard}
+        >
+          {vaultLocked && step === "backup-password" ? (
+            <ImportVaultUnlockPanel
+              onUnlocked={() => {
+                setVaultLocked(false);
+                setError(null);
+                void checkVaultUnlocked();
+              }}
+              onCancel={closeWizard}
+            />
+          ) : null}
+        </RestoreEncryptedBackupDialog>
+      </>
+    );
+  }
 
+  if (intent === "import" && (step === "pick" || step === "processing")) {
+    return (
+      <>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".csv,.json,.vhbak,text/csv,application/json"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) {
+              setPickedImport(f);
+              setError(null);
+            }
+            e.target.value = "";
+          }}
+        />
+        <ImportPasswordsDialog
+          picked={pickedImport}
+          error={error}
+          busy={readingImport || step === "processing"}
+          onChooseFile={() => fileRef.current?.click()}
+          onImport={() => {
+            if (!pickedImport || readingImportRef.current) return;
+            readingImportRef.current = true;
+            setReadingImport(true);
+            void processFile(pickedImport).finally(() => {
+              readingImportRef.current = false;
+              setReadingImport(false);
+            });
+          }}
+          onClose={closeWizard}
+        />
+      </>
+    );
+  }
+
+  if (intent === "import" && step === "backup-password") {
+    return (
+      <RestoreEncryptedBackupDialog
+        picked={pickedBackup}
+        passwordStep
+        password={backupPassword}
+        error={error}
+        busy={decrypting}
+        onPasswordChange={setBackupPassword}
+        onChooseFile={() => fileRef.current?.click()}
+        onRestore={() => void handleDecryptBackup()}
+        onCancel={backToPick}
+        onClose={closeWizard}
+      >
+        {vaultLocked ? (
+          <ImportVaultUnlockPanel
+            onUnlocked={() => {
+              setVaultLocked(false);
+              setError(null);
+              void checkVaultUnlocked();
+            }}
+            onCancel={closeWizard}
+          />
+        ) : null}
+      </RestoreEncryptedBackupDialog>
+    );
+  }
 
   return (
 
@@ -533,17 +843,17 @@ export function ImportWizardModal({ onClose, onDone }: Props) {
 
       <div className="vh-modal vh-modal--wide vs-scrollbar">
 
-        <div className="vh-modal__header">
-
-          <h2 id="import-wizard-title">Import passwords</h2>
-
-          <button type="button" className="vault-banner__dismiss" aria-label="Close" onClick={closeWizard}>
-
-            ×
-
+        <header className="vh-restore__header vh-import-wizard__header">
+          <div>
+            <h2 id="import-wizard-title">
+              {intent === "backup" ? "Restore encrypted backup" : "Import passwords"}
+            </h2>
+            <p>Review what will be added. Your current vault is not replaced.</p>
+          </div>
+          <button type="button" className="vh-restore__close" aria-label="Close" onClick={closeWizard}>
+            <IconX size={18} />
           </button>
-
-        </div>
+        </header>
 
 
 
@@ -560,61 +870,19 @@ export function ImportWizardModal({ onClose, onDone }: Props) {
           />
         ) : (
           <>
-        {step === "pick" && (
-
-          <>
-
-            <p className="muted">Choose a CSV or VaultHarbor JSON export file.</p>
-
-            <input
-
-              ref={fileRef}
-
-              type="file"
-
-              accept=".csv,.json,text/csv,application/json"
-
-              style={{ display: "none" }}
-
-              onChange={(e) => {
-
-                const f = e.target.files?.[0];
-
-                if (f) void processFile(f);
-
-                e.target.value = "";
-
-              }}
-
-            />
-
-            <div className="actions">
-
-              <button type="button" className="btn btn-secondary" onClick={closeWizard}>
-
-                Cancel
-
-              </button>
-
-              <button type="button" className="btn" onClick={() => fileRef.current?.click()}>
-
-                Choose file
-
-              </button>
-
-            </div>
-
-          </>
-
-        )}
-
-
-
         {step === "generic-map" && (
 
           <form onSubmit={handleGenericMapSubmit}>
 
-            <p className="muted">CSV format not recognized. Map columns to VaultHarbor fields.</p>
+            <p className="vh-restore__note vh-import-wizard__note">
+              <span className="vh-restore__note-icon" aria-hidden="true">
+                <IconInfo size={15} />
+              </span>
+              <span>
+                CSV format not recognized. Map columns to VaultHarbor fields, then continue. Existing
+                items are not replaced.
+              </span>
+            </p>
 
             <GenericMapForm headers={csvHeaders} mapping={columnMap} onChange={setColumnMap} />
 
@@ -883,7 +1151,7 @@ export function ImportWizardModal({ onClose, onDone }: Props) {
 
         {step === "report" && report && (
           <>
-            <h3>Import complete</h3>
+            <h3>{intent === "backup" ? "Imported from encrypted backup" : "Import complete"}</h3>
             <ul className="vh-import-report">
               <li>{report.imported} imported</li>
               {report.skipped > 0 && <li>{report.skipped} duplicates skipped</li>}
@@ -894,7 +1162,9 @@ export function ImportWizardModal({ onClose, onDone }: Props) {
             </ul>
             {report.sync.ok ? (
               <p className="vh-banner vh-banner--success">
-                Synced to server — your imported items are backed up.
+                {intent === "backup"
+                  ? "Synced to server. Your current vault was not replaced."
+                  : "Synced to server — your imported items are backed up."}
               </p>
             ) : (
               <div className="vh-banner vh-banner--warn">

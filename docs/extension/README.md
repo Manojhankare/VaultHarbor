@@ -33,7 +33,7 @@ The toolbar popup stays compact: sticky search, current-site matches, fill, sync
 
 ## Full-screen vault
 
-The full-screen page is the primary place to search, filter, create, edit, and trash items (logins and secure notes). **Security** also includes import/export for migrating from other password managers. It uses the same service-worker crypto/sync pipeline as the popup — not a second vault. Folders, shared items, and passkeys are shown as coming-soon placeholders when the data model does not support them yet.
+The full-screen page is the primary place to search, filter, create, edit, and trash items (logins and secure notes). Search sits in the list toolbar next to filter chips and sort (not in the top bar). Press `/` to focus it. **Security** also includes import/export for migrating from other password managers. It uses the same service-worker crypto/sync pipeline as the popup — not a second vault. Folders, shared items, and passkeys are shown as coming-soon placeholders when the data model does not support them yet.
 
 Edit sources in [`branding/`](../branding/README.md) only (`vaultharborlogo_icon.png`). Run `node scripts/generate-icons.mjs` before build — transparent icons for toolbar/manifest; CSS `--vs-bg` provides popup backgrounds. Store promo is `extension/public/store/promo-440x280.png`.
 

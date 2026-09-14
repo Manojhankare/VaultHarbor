@@ -12,7 +12,8 @@ export function downloadTextFile(
   URL.revokeObjectURL(url);
 }
 
-export function exportFilename(ext: "csv" | "json"): string {
+export function exportFilename(ext: "csv" | "json" | "vhbak"): string {
   const date = new Date().toISOString().slice(0, 10);
+  if (ext === "vhbak") return `vaultharbor-backup-${date}.vhbak`;
   return `vaultharbor-export-${date}.${ext}`;
 }

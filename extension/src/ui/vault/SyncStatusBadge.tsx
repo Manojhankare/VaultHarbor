@@ -1,4 +1,4 @@
-import { IconSync, IconWarning } from "../../popup/components/icons/Icon";
+import { IconSync } from "../../popup/components/icons/Icon";
 
 type Props = {
   syncing: boolean;
@@ -21,9 +21,11 @@ export function SyncStatusBadge({ syncing, pendingChanges, hasConflict, onSync }
     className += " vh-sync--pending";
   }
 
+  const showIcon = hasConflict || syncing || pendingChanges > 0;
+
   return (
     <button type="button" className={className} onClick={onSync} disabled={syncing} title="Sync now">
-      {hasConflict ? <IconWarning size={14} /> : <IconSync size={14} />}
+      {showIcon ? <IconSync size={13} /> : <span className="vh-sync__dot" aria-hidden="true" />}
       {label}
     </button>
   );

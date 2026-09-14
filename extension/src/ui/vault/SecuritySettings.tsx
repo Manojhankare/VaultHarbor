@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { bg } from "../../popup/api";
 import {
+  IconChevronRight,
   IconKey,
   IconLock,
+  IconRestore,
   IconShield,
   IconSync,
   IconVault,
@@ -18,6 +20,8 @@ type Props = {
   onLock: () => void;
   onImport: () => void;
   onExport: () => void;
+  onCreateBackup: () => void;
+  onRestoreBackup: () => void;
 };
 
 type RecoveryKeyInfo = {
@@ -40,6 +44,8 @@ export function SecuritySettings({
   onLock,
   onImport,
   onExport,
+  onCreateBackup,
+  onRestoreBackup,
 }: Props) {
   const [lastRotatedAt, setLastRotatedAt] = useState<string | null>(null);
 
@@ -116,24 +122,65 @@ export function SecuritySettings({
 
       <ImportExportPanel hasConflict={hasConflict} onImport={onImport} onExport={onExport} />
 
-      <section className="vh-security-card vh-security-card--muted">
+      <section className="vh-security-card">
         <div className="vh-security-split">
           <div className="vh-security-split__left">
             <div className="vh-security-heading">
               <div
-                className="vh-security-card__icon vh-security-card__icon--round"
+                className="vh-security-card__icon vh-security-card__icon--round vh-security-card__icon--backup"
                 aria-hidden="true"
               >
                 <IconVault size={20} />
               </div>
-              <h3 className="vh-security-card__title">Encrypted VaultHarbor Backup — coming soon</h3>
+              <h3 className="vh-security-card__title">Encrypted backup</h3>
             </div>
             <p className="vh-security-card__desc">
-              Secure cloud backup with end-to-end encryption.
+              Save a password-protected .vhbak file on this device. It is encrypted with AES-GCM
+              before download and can only be opened in VaultHarbor. CSV or JSON export is for
+              moving items to another password manager.
             </p>
           </div>
-          <div className="vh-security-split__right vh-security-split__right--badge">
-            <span className="vh-security-badge">Coming soon</span>
+          <div className="vh-security-split__right vh-security-split__right--wide vh-security-split__right--import-export">
+            {hasConflict && (
+              <div className="vh-banner vh-banner--warn vh-security-inline-banner">
+                Resolve sync conflict before restoring a backup.
+              </div>
+            )}
+            <div className="vh-security-action-list">
+              <button type="button" className="vh-security-action-card" onClick={onCreateBackup}>
+                <span className="vh-security-action-card__icon" aria-hidden="true">
+                  <IconLock size={18} />
+                </span>
+                <span className="vh-security-action-card__body">
+                  <span className="vh-security-action-card__title">Create backup</span>
+                  <span className="vh-security-action-card__desc">
+                    Download a password-protected .vhbak file.
+                  </span>
+                </span>
+                <span className="vh-security-action-card__chevron" aria-hidden="true">
+                  <IconChevronRight size={16} />
+                </span>
+              </button>
+              <button
+                type="button"
+                className="vh-security-action-card"
+                disabled={hasConflict}
+                onClick={onRestoreBackup}
+              >
+                <span className="vh-security-action-card__icon" aria-hidden="true">
+                  <IconRestore size={18} />
+                </span>
+                <span className="vh-security-action-card__body">
+                  <span className="vh-security-action-card__title">Restore backup</span>
+                  <span className="vh-security-action-card__desc">
+                    Add items from a backup. Does not replace your vault.
+                  </span>
+                </span>
+                <span className="vh-security-action-card__chevron" aria-hidden="true">
+                  <IconChevronRight size={16} />
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </section>

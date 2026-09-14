@@ -14,7 +14,7 @@ extension/
 │   ├── api/            REST client
 │   ├── domain/         URL matching
 │   ├── import/         CSV/JSON import adapters, duplicate detection
-│   ├── export/         VaultHarbor CSV/JSON exporters
+│   ├── export/         VaultHarbor CSV/JSON exporters + encrypted .vhbak backup
 │   └── shared/         browser shim, constants, errors
 ├── tests/
 ├── dist/chrome/        Chromium build output

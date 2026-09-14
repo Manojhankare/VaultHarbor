@@ -4,7 +4,7 @@ VaultHarbor import and export runs **entirely in the browser**. Files are never 
 
 ## Location
 
-Full-screen vault → **Tools → Security** → **Import & Export**
+Full-screen vault → **Tools → Security** → **Import & Export** or **Encrypted backup**
 
 ## Supported import formats
 
@@ -18,10 +18,11 @@ Full-screen vault → **Tools → Security** → **Import & Export**
 | Firefox CSV | `url,username,password,guid,…` |
 | Generic CSV | Manual column mapping |
 | VaultHarbor CSV / JSON | Round-trip export formats |
+| Encrypted VaultHarbor Backup (`.vhbak`) | `format: vaultharbor-backup` (password required) |
 
 ## Import flow
 
-1. Select file → format detection → parse → validate
+1. Choose a file in the import dialog, then **Import** starts detection → parse → validate
 2. Duplicate detection (vault + within file)
 3. **Items table** — all rows with status badges (New, In vault, In file, Invalid); filter chips and type tabs
 4. **Invalid review** (if any) — edit fields to fix or skip each invalid row
@@ -37,10 +38,28 @@ Full-screen vault → **Tools → Security** → **Import & Export**
 
 - **VaultHarbor CSV** — interoperability (plaintext)
 - **JSON** — portable item export (plaintext)
+- **Encrypted VaultHarbor Backup (`.vhbak`)** — password-protected round-trip for VaultHarbor only
 
-Scope: entire vault, current item, or folder (`custom_fields.folder`).
+Scope for CSV/JSON: entire vault, current item, folder (`custom_fields.folder`), or the current selection. The export dialog asks you to confirm that the file contains plaintext passwords, then keeps a download confirmation on screen.
 
-**Encrypted VaultHarbor Backup** — planned; not in v1.
+Encrypted backup is always the entire vault (logins and secure notes). It is created from **Tools → Security → Encrypted backup**, not from the plaintext Export dialog.
+
+## Encrypted backup (`.vhbak`)
+
+The file never leaves the browser except as a download. The server does not see it.
+
+Envelope (`format: "vaultharbor-backup"`, `version: 1`):
+
+- Random salt stored as a **base64 string** (the same string is the PBKDF2 salt; it is not decoded to bytes before derivation)
+- PBKDF2-SHA256, 600000 iterations → backup KEK
+- New random DEK, wrapped with AES-256-GCM (`wrapped_dek`)
+- VaultHarbor JSON payload encrypted with AES-256-GCM (`encrypted_payload`)
+
+The backup password is chosen at export time. It is not the account login password and is not stored. A wrong password or a tampered file fails decryption with no partial plaintext.
+
+**Restore adds items** into the current vault (same duplicate / invalid review as other imports). It does not replace or wipe the vault. Other password managers cannot open `.vhbak`. Use CSV to move items elsewhere.
+
+Detection order on import: encrypted backup envelope → if the file claims `vaultharbor-backup` but is invalid, stop (do not parse as CSV) → VaultHarbor JSON → CSV.
 
 ## Security
 
